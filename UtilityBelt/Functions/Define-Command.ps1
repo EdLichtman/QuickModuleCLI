@@ -1,4 +1,4 @@
-function Read-Command {
+function Define-Command {
         param(
         [String] $commandName
     )
