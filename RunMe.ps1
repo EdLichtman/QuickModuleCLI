@@ -1,19 +1,24 @@
 param(
     [Switch]$InstallUtilityBelt,
-    [Switch]$Force,
     [Switch]$Install,
     [Switch]$Uninstall,
-    [Switch]$Reinstall
-
+    [Switch]$Reinstall,
+    [Switch]$PreserveUserDefinedCommands
     )
-if (!$Install -and !$Uninstall -and !$Reinstall) {
+if (!$Install -and !$Uninstall -and !$Reinstall -and !$InstallUtilityBelt) {
     Get-Content .\Readme.md -Raw
 }
 
-if ($Uninstall -or $Reinstall) {
-    . ".\Uninstall-Script.ps1"
+$QuickForceText = if ($Reinstall) { '-force' } else { '' }
+
+if ($Uninstall) {
+    . ".\Uninstall-Script.ps1" -PreserveUserDefinedCommands $PreserveUserDefinedCommands
 }
 
 if ($Install -or $Reinstall) {
-    . ".\Install-Script.ps1" -InstallUtilityBelt $InstallUtilityBelt -Force $Force
+    Invoke-Expression ".\Install-Script.ps1 $QuickForceText"
+}
+
+if ($InstallUtilityBelt) {
+    . ".\Install-UtilityBelt.ps1"
 }

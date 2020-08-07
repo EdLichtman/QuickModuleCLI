@@ -1,12 +1,12 @@
-function Add-UDTool {
+function Add-QuickTool {
 
-    . $PSScriptRoot\Get-UDPowershellEnvironment.ps1
-    . $PSScriptRoot\Set-UDToolsPath.ps1
-    . $PSScriptRoot\Add-UDOneLineFunction.ps1
+    . $PSScriptRoot\Get-QuickEnvironment.ps1
+    . $PSScriptRoot\Set-QuickToolsPath.ps1
+    . $PSScriptRoot\Add-QuickOneLineFunction.ps1
 
     $toolsDir = $env:Tools
     if ([String]::IsNullOrWhiteSpace($toolsDir)) {
-        Set-UDToolsPath
+        Set-QuickToolsPath
     } 
 
     $pathToNewTool = Read-Host "Please add the path to the EXE. If you start with '\' the relative path will be: $($toolsDir)"
@@ -17,5 +17,5 @@ function Add-UDTool {
     $CommandName = $pathToNewTool.Replace('.exe','').Substring($pathToNewTool.LastIndexOf("\")+1);
     Write-Output "Adding Tool 'Run-$CommandName'."
 
-    Add-UDOneLineFunction -functionName "Run-$CommandName" -functionText "& '$pathToNewTool'"
+    Add-QuickOneLineFunction -functionName "Run-$CommandName" -functionText "& '$pathToNewTool'"
 }

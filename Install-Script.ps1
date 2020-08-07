@@ -1,70 +1,56 @@
 param(
-    [Switch] $InstallUtilityBelt,
     [Switch] $Force
 )
 
 $localHelpersPath = ".\Required"
-. $localHelpersPath\Get-UDPowershellEnvironment.ps1
+. $localHelpersPath\Get-QuickEnvironment.ps1
 
-New-FolderIfNotExists $PowershellUserProfileRoot
-New-FolderIfNotExists $functionsRoot
-New-FolderIfNotExists $aliasesRoot
-New-FolderIfNotExists $HelpersRoot
+$QuickForceText = if ($Force) { '-force' } else { '' }
 
-$forceText = if ($Force) { '-force' } else { '' }
+New-FolderIfNotExists $QuickPowershellUserProfileRoot
+New-FolderIfNotExists $QuickFunctionsRoot
+New-FolderIfNotExists $QuickAliasesRoot
+New-FolderIfNotExists $QuickHelpersRoot
 
 $helpers = @(Get-ChildItem $localHelpersPath -Filter '*.ps1')
 foreach($helper in $helpers) {
-    if (!(Test-Path $helpersRoot\$helper) -or $Force){
-        Invoke-Expression "New-FileWithContent -FilePath $helpersRoot\$helper -FileText (Get-Content $localHelpersPath\$helper -Raw) $forceText"
+    if (!(Test-Path $QuickHelpersRoot\$helper) -or $Force){
+        Invoke-Expression "New-FileWithContent -FilePath $QuickHelpersRoot\$helper -FileText (Get-Content $localHelpersPath\$helper -Raw) $QuickForceText"
     } 
 }
 
-if ($InstallUtilityBelt) {
-    $localUtilityBeltPath = ".\UtilityBelt"
-    $localUtilityBeltFunctionsPath = "$localUtilityBeltPath\Functions"
-    $utilityBeltFunctions = @(Get-ChildItem $localUtilityBeltFunctionsPath -Filter '*.ps1')
-    foreach($function in $utilityBeltFunctions) {
-        Invoke-Expression "New-FileWithContent -FilePath $functionsRoot\$function -FileText (Get-Content $localUtilityBeltFunctionsPath\$function -Raw) $forceText"
-    }
-
-    $localUtilityBeltAliasesPath = "$localUtilityBeltPath\Aliases"
-    $utilityBeltAliases = @(Get-ChildItem $localUtilityBeltAliasesPath -Filter '*.ps1')
-    foreach($alias in $utilityBeltAliases) {
-        Invoke-Expression "New-FileWithContent -FilePath $aliasesRoot\$alias -FileText (Get-Content $localUtilityBeltAliasesPath\$alias -Raw) $forceText"
-    }
+if ($Force -and (Test-Path $QuickPowershellProfilePath)) {
+    Remove-Item $QuickPowershellProfilePath
 }
-
-
-if ($Force -and (Test-Path $PowershellProfilePath)) {
-    Remove-Item $PowershellProfilePath
+if (!(Test-Path $QuickPowershellProfilePath)) {
+    New-FileWithContent $QuickPowershellProfilePath ''
 }
-if (!(Test-Path $PowershellProfilePath)) {
-    New-FileWithContent $PowershellProfilePath ''
-}
-Add-Content $PowershellProfilePath `
+if (!(Get-Content $QuickPowershellProfilePath | Select-String 'Import-Module Quick-Package')) {
+    Add-Content $QuickPowershellProfilePath `
 @"
-Import-Module UDFunction-Builder
+Import-Module Quick-Package
 "@
-
-if ($Force -and (Test-Path $PowershellModulePath)) {
-    Remove-Item $PowershellModulePath
+    
 }
-if (!(Test-Path $PowershellModulePath)) {
-    New-FileWithContent $PowershellModulePath  `
+
+if ($Force -and (Test-Path $QuickPowershellModulePath)) {
+    Remove-Item $QuickPowershellModulePath
+}
+if (!(Test-Path $QuickPowershellModulePath)) {
+    New-FileWithContent $QuickPowershellModulePath  `
 @"
-$('$helperFunctions') = Get-ChildItem $helpersRoot -Filter "*.ps1"
+$('$helperFunctions') = Get-ChildItem $QuickHelpersRoot -Filter "*.ps1"
 foreach($('$helperFunction') in $('$helperFunctions')) {
-    . $helpersRoot\$('$helperFunction')
+    . $QuickHelpersRoot\$('$helperFunction')
 }
 
-$('$functions') = Get-ChildItem $functionsRoot -Filter "*.ps1"
+$('$functions') = Get-ChildItem $QuickFunctionsRoot -Filter "*.ps1"
 foreach($('$function') in $('$functions')) {
-    . $functionsRoot\$('$function')
+    . $QuickFunctionsRoot\$('$function')
 }
-$('$aliases') = Get-ChildItem $aliasesRoot -Filter "*.ps1"
+$('$aliases') = Get-ChildItem $QuickAliasesRoot -Filter "*.ps1"
 foreach($('$alias') in $('$aliases')) {
-    . $aliasesRoot\$('$alias')
+    . $QuickAliasesRoot\$('$alias')
 }
 "@
 

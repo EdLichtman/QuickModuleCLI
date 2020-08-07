@@ -1,1 +1,1 @@
-Set-Alias edit Edit-UDCommand
+Set-Alias edit Edit-QuickCommand

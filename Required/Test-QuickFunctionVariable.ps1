@@ -1,4 +1,4 @@
-function Test-UDFunctionVariable {
+function Test-QuickFunctionVariable {
     param(
         [hashtable]$Parameters,
         [String]$variableName,
