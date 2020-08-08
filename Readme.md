@@ -9,7 +9,7 @@ Quick-Package is a Module that gets added into your '$Profile', and makes availa
 
 ### How do I use it?
 __**The following Function will show you all the available Quick-Commands:**__
-Get-QuickCommands 
+* Get-QuickCommands 
 
 __**The following Functions allow you to Add a command:**__
 * Add-QuickAlias
@@ -32,15 +32,15 @@ __**The following are utility functions:**__
 __**The following are installed with the Utility Belt. The Utility Belt can be installed on a per Function basis:**__
 * Add-Reminder (Sets a Scheduled Task to alert you after a pre-defined time period)
 * Show-CommandContent (Prints out to the screen the Function Definition. Would be nice to colorize the text)
-* * read (The Alias for Define-Command)
+  * read (The Alias for Define-Command)
 * Get-DiskInfo (Prints out to the screen Information about your Disk such as Free Space and Total Space in GB)
 * Get-RealtimeFileContents (Just a Wrapper for Get-Content -Wait)
-* * tail (The Alias for Tail-File. The only reason I included Tail-File. This is if you're used to using Linux tail command)
+  * tail (The Alias for Tail-File. The only reason I included Tail-File. This is if you're used to using Linux tail command)
 * Set-Env (sets environment variable)
 * Find-Desktop (Uses Powershell logic to get the Desktop of the profile an goes to it)
 
 * Aliases Unmapped to functions
-* * edit (The Alias for Edit-Command)
+  * edit (The Alias for Edit-Command)
 
 Once the Help Documentation has been completed, you will be able to run 'Get-Help Add-QuickAlias' for example to see a description of what the function does.
 
