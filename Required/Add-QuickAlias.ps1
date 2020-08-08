@@ -2,7 +2,7 @@ function Add-QuickAlias {
     param(
         [string]$AliasName,
         [string]$AliasText,
-        [Switch]$ExcludeShell
+        [Switch]$Raw
     )
     
     . "$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1"
@@ -23,9 +23,10 @@ function Add-QuickAlias {
     }
 
     $newCode = $AliasText
-    if (!$ExcludeShell){
+    if (!$Raw){
         $newCode = "Set-Alias $AliasName $AliasText -Scope Global"
     }
 
     New-FileWithContent -filePath "$QuickAliasesRoot\$AliasName.ps1" -fileText $newCode
+    Invoke-Expression $newCode
 }

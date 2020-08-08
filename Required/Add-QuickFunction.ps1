@@ -3,7 +3,7 @@ function Add-QuickFunction {
         [string]$functionName,
         [string]$functionText,
         [Switch]$addLineBreaks,
-        [Switch]$excludeShell
+        [Switch]$Raw
     )
     
     . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1
@@ -27,7 +27,7 @@ function Add-QuickFunction {
     }
 
     $newCode = $functionText
-    if (!$excludeShell) {
+    if (!$Raw) {
     $newCode = 
 @"
 function global:$FunctionName {
@@ -35,7 +35,7 @@ function global:$FunctionName {
 }
 "@
     }
-    
+
     New-FileWithContent -filePath "$QuickFunctionsRoot\$FunctionName.ps1" -fileText $newCode
     Invoke-Expression $newCode
 }

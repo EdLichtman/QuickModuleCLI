@@ -47,6 +47,8 @@ Once the Help Documentation has been completed, you will be able to run 'Get-Hel
 ## Roadmap
 * I need to learn a bit more about CMDLET, and once I understand them, I need to Add-QuickCmdlet
 * Complete Export-QuickCommand to create a script that, when run, will import into the Quick-Package Module
+* The Export-QuickCommand should actually create a script that, when run, will infer if the Quick-Package Module is Loaded. If it's not loaded, it'll add the Quick-Command into a /Functions or /Aliases Folder at the root of WindowsPowershell. If the Quick-Package Module is Loaded, it will import the function or Alias into the Quick-Package Module. 
+   * I can leverage this by creating an Import-QuickCommand function with the -All flag. Each QuickCommand that is not loaded into the Quick-Package Module (i.e. functions, Aliases) can be imported into Quick-Package. 
 * Clean up the Get-QuickModules printout. 
 * Move Install, Uninstall and Install-UtilityBelt to also be reserved, and expose a new function: Uninstall-QuickPackage, Install-Utility, Install-UtilityBelt
 * Document all of the built-in functions. 
@@ -57,4 +59,5 @@ Once the Help Documentation has been completed, you will be able to run 'Get-Hel
 * Add the ability to "Add New Profile" without re-installing the whole thing. 
 * Install-Script should be a function that gets run on the RunMe, as well as uninstall and install-UtilityBelt stuff
 * Add Pester Unit Tests
+* Add Set-Env, Remove-Env to the Required instead of the Utility Belt. Remove Set-QuickToolsPath and use SetEnv in it's place
 

@@ -18,13 +18,13 @@ function Rename-QuickCommand {
         $NewFunctionBlock = $FunctionBlock -Replace "$commandName", "$replacement" 
         
         Remove-QuickCommand -commandName $commandName
-        Add-QuickFunction -functionName $replacement -functionText $NewFunctionBlock -ExcludeShell
+        Add-QuickFunction -functionName $replacement -functionText $NewFunctionBlock -Raw
     } elseif (Test-Path $aliasFileRoot) {
         $aliasBlock = Get-Content $aliasFileRoot -Raw
         $NewAliasBlock = $aliasBlock -Replace "Set-Alias $commandName", "Set-Alias $replacement" 
         
         Remove-QuickCommand -commandName $commandName
-        Add-QuickAlias -aliasName $replacement -aliasText $NewAliasBlock -ExcludeShell
+        Add-QuickAlias -aliasName $replacement -aliasText $NewAliasBlock -Raw
     } else {
         Write-Output "Command '$commandName' not found."
         return;
