@@ -60,4 +60,6 @@ Once the Help Documentation has been completed, you will be able to run 'Get-Hel
 * Install-Script should be a function that gets run on the RunMe, as well as uninstall and install-UtilityBelt stuff
 * Add Pester Unit Tests
 * Add Set-Env, Remove-Env to the Required instead of the Utility Belt. Remove Set-QuickToolsPath and use SetEnv in it's place
+* Perhaps add Update-QuickPackage?
+* Replace the Continue? (Y/N) with the proper Powershell UI way of doing it with the prompt that looks like: [Y] Yes  [N] No  [S] Suspend  [?] Help (default is "Y")
 
