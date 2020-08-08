@@ -27,14 +27,17 @@ __**The following Functions will allow you to remove an existing command. You ca
 __**The following are utility functions:**__
 * Set-QuickToolsPath
 * Export-QuickCommand
+* Refresh-QuickCommand
 
 __**The following are installed with the Utility Belt. The Utility Belt can be installed on a per Function basis:**__
 * Add-Reminder (Sets a Scheduled Task to alert you after a pre-defined time period)
-* Define-Command (Prints out to the screen the Function Definition. Would be nice to colorize the text)
+* Show-CommandContent (Prints out to the screen the Function Definition. Would be nice to colorize the text)
 * * read (The Alias for Define-Command)
 * Get-DiskInfo (Prints out to the screen Information about your Disk such as Free Space and Total Space in GB)
-* Tail-File (Just a Wrapper for Get-Content -Wait)
+* Get-RealtimeFileContents (Just a Wrapper for Get-Content -Wait)
 * * tail (The Alias for Tail-File. The only reason I included Tail-File. This is if you're used to using Linux tail command)
+* Set-Env (sets environment variable)
+* Find-Desktop (Uses Powershell logic to get the Desktop of the profile an goes to it)
 
 * Aliases Unmapped to functions
 * * edit (The Alias for Edit-Command)
@@ -44,7 +47,7 @@ Once the Help Documentation has been completed, you will be able to run 'Get-Hel
 ## Roadmap
 * I need to learn a bit more about CMDLET, and once I understand them, I need to Add-QuickCmdlet
 * Complete Export-QuickCommand to create a script that, when run, will import into the Quick-Package Module
-* Clean up the Get-QuickModules printout. Perhaps rename it to Get-QuickCommands
+* Clean up the Get-QuickModules printout. 
 * Move Install, Uninstall and Install-UtilityBelt to also be reserved, and expose a new function: Uninstall-QuickPackage, Install-Utility, Install-UtilityBelt
 * Document all of the built-in functions. 
 * After the Documentation is completed then the How do I use documentation needs to be updated, and it will make it easier to understand the commands
