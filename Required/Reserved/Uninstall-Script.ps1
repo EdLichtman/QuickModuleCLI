@@ -2,35 +2,33 @@ param(
     [Switch]$PreserveUserDefinedCommands
     )
 
-$localHelpersPath = ".\Required"
-. $localHelpersPath\Get-QuickEnvironment.ps1
+. "$PSScriptRoot\Get-QuickEnvironment.ps1"
+. "$PSScriptRoot\Remove-FolderIfExists.ps1"
 
 $PowershellModuleRoot = Split-Path $QuickPowershellModulePath
 if (Test-Path $PowershellModuleRoot) {
-    if (Test-Path $QuickHelpersRoot) {
-        Remove-Item $QuickHelpersRoot -Recurse
-    }
+    Remove-FolderIfExists $QuickHelpersRoot
     
     if ($PreserveUserDefinedCommands) {
-        $UtilityBeltFunctions = Get-ChildItem ".\UtilityBelt\Functions"
-        foreach($Function in $UtilityBeltFunctions) {
-            if (Test-Path "$QuickFunctionsRoot\$Function") {
+        $functions = Get-ChildItem $QuickFunctionsRoot
+        foreach($function in $functions) {
+            if (Get-Content $QuickFunctionsRoot\$function | Select-String $QuickUtilityBeltFunctionIdentifier) {
                 Remove-Item "$QuickFunctionsRoot\$Function"
             }
         }
-
-        $UtilityBeltAliases = Get-ChildItem ".\UtilityBelt\Aliases"
-        foreach($Alias in $UtilityBeltAliases) {
-            if (Test-Path "$QuickAliasesRoot\$Alias") {
-                Remove-Item "$QuickAliasesRoot\$Alias"
+        
+        $aliases = Get-ChildItem $QuickAliasesRoot
+        foreach($alias in $aliases) {
+            if (Get-Content $QuickAliasesRoot\$alias | Select-String $QuickUtilityBeltFunctionIdentifier) {
+                Remove-Item "$QuickAliasesRoot\$alias"
             }
         }
-        #todo: Create Remove-Item if exists. Perhaps Remove-Folder and File if exists to express intent
+
         if (Test-Path $QuickPowershellModulePath) {
             Remove-Item $QuickPowershellModulePath
         }
     } else {
-        Remove-Item (Split-Path $QuickPowershellModulePath)
+        Remove-FolderIfExists (Split-Path $QuickPowershellModulePath)
     }   
 }
 if (Test-Path $QuickPowershellUserProfileRoot) {

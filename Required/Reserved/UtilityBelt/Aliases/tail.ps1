@@ -1,0 +1,1 @@
+Set-Alias tail Get-RealtimeFileContents -Scope Global

@@ -3,15 +3,13 @@ param(
     [Switch] $Force
 )
 
-$localHelpersPath = ".\Required"
-. $localHelpersPath\Get-QuickEnvironment.ps1
-. $localHelpersPath\New-FileWithContent.ps1
-
-. .\Installer\Show-Menu.ps1
+. "$PSScriptRoot\Get-QuickEnvironment.ps1"
+. "$PSScriptRoot\New-FileWithContent.ps1"
+. "$PSScriptRoot\Show-Menu.ps1"
 
 $QuickForceText = if ($Force) { '-force' } else { '' }
 
-$localUtilityBeltPath = ".\UtilityBelt"
+$localUtilityBeltPath = "$PSScriptRoot\UtilityBelt"
 
 
 $localUtilityBeltFunctionsPath = "$localUtilityBeltPath\Functions"
@@ -41,7 +39,8 @@ if ($InstallEntireBelt) {
     foreach($tool in $UtilityBeltCommands) {
         $InstallLocation = $tool.InstallLocation
         $InstallerLocation = $tool.InstallerLocation
-        Invoke-Expression "New-FileWithContent -FilePath $InstallLocation -FileText (Get-Content $InstallerLocation -Raw) $QuickForceText"
+        $fileText = "('$QuickUtilityBeltFunctionIdentifier`r' + (Get-Content $InstallerLocation -Raw))"
+        Invoke-Expression "New-FileWithContent -FilePath $InstallLocation -FileText $fileText $QuickForceText"
     }
 } else {
     $MenuOptions = @{}
@@ -55,6 +54,7 @@ if ($InstallEntireBelt) {
     $tool = $MenuOptionMappings[$ChosenOption]
     $InstallLocation = $tool.InstallLocation
     $InstallerLocation = $tool.InstallerLocation
-    Invoke-Expression "New-FileWithContent -FilePath $InstallLocation -FileText (Get-Content $InstallerLocation -Raw) $QuickForceText"
+    $fileText = "('$QuickUtilityBeltFunctionIdentifier`r' + (Get-Content $InstallerLocation -Raw))"
+    Invoke-Expression "New-FileWithContent -FilePath $InstallLocation -FileText $fileText $QuickForceText"
     
 }

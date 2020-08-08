@@ -6,21 +6,26 @@ param(
     [Switch]$Reinstall,
     [Switch]$PreserveUserDefinedCommands
     )
-if (!$Install -and !$Uninstall -and !$Reinstall -and !$InstallUtilityBelt -and !$InstallUtility) {
+
+if (!$Install -and !$Uninstall -and !$Reinstall -and !$InstallUtilityBelt -and !$InstallUtility -and !$AddToProfile) {
     Get-Content .\Readme.md -Raw
 }
 
-$QuickForceText = if ($Reinstall) { '-force' } else { '' }
+$ReservedRoot = "$PSScriptRoot\Required\Reserved"
 
-if ($Uninstall) {
-    . ".\Uninstall-Script.ps1" -PreserveUserDefinedCommands $PreserveUserDefinedCommands
+$QuickForceText = if ($Reinstall) { '-force' } else { '' }
+$PreserveUserDefinedCommandsText = if ($PreserveUserDefinedCommands) { '-PreserveUserDefinedCommands' } else { '' }
+$AddToProfileText = if ($AddToProfile) { '-AssociateProfile' } else { '' }
+
+if ($Uninstall -or $Reinstall) {
+    Invoke-Expression "$ReservedRoot\Uninstall-Script.ps1 $PreserveUserDefinedCommandsText"
 }
 
 if ($Install -or $Reinstall) {
-    Invoke-Expression ".\Install-Script.ps1 $QuickForceText"
+    Invoke-Expression "$ReservedRoot\Install-Script.ps1 $QuickForceText"
 }
 
 if ($InstallUtilityBelt -or $InstallUtility) {
     $InstallEntireBelt = if ($InstallUtilityBelt) { '-InstallEntireBelt' } else { '' }
-    Invoke-Expression ".\Install-UtilityBelt.ps1 $InstallEntireBelt $QuickForceText"
+    Invoke-Expression "$ReservedRoot\Install-UtilityBelt.ps1 $InstallEntireBelt $QuickForceText"
 }

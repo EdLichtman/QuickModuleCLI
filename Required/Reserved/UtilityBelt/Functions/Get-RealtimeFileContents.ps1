@@ -1,4 +1,4 @@
-function Get-RealtimeFileContents {
+function global:Get-RealtimeFileContents {
     param(
         [Parameter(Mandatory=$true)][String]$filePath,
         [Int32]$lines

@@ -9,24 +9,22 @@ Quick-Package is a Module that gets added into your '$Profile', and makes availa
 
 ### How do I use it?
 __**The following Function will show you all the available Quick-Commands:**__
-Get-QuickModules (To Be Renamed: Get-QuickCommands)
+Get-QuickCommands 
 
 __**The following Functions allow you to Add a command:**__
 * Add-QuickAlias
 * Add-QuickFunction
-* Add-QuickOneLineFunction
+* Add-QuickFunctionWithEditor
 * Add-QuickTool 
 
 __**The following Functions will allow you to alter an existing command:**__
 * Edit-QuickCommand
-* Rename-QuickFunction (To be renamed and enhanced to support aliases: Rename-QuickCommand)
+* Rename-QuickCommand
 
 __**The following Functions will allow you to remove an existing command. You can only remove UserDefined Quick Commands, or Utility Belt Quick-Commands:**__
-* Remove-QuickAlias
-* Remove-QuickFunction (To be combined into 1 function)
+* Remove-QuickCommand
 
-__**The following are necessary utility functions that would make sense to expose:**__
-* Test-CommandExists (To be added to reserved and duplicated for Utility Belt)
+__**The following are utility functions:**__
 * Set-QuickToolsPath
 * Export-QuickCommand
 
@@ -45,18 +43,15 @@ Once the Help Documentation has been completed, you will be able to run 'Get-Hel
 
 ## Roadmap
 * I need to learn a bit more about CMDLET, and once I understand them, I need to Add-QuickCmdlet
-* New-FileWithContent, New-FolderIfNotExists, Get-QuickEnvironment(.ps1) and Test-QuickFunctionVariable should be "Reserved" (i.e. private)
-* Installing the Utility Belt into the Reserved section so that you can always uninstall and re-install the utility belt would also be nice
 * Complete Export-QuickCommand to create a script that, when run, will import into the Quick-Package Module
 * Clean up the Get-QuickModules printout. Perhaps rename it to Get-QuickCommands
-* Move Install, Uninstall and Install-UtilityBelt to also be reserved, and expose a new function: Uninstall-QuickPackage
+* Move Install, Uninstall and Install-UtilityBelt to also be reserved, and expose a new function: Uninstall-QuickPackage, Install-Utility, Install-UtilityBelt
 * Document all of the built-in functions. 
-* Right now there is Get-QuickModules -IncludeBuiltIn. I'd like to make -OnlyIncludeBuiltIn 
-* After the above two steps are completed then the How do I use documentation needs to be updated, and it will make it easier to understand the commands
+* After the Documentation is completed then the How do I use documentation needs to be updated, and it will make it easier to understand the commands
 * I need to rebuild the Alias Mapping to get created and passed around on startup, so that Rename-Function and Remove-Function will also affect the Aliases
-* I want to add Rename-QuickAlias, or convert Rename QuickFunction to Rename-QuickCommand
-* Make "UtilityBelt-installed" Commands a lot easier to identify for the uninstaller
 * Cleanup. Always cleanup.
 * Adding more tools to the Utility Belt would be nice
-
+* Add the ability to "Add New Profile" without re-installing the whole thing. 
+* Install-Script should be a function that gets run on the RunMe, as well as uninstall and install-UtilityBelt stuff
+* Add Pester Unit Tests
 

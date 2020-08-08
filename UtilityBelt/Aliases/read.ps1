@@ -1,1 +1,0 @@
-Set-Alias read Read-Command

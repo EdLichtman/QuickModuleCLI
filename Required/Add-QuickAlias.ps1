@@ -1,13 +1,14 @@
 function Add-QuickAlias {
     param(
         [string]$AliasName,
-        [string]$AliasText
+        [string]$AliasText,
+        [Switch]$ExcludeShell
     )
     
-    . $PSScriptRoot\Get-QuickEnvironment.ps1
-    . $PSScriptRoot\Test-QuickFunctionVariable.ps1
-    . $PSScriptRoot\Test-CommandExists.ps1
-    . $PSScriptRoot\New-FileWithContent.ps1
+    . "$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1"
+    . "$QuickReservedHelpersRoot\Test-QuickFunctionVariable.ps1"
+    . "$QuickReservedHelpersRoot\Test-CommandExists.ps1"
+    . "$QuickReservedHelpersRoot\New-FileWithContent.ps1"
 
     $AliasName = Test-QuickFunctionVariable $PSBoundParameters 'AliasName' 'Please enter the Alias'
     $AliasText = Test-QuickFunctionVariable $PSBoundParameters 'AliasText' 'Please enter the Function'
@@ -21,6 +22,10 @@ function Add-QuickAlias {
         return
     }
 
-    $newCode = "Set-Alias $AliasName $AliasText"
+    $newCode = $AliasText
+    if (!$ExcludeShell){
+        $newCode = "Set-Alias $AliasName $AliasText -Scope Global"
+    }
+
     New-FileWithContent -filePath "$QuickAliasesRoot\$AliasName.ps1" -fileText $newCode
 }

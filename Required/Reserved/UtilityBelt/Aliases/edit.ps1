@@ -1,0 +1,1 @@
+Set-Alias edit Edit-QuickCommand -Scope Global

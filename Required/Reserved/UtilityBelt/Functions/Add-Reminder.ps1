@@ -1,4 +1,4 @@
-function Add-Reminder{
+function global:Add-Reminder{
     <#
    .Synopsis
    Creates a scheduled task that will display a reminder.

@@ -1,6 +1,6 @@
 function Add-QuickTool {
 
-    . $PSScriptRoot\Get-QuickEnvironment.ps1
+    . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1
     . $PSScriptRoot\Set-QuickToolsPath.ps1
     . $PSScriptRoot\Add-QuickOneLineFunction.ps1
 
