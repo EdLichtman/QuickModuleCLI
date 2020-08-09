@@ -1,4 +1,4 @@
-function Reset-QuickCommand {
+function global:Reset-QuickCommand {
     param(
         [String]$commandName
     )

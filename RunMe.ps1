@@ -12,20 +12,25 @@ if (!$Install -and !$Uninstall -and !$Reinstall -and !$InstallUtilityBelt -and !
 }
 
 $ReservedRoot = "$PSScriptRoot\Required\Reserved"
+. "$PSScriptRoot\Required\Add-QuickUtility.ps1"
+. "$PSScriptRoot\Add-QuickPackageToProfile.ps1"
+. "$PSScriptRoot\Required\Remove-QuickPackage.ps1"
+. "$PSScriptRoot\Required\Remove-QuickUtilityBelt.ps1"
 
 $QuickForceText = if ($Reinstall) { '-force' } else { '' }
 $PreserveUserDefinedCommandsText = if ($PreserveUserDefinedCommands) { '-PreserveUserDefinedCommands' } else { '' }
-$AddToProfileText = if ($AddToProfile) { '-AssociateProfile' } else { '' }
 
 if ($Uninstall -or $Reinstall) {
-    Invoke-Expression "$ReservedRoot\Uninstall-Script.ps1 $PreserveUserDefinedCommandsText"
+    Remove-QuickUtilityBelt
+    Invoke-Expression "Remove-QuickPackage $PreserveUserDefinedCommandsText $QuickForceText"
 }
 
 if ($Install -or $Reinstall) {
-    Invoke-Expression "$ReservedRoot\Install-Script.ps1 $QuickForceText"
+    Invoke-Expression "$ReservedRoot\Installer\Install-Script.ps1 $QuickForceText"
+    Add-QuickPackageToProfile
 }
 
 if ($InstallUtilityBelt -or $InstallUtility) {
     $InstallEntireBelt = if ($InstallUtilityBelt) { '-InstallEntireBelt' } else { '' }
-    Invoke-Expression "$ReservedRoot\Install-UtilityBelt.ps1 $InstallEntireBelt $QuickForceText"
+    Invoke-Expression "Add-QuickUtility $InstallEntireBelt $QuickForceText"
 }

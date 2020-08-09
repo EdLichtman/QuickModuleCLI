@@ -1,4 +1,4 @@
-function Edit-QuickCommand {
+function global:Edit-QuickCommand {
     param(
         [String]$commandName
     )

@@ -1,4 +1,4 @@
-function Get-QuickCommands {
+function global:Get-QuickCommands {
     param(
         [Switch] $IncludeBuiltIn,
         [Switch] $OnlyIncludeBuiltIn

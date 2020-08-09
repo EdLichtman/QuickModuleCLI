@@ -7,6 +7,6 @@ $QuickUtilityBeltFunctionsRoot = "$QuickReservedHelpersRoot\UtilityBelt\Function
 $QuickUtilityBeltAliasesRoot = "$QuickReservedHelpersRoot\UtilityBelt\Aliases"
 $QuickPowershellProfilePath = $profile
 $QuickPowershellModulePath = "$QuickPowershellUserProfileRoot\Modules\Quick-Package\Quick-Package.psm1"
-$QuickUtilityBeltFunctionIdentifier = "##PREINSTALLED##"
+$QuickUtilityBeltCommandIdentifier = "##PREINSTALLED##"
 $QuickImportedFunctionIdentifier = "##IMPORTED##"
 

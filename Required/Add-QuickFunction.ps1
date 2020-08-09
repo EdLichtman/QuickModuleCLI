@@ -1,4 +1,4 @@
-function Add-QuickFunction {
+function global:Add-QuickFunction {
     param(
         [string]$functionName,
         [string]$functionText,

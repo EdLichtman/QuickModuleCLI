@@ -1,12 +1,14 @@
-function Add-QuickTool {
+function global:Add-QuickTool {
 
     . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1
     . $PSScriptRoot\Set-QuickToolsPath.ps1
     . $PSScriptRoot\Add-QuickOneLineFunction.ps1
+    . $PSScriptRoot\Set-Env.ps1
 
     $toolsDir = $env:Tools
     if ([String]::IsNullOrWhiteSpace($toolsDir)) {
-        Set-QuickToolsPath
+        $toolsPath = Read-Host "Please enter path to Tools Directory"
+        Set-Env 'Tools' $toolsPath
     } 
 
     $pathToNewTool = Read-Host "Please add the path to the EXE. If you start with '\' the relative path will be: $($toolsDir)"

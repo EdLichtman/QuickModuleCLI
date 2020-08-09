@@ -1,4 +1,4 @@
-function Add-QuickAlias {
+function global:Add-QuickAlias {
     param(
         [string]$AliasName,
         [string]$AliasText,

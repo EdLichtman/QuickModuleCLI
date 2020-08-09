@@ -1,4 +1,4 @@
-function Rename-QuickCommand {
+function global:Rename-QuickCommand {
     param(
         [String] $commandName,
         [String] $replacement

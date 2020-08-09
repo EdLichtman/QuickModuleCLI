@@ -1,4 +1,4 @@
-function Remove-QuickCommand {
+function global:Remove-QuickCommand {
     param(
         [String]$commandName
     )

@@ -1,4 +1,4 @@
-function Add-QuickFunctionWithEditor {
+function global:Add-QuickFunctionWithEditor {
     param(
         [string]$functionName
     )

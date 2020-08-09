@@ -1,7 +1,11 @@
 function Remove-FolderIfExists {
-    param([String] $pathToFolder)
+    param(
+        [String] $pathToFolder,
+        [Switch] $Force
+    )
 
+    $QuickForceText = if ($force) { '-force' } else {''}
     if (Test-Path $pathToFolder -PathType Container) {
-        Remove-Item -Path $pathToFolder -Recurse | Out-null
+        Invoke-Expression "Remove-Item -Path $pathToFolder -Recurse $QuickForceText | Out-null"
     }
 }
