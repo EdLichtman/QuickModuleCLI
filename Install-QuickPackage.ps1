@@ -11,12 +11,15 @@ function Install-QuickPackage {
         Write-Output 'Help Documentation WIP'
     }
     
-    $ReservedRoot = "$PSScriptRoot\Required\Reserved"
-    . "$ReservedRoot\Installer\Add-QuickPackage.ps1"
-    . "$PSScriptRoot\Required\Add-QuickUtility.ps1"
-    . "$PSScriptRoot\Required\Add-QuickPackageToProfile.ps1"
-    . "$PSScriptRoot\Required\Remove-QuickPackage.ps1"
-    . "$PSScriptRoot\Required\Remove-QuickUtilityBelt.ps1"
+    if (!(Test-Path Variable:\$UnderTest) -and ($UnderTest -eq $true)) {
+        throw 'There is no undertest variable'
+        $ReservedRoot = "$PSScriptRoot\Required\Reserved"
+        . "$ReservedRoot\Installer\Add-QuickPackage.ps1"
+        . "$PSScriptRoot\Required\Add-QuickUtility.ps1"
+        . "$PSScriptRoot\Required\Add-QuickPackageToProfile.ps1"
+        . "$PSScriptRoot\Required\Remove-QuickPackage.ps1"
+        . "$PSScriptRoot\Required\Remove-QuickUtilityBelt.ps1"
+    }
     
     if ($Uninstall -or $Reinstall) {
         Remove-QuickUtilityBelt

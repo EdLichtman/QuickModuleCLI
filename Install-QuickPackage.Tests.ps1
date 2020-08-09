@@ -2,17 +2,18 @@ $here = (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '\.Tests\.', '.'
 
 Describe 'Install-QuickPackage' {
-    function Get-TestFileLocation {
-        return "$here/$sut"
+    BeforeAll {
+        $UnderTest = $true
+        . ".\Required\Reserved\Import-TestHeader.ps1"
+        # Mock Remove-QuickUtilityBelt
+        # Mock Remove-QuickPackage
+        # Mock Add-QuickPackage
+        # Mock Add-QuickPackageToProfile
+        # Mock Add-QuickUtility
     }
 
-    Mock Remove-QuickUtilityBelt
-    Mock Remove-QuickPackage
-    Mock Add-QuickPackage
-    Mock Add-QuickPackageToProfile
-    Mock Add-QuickUtility
     It "does nothing if no flag is called" {
-        . (Get-TestFileLocation)
+        
 
         Install-QuickPackage
         Assert-MockCalled Remove-QuickUtilityBelt -Times 0
