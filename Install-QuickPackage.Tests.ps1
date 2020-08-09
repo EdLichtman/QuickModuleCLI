@@ -1,6 +1,7 @@
 Describe 'Install-QuickPackage' {
     BeforeAll {
         $UnderTest = $true
+        $ValidatingImports = $false
         . ".\Required\Reserved\Import-TestHeader.ps1"
         Mock Remove-QuickUtilityBelt
         Mock Remove-QuickPackage
@@ -34,6 +35,13 @@ Describe 'Install-QuickPackage' {
         Assert-MockCalled Add-QuickPackage -Times 0
         Assert-MockCalled Add-QuickPackageToProfile -Times 0
         Assert-MockCalled Add-QuickUtility -Times 0
+    }
+
+    It "Successfully imports all files" {
+        $ValidatingImports = $true
+
+        # Should throw AssertionError if any Imports are missing
+        Install-QuickPackage
     }
 }
 
