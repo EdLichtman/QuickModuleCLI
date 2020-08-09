@@ -11,8 +11,7 @@ function Install-QuickPackage {
         Write-Output 'Help Documentation WIP'
     }
     
-    if (!(Test-Path Variable:\$UnderTest) -and ($UnderTest -eq $true)) {
-        throw 'There is no undertest variable'
+    if (!(Test-Path Variable:\$UnderTest) -or $UnderTest -eq $False) {
         $ReservedRoot = "$PSScriptRoot\Required\Reserved"
         . "$ReservedRoot\Installer\Add-QuickPackage.ps1"
         . "$PSScriptRoot\Required\Add-QuickUtility.ps1"
