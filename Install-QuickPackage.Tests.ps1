@@ -1,16 +1,17 @@
 Describe 'Install-QuickPackage' {
     BeforeAll {
-        $UnderTest = $true
-        $ValidatingImports = $false
-        . ".\Required\Reserved\Import-TestHeader.ps1"
+        . ".\Required\Reserved\Get-TestHeaders.ps1"
+        . ".\Install-QuickPackage.ps1"
+    }
+
+    It "does nothing if no flag is called" {
+        Invoke-Expression (Get-MockImportsHeader)
         Mock Remove-QuickUtilityBelt
         Mock Remove-QuickPackage
         Mock Add-QuickPackage
         Mock Add-QuickPackageToProfile
         Mock Add-QuickUtility
-    }
 
-    It "does nothing if no flag is called" {
         Install-QuickPackage
         Assert-MockCalled Remove-QuickUtilityBelt -Times 0
         Assert-MockCalled Remove-QuickPackage -Times 0
@@ -21,16 +22,37 @@ Describe 'Install-QuickPackage' {
     }
 
     It "Uninstalls QuickPackage if Uninstall flag is called" {
+        Invoke-Expression (Get-MockImportsHeader)
+        Mock Remove-QuickUtilityBelt
+        Mock Remove-QuickPackage
+        Mock Add-QuickPackage
+        Mock Add-QuickPackageToProfile
+        Mock Add-QuickUtility
+
         Install-QuickPackage -Uninstall
         Assert-MockCalled Remove-QuickPackage -Times 1
     }
 
     It "Uninstall QuickPackageUtility if Uninstall flag is called" {
+        Invoke-Expression (Get-MockImportsHeader)
+        Mock Remove-QuickUtilityBelt
+        Mock Remove-QuickPackage
+        Mock Add-QuickPackage
+        Mock Add-QuickPackageToProfile
+        Mock Add-QuickUtility
+
         Install-QuickPackage -Uninstall
         Assert-MockCalled Remove-QuickUtilityBelt -Times 1
     }
 
     It "Does not install anything if Uninstall flag is called" {
+        Invoke-Expression (Get-MockImportsHeader)
+        Mock Remove-QuickUtilityBelt
+        Mock Remove-QuickPackage
+        Mock Add-QuickPackage
+        Mock Add-QuickPackageToProfile
+        Mock Add-QuickUtility
+
         Install-QuickPackage -Uninstall
         Assert-MockCalled Add-QuickPackage -Times 0
         Assert-MockCalled Add-QuickPackageToProfile -Times 0
@@ -38,10 +60,12 @@ Describe 'Install-QuickPackage' {
     }
 
     It "Successfully imports all files" {
-        $ValidatingImports = $true
+        Invoke-Expression (Get-TestImportsHeader)
 
         # Should throw AssertionError if any Imports are missing
         Install-QuickPackage
+
+        Assert-MockCalled Test-ImportCompleted -Times 1
     }
 }
 

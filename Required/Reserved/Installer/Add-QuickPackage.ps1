@@ -2,7 +2,7 @@ function Add-QuickPackage {
     param(
         [Switch] $Force
     )
-    
+
     $localHelpersPath = "$PSScriptRoot\..\.."
     $localReservedHelpersPath = "$localHelpersPath\Reserved"
     $localUtilityBeltFunctionsPath = "$localReservedHelpersPath\UtilityBelt\Functions"

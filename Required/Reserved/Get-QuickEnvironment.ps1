@@ -10,3 +10,11 @@ $QuickPowershellModulePath = "$QuickPowershellUserProfileRoot\Modules\Quick-Pack
 $QuickUtilityBeltCommandIdentifier = "##PREINSTALLED##"
 $QuickImportedFunctionIdentifier = "##IMPORTED##"
 
+function Exit-AfterImport {
+    #Do Nothing -- Allows us to Mock the function to test that the import headers returned successfully
+    return $false;
+}
+
+function Test-ImportCompleted {
+    #Do Nothing -- Allows us to test whether the function has been called
+}
