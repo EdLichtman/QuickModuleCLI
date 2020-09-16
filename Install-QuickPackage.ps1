@@ -9,6 +9,7 @@ function Install-QuickPackage {
     )
 
     $ReservedRoot = "$PSScriptRoot\Required\Reserved"
+    Invoke-Expression ". '$ReservedRoot\Get-QuickEnvironment.ps1'"
     Invoke-Expression ". '$ReservedRoot\Installer\Add-QuickPackage.ps1'"
     Invoke-Expression ". '$PSScriptRoot\Required\Add-QuickUtility.ps1'"
     Invoke-Expression ". '$PSScriptRoot\Required\Add-QuickPackageToProfile.ps1'"
