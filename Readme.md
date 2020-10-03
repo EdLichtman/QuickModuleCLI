@@ -62,4 +62,4 @@ Once the Help Documentation has been completed, you will be able to run 'Get-Hel
 * Add Quick-Configuration, such that you can overwrite the Prompt function, or add Profile Variables upon startup.
 * Do another pass-through at ConvertTo-PowershellEncodedString to make sure it's tested, documented and completely accurate
 * Edit this to no longer use $PSScriptRoot, and instead use injected functions private to this Module
-  * **It Looks like the module is not getting published to NuGet because of the above point. This needs to be rewritten in order to be published.
+* Re-write this so that instead of adding a QuickFunction, you're creating a QuickModule, and adding to the QuickModule. This way you can Publish-QuickModule
