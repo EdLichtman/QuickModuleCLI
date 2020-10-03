@@ -24,9 +24,23 @@ function global:Add-QuickAlias {
 
     $newCode = $AliasText
     if (!$Raw){
-        $newCode = "Set-Alias $AliasName $AliasText -Scope Global"
+        $newCode = 
+@"
+Set-Alias $AliasName $AliasText -Scope Global
+Export-ModuleMember -Alias '$AliasName'
+"@
     }
 
     New-FileWithContent -filePath "$QuickAliasesRoot\$AliasName.ps1" -fileText $newCode
     Invoke-Expression $newCode
+
+    #Export Member to Module
+    $psd1Location = "$(Split-Path (Get-Module Quick-Package).Path)\Quick-Package.psd1"
+    $psd1Content = (Get-Content $psd1Location | Out-String)
+    $psd1 = (Invoke-Expression $psd1Content)
+    $NewAliasesToExport = New-Object System.Collections.ArrayList($null)
+    $NewAliasesToExport.AddRange($psd1.AliasesToExport)
+    $NewAliasesToExport.Add($AliasName) | Out-Null
+    $psd1.AliasesToExport = $NewAliasesToExport;
+    Set-Content $psd1Location (ConvertTo-PowershellEncodedString $psd1)
 }

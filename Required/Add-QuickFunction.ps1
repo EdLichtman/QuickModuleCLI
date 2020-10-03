@@ -100,9 +100,23 @@ function global:Add-QuickFunction {
 function global:$FunctionName {
     $newFunctionText
 }
+
 "@
     }
 
     New-FileWithContent -filePath "$QuickFunctionsRoot\$FunctionName.ps1" -fileText $newCode
     Invoke-Expression $newCode
+
+    #Export Member to Module
+    $psd1Location = "$(Split-Path (Get-Module Quick-Package).Path)\Quick-Package.psd1"
+    $psd1Content = (Get-Content $psd1Location | Out-String)
+    $psd1 = (Invoke-Expression $psd1Content)
+    $NewFunctionsToExport = New-Object System.Collections.ArrayList($null)
+    $NewFunctionsToExport.AddRange($psd1.FunctionsToExport)
+    $NewFunctionsToExport.Add($FunctionName) | Out-Null
+    $psd1.FunctionsToExport = $NewFunctionsToExport;
+    Set-Content $psd1Location (ConvertTo-PowershellEncodedString $psd1)
+@"
+
+"@
 }

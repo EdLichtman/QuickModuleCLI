@@ -60,4 +60,4 @@ Once the Help Documentation has been completed, you will be able to run 'Get-Hel
 * Perhaps add Update-QuickPackage?
 * Convert the Text flags ($QuickForceText) using https://stackoverflow.com/questions/38009106/how-to-pass-a-switch-parameter-to-another-powershell-script
 * Add Quick-Configuration, such that you can overwrite the Prompt function, or add Profile Variables upon startup.
-
+* Do another pass-through at ConvertTo-PowershellEncodedString to make sure it's tested, documented and completely accurate
