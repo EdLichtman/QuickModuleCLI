@@ -61,3 +61,5 @@ Once the Help Documentation has been completed, you will be able to run 'Get-Hel
 * Convert the Text flags ($QuickForceText) using https://stackoverflow.com/questions/38009106/how-to-pass-a-switch-parameter-to-another-powershell-script
 * Add Quick-Configuration, such that you can overwrite the Prompt function, or add Profile Variables upon startup.
 * Do another pass-through at ConvertTo-PowershellEncodedString to make sure it's tested, documented and completely accurate
+* Edit this to no longer use $PSScriptRoot, and instead use injected functions private to this Module
+  * **It Looks like the module is not getting published to NuGet because of the above point. This needs to be rewritten in order to be published.
