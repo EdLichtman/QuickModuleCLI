@@ -13,3 +13,5 @@ $aliases = Get-ChildItem $QuickAliasesRoot -Filter "*.ps1"
 foreach($alias in $aliases) {
     . $QuickAliasesRoot\$alias
 }
+
+. $QuickConfigurationsFile

@@ -1,6 +1,7 @@
 $QuickPowershellUserProfileRoot = Split-Path $profile
 $QuickFunctionsRoot = "$QuickPowershellUserProfileRoot\Modules\Quick-Package\Functions"
 $QuickAliasesRoot = "$QuickPowershellUserProfileRoot\Modules\Quick-Package\Aliases"
+$QuickConfigurationsFile = "$QuickPowershellUserProfileRoot\Modules\Quick-Package\Configuration\Configuration.ps1"
 $QuickHelpersRoot = "$QuickPowershellUserProfileRoot\Modules\Quick-Package\Required"
 $QuickReservedHelpersRoot = "$QuickHelpersRoot\Reserved"
 $QuickUtilityBeltFunctionsRoot = "$QuickReservedHelpersRoot\UtilityBelt\Functions"

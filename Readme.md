@@ -58,6 +58,6 @@ Once the Help Documentation has been completed, you will be able to run 'Get-Hel
 * Adding more tools to the Utility Belt would be nice
 * Add Pester Unit Tests
 * Perhaps add Update-QuickPackage?
-* Replace the Continue? (Y/N) with the proper Powershell UI way of doing it with the prompt that looks like: [Y] Yes  [N] No  [S] Suspend  [?] Help (default is "Y")
 * Convert the Text flags ($QuickForceText) using https://stackoverflow.com/questions/38009106/how-to-pass-a-switch-parameter-to-another-powershell-script
+* Add Quick-Configuration, such that you can overwrite the Prompt function, or add Profile Variables upon startup.
 

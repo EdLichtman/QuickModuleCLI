@@ -19,6 +19,7 @@ function Add-QuickPackage {
     New-FolderIfNotExists $QuickHelpersRoot
     New-FolderIfNotExists $QuickUtilityBeltFunctionsRoot
     New-FolderIfNotExists $QuickUtilityBeltAliasesRoot
+    New-FolderIfNotExists (Split-Path $QuickConfigurationsFile)
     
     Copy-QuickFolderWithWarning $localHelpersPath $QuickHelpersRoot 
     Copy-QuickFolderWithWarning $localReservedHelpersPath $QuickReservedHelpersRoot

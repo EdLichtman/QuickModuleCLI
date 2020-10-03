@@ -3,22 +3,20 @@ function New-FileWithContent {
             [String] $fileText,
             [Switch] $force)
 
+    $continue = 0;
     if (Test-Path $filePath) {
         if (!$force) {
             $folderPath = Split-Path $filePath
             $fileName = Split-Path $filePath -Leaf
-            $continue = (Read-Host -Prompt "'$fileName' already exists at location $folderPath. Want to overwrite? (Y/N)")
-        } else {
-            $continue = 'y'
+            $continue = $Host.UI.PromptForChoice("'$fileName' already exists at location $folderPath.", "Would you like to overwrite?", @('&Yes','&No'),1)
         }
        
-        if ($continue -eq 'y') {
+        if ($continue -eq '0') {
             Remove-Item $filePath
         }
-    } else {
-        $continue = 'y'
-    }
-    if ($continue -eq 'y') {
+    } 
+
+    if ($continue -eq '0') {
         New-Item -ItemType File -Force -Path $filePath | Out-null
     }
     if (Test-Path $filePath) {
