@@ -1,6 +1,6 @@
 function Update-QuickModule {
     param (
-        [Parameter(Required=$True)]
+        [Parameter(Mandatory=$true)]
         [string]
         $QuickModule
     )

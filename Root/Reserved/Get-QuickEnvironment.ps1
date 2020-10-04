@@ -1,5 +1,5 @@
-$QuickPackageModuleFolder =  "$PSScriptRoot\..\.."
-$QuickPackageModuleName = (Get-Item $QuickPackageModuleFolder).Name
+$QuickPackageModuleFolder =  Split-Path (Get-Module -Name QuickModuleCLI).Path
+$QuickPackageModuleName = "QuickModuleCLI"
 $QuickPackageModuleContainerPath = "$QuickPackageModuleFolder\Modules"
 $QuickHelpersRoot = "$QuickPackageModuleFolder\Root"
 $QuickReservedHelpersRoot = "$QuickHelpersRoot\Reserved"
