@@ -1,20 +1,26 @@
 function global:Add-QuickAlias {
     param(
-        [string]$AliasName,
-        [string]$AliasText,
-        [string]$QuickModule,
+        [Parameter(Mandatory=$true)][string]$QuickModule,
+        [Parameter(Mandatory=$true)][string]$AliasName,
+        [Parameter(Mandatory=$true)][string]$AliasText,
         [Switch]$Raw
     )
     
     . "$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1"
-    . "$QuickReservedHelpersRoot\Test-QuickFunctionVariable.ps1"
     . "$QuickReservedHelpersRoot\Test-CommandExists.ps1"
     . "$QuickReservedHelpersRoot\New-FileWithContent.ps1"
-
-    $AliasName = Test-QuickFunctionVariable $PSBoundParameters 'AliasName' 'Please enter the Alias'
-    $AliasText = Test-QuickFunctionVariable $PSBoundParameters 'AliasText' 'Please enter the Function'
-    $QuickModule = Test-QuickFunctionVariable $PSBoundParameters 'QuickModule' 'Please enter the name of the Module'
+    Invoke-Expression ". '$QuickHelpersRoot\New-QuickModule.ps1'"
+    Invoke-Expression ". '$QuickHelpersRoot\Update-QuickModule.ps1'"
     
+    if (!(Test-Path $QuickPackageModuleContainerPath\$QuickModule)) {
+        $Continue = $Host.UI.PromptForChoice("No Module by the name '$QuickModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
+        if ($Continue -eq 0) {
+            New-QuickModule $QuickModule;
+        } else {
+            return;
+        }
+    }
+
     if (Test-CommandExists $aliasName) {
         Write-Output "That alias already exists as a command. $QuickPackageModuleName does not support Clobber."
         return
@@ -39,6 +45,6 @@ Set-Alias $AliasName $AliasText -Scope Global
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
     }
 
-    Add-QuickModuleExport -QuickModule $QuickModule -AliasToExport $AliasName
+    Update-QuickModule -QuickModule $QuickModule
     Reset-QuickCommand -QuickModule $QuickModule -commandName $AliasName
 }

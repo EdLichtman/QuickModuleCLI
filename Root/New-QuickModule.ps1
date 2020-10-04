@@ -6,6 +6,8 @@ function New-QuickModule {
 
     $ModuleDirectory = "$QuickPackageModuleContainerPath\$QuickModule"
     $ModuleFile = "$ModuleDirectory\$QuickModule.psm1";
+    $ModuleDeclarationFile = "$ModuleDirectory\$QuickModule.psd1";
+    
     if (!(Test-Path "$ModuleDirectory")) {
         New-Item "$ModuleDirectory" -ItemType Directory | Out-Null
     }
@@ -17,7 +19,7 @@ function New-QuickModule {
     }
 
     if (!(Test-Path $ModuleFile)) {
-        $fileContent = @'
+        $ModuleFileContent = @'
 $functions = Get-ChildItem $PSScriptRoot\Functions -Filter "*.ps1"
 foreach($function in $functions) {
     $functionName = $function.BaseName;
@@ -33,9 +35,23 @@ foreach($alias in $aliases) {
         
 '@
         New-Item $ModuleFile | Out-Null
-        Add-Content -Path $ModuleFile -Value $fileContent
+        Add-Content -Path $ModuleFile -Value $ModuleFileContent
     } else {
         Write-Output 'Module already exists.'
+    }
+
+    if (!(Test-Path $ModuleDeclarationFile)) {
+        $currentPowershellVersion = "$($PSVersionTable.PSVersion.Major).$($PSVersionTable.PSVersion.Minor)"
+        New-ModuleManifest -Path $ModuleDeclarationFile `
+            -Author 'TODO' `
+            -Description 'TODO' `
+            -RootModule "$QuickModule.psm1" `
+            -ModuleVersion '0.0.1' `
+            -PowerShellVersion "$currentPowershellVersion" `
+            -CompatiblePSEditions "Desktop" `
+            -FunctionsToExport @() `
+            -AliasesToExport @() `
+            -CmdletsToExport @() `
     }
 
     #Export Member to Module
@@ -44,7 +60,9 @@ foreach($alias in $aliases) {
     $psd1 = (Invoke-Expression $psd1Content)
     $NewNestedModules = New-Object System.Collections.ArrayList($null)
     $NewNestedModules.AddRange($psd1.NestedModules)
-    $NewNestedModules.Add("Modules\$QuickModule\$QuickModule") | Out-Null
+    if (!$NewNestedModules.Contains("Modules\$QuickModule\$QuickModule")) {
+        $NewNestedModules.Add("Modules\$QuickModule\$QuickModule") | Out-Null
+    }
     $psd1.NestedModules = $NewNestedModules;
     Set-Content $psd1Location (ConvertTo-PowershellEncodedString $psd1)
 }

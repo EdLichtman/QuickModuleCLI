@@ -63,6 +63,7 @@ function global:Add-QuickFunction {
     Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
     Invoke-Expression ". '$QuickReservedHelpersRoot\New-FileWithContent.ps1'"
     Invoke-Expression ". '$QuickHelpersRoot\New-QuickModule.ps1'"
+    Invoke-Expression ". '$QuickHelpersRoot\Update-QuickModule.ps1'"
 
     if (Exit-AfterImport) {
         Test-ImportCompleted
@@ -119,5 +120,6 @@ function global:$FunctionName {
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
     }
 
+    Update-QuickModule -QuickModule $QuickModule
     Reset-QuickCommand -QuickModule $QuickModule -commandName $FunctionName
 }
