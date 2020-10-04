@@ -1,17 +1,14 @@
 function global:Rename-QuickCommand {
     param(
-        [String] $commandName,
-        [String] $replacement
+        [required][string] $QuickModule,
+        [required][string] $commandName,
+        [required][string] $replacement
     )
 
     . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1
-    . $QuickReservedHelpersRoot\Test-QuickFunctionVariable.ps1
-
-    $commandName = Test-QuickFunctionVariable $PSBoundParameters 'commandName' 'Please enter the function/alias name to be renamed'
-    $replacement = Test-QuickFunctionVariable $PSBoundParameters 'replacement' 'Please enter the replacement'
     
-    $functionFileRoot = "$QuickFunctionsRoot\$commandName.ps1"
-    $aliasFileRoot = "$QuickAliasesRoot\$commandName.ps1"
+    $functionFileRoot = "$QuickPackageModuleContainerPath\$QuickModule\Functions\$commandName.ps1"
+    $aliasFileRoot = "$QuickPackageModuleContainerPath\$QuickModule\Aliases\$commandName.ps1"
     if(Test-Path $functionFileRoot) {
         $FunctionBlock = Get-Content $functionFileRoot -Raw
         $NewFunctionBlock = $FunctionBlock -Replace "$commandName", "$replacement" 

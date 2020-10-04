@@ -1,9 +1,7 @@
 $QuickPackageModuleFolder =  "$PSScriptRoot\..\.."
 $QuickPackageModuleName = (Get-Item $QuickPackageModuleFolder).Name
 $QuickPackageModuleContainerPath = "$QuickPackageModuleFolder\Modules"
-# $QuickFunctionsRoot = "$QuickPackageModuleFolder\Functions"
-# $QuickAliasesRoot = "$QuickPackageModuleFolder\Aliases"
-# $QuickHelpersRoot = "$QuickPackageModuleFolder\Root"
+$QuickHelpersRoot = "$QuickPackageModuleFolder\Root"
 $QuickReservedHelpersRoot = "$QuickHelpersRoot\Reserved"
 $QuickUtilityBeltFunctionsRoot = "$QuickReservedHelpersRoot\UtilityBelt\Functions"
 $QuickUtilityBeltAliasesRoot = "$QuickReservedHelpersRoot\UtilityBelt\Aliases"

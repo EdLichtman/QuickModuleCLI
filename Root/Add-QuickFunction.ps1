@@ -40,6 +40,12 @@ https://github.com/EdLichtman/Quick-Package
 #>
 function global:Add-QuickFunction {
     param(
+        [required]
+        [string]
+        #Specifies the name of the Module this functions should be added to. This helps keep a separation of 
+        #concern over which functions belong with which module behaviors.
+        $QuickModule,
+        [required]
         [string]
         #Specifies the name of the new function
         $functionName,
@@ -48,10 +54,6 @@ function global:Add-QuickFunction {
         #be added after semi semicolons. If the -Raw flag is added after, 
         #it will specify the content that should go in the newly-created file.
         $functionText,
-        [string]
-        #Specifies the name of the Module this functions should be added to. This helps keep a separation of 
-        #concern over which functions belong with which module behaviors.
-        $QuickModule,
         [Switch]
         #Specifies that the file text should contain the -functionText value as is, with no function shell 
         #and no additional line breaks.
@@ -59,21 +61,14 @@ function global:Add-QuickFunction {
     )
     
     Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
-    Invoke-Expression ". '$QuickReservedHelpersRoot\Test-QuickFunctionVariable.ps1'"
     Invoke-Expression ". '$QuickReservedHelpersRoot\New-FileWithContent.ps1'"
     Invoke-Expression ". '$QuickHelpersRoot\New-QuickModule.ps1'"
+    Invoke-Expression ". '$QuickHelpersRoot\Add-QuickModuleFunction.ps1'"
 
     if (Exit-AfterImport) {
         Test-ImportCompleted
         return;
     }
-    # if (Test-Integration) {
-    #     Invoke-Expression (Get-IntegrationTestEnvironment)
-    # }
-
-    $functionName = Test-QuickFunctionVariable $PSBoundParameters 'functionName' 'Please enter the name of the new function'
-    $functionText = Test-QuickFunctionVariable $PSBoundParameters 'functionText' 'Please enter the Function'
-    $QuickModule = Test-QuickFunctionVariable $PSBoundParameters 'QuickModule' 'Please enter the name of the Module'
     
     $ApprovedVerbs = [System.Collections.Generic.HashSet[String]]::new();
     (Get-Verb | Select-Object -Property Verb) | ForEach-Object {$ApprovedVerbs.Add($_.Verb)} | Out-Null;
@@ -82,6 +77,15 @@ function global:Add-QuickFunction {
     if (!$ApprovedVerbs.Contains($chosenVerb)) {
         throw [System.ArgumentException] "$chosenVerb is not a common accepted verb. Please find an appropriate verb by using the command 'Get-Verb'." 
         return;
+    }
+
+    if (!(Test-Path $QuickPackageModuleContainerPath\$QuickModule)) {
+        $Continue = $Host.UI.PromptForChoice("No Module by the name '$QuickModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
+        if ($Continue -eq 0) {
+            New-QuickModule $QuickModule;
+        } else {
+            return;
+        }
     }
 
     $newCode = $functionText
@@ -102,27 +106,20 @@ function global:Add-QuickFunction {
                 $newFunctionText += $character
             }
         }
-        $newCode = 
-@"
+        $newCode = @"
 function global:$FunctionName {
     $newFunctionText
 }
-
 "@
     }
 
-    if (!(Test-Path $QuickPackageModuleContainerPath\$QuickModule)) {
-        $Continue = $Host.UI.PromptForChoice("No Module by the name '$QuickModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
-        if ($Continue -eq 0) {
-            New-QuickModule $QuickModule;
-        } else {
-            return;
-        }
-    }
     New-FileWithContent -filePath "$QuickPackageModuleContainerPath\$QuickModule\Functions\$FunctionName.ps1" -fileText $newCode
-    Invoke-Expression $newCode
+    if ([String]::IsNullOrWhiteSpace($newFunctionText)) {
+        powershell_ise.exe "$QuickPackageModuleContainerPath\$QuickModule\Functions\$FunctionName.ps1"
+        Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
+        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+    }
 
-@"
-
-"@
+    Add-QuickModuleExport -QuickModule $QuickModule -FunctionToExport $FunctionName
+    Reset-QuickCommand -QuickModule $QuickModule -commandName $FunctionName
 }
