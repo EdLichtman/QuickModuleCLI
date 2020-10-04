@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
 
-Adds a User-Defined function to the Quick-Package Module.
+Adds a User-Defined function to the QuickPackage Module.
 
 .DESCRIPTION
 
-Adds a User-Defined function to the Quick-Package Module to later be used globally. 
-Once the function is part of the Quick-Package Module, it will be imported every time 
+Adds a User-Defined function to the QuickPackage Module to later be used globally. 
+Once the function is part of the QuickPackage Module, it will be imported every time 
 you open a new PowerShell Session.
 
 .NOTES
@@ -48,6 +48,10 @@ function global:Add-QuickFunction {
         #be added after semi semicolons. If the -Raw flag is added after, 
         #it will specify the content that should go in the newly-created file.
         $functionText,
+        [string]
+        #Specifies the name of the Module this functions should be added to. This helps keep a separation of 
+        #concern over which functions belong with which module behaviors.
+        $QuickModule,
         [Switch]
         #Specifies that the file text should contain the -functionText value as is, with no function shell 
         #and no additional line breaks.
@@ -57,6 +61,8 @@ function global:Add-QuickFunction {
     Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
     Invoke-Expression ". '$QuickReservedHelpersRoot\Test-QuickFunctionVariable.ps1'"
     Invoke-Expression ". '$QuickReservedHelpersRoot\New-FileWithContent.ps1'"
+    Invoke-Expression ". '$QuickHelpersRoot\New-QuickModule.ps1'"
+
     if (Exit-AfterImport) {
         Test-ImportCompleted
         return;
@@ -67,6 +73,7 @@ function global:Add-QuickFunction {
 
     $functionName = Test-QuickFunctionVariable $PSBoundParameters 'functionName' 'Please enter the name of the new function'
     $functionText = Test-QuickFunctionVariable $PSBoundParameters 'functionText' 'Please enter the Function'
+    $QuickModule = Test-QuickFunctionVariable $PSBoundParameters 'QuickModule' 'Please enter the name of the Module'
     
     $ApprovedVerbs = [System.Collections.Generic.HashSet[String]]::new();
     (Get-Verb | Select-Object -Property Verb) | ForEach-Object {$ApprovedVerbs.Add($_.Verb)} | Out-Null;
@@ -104,18 +111,17 @@ function global:$FunctionName {
 "@
     }
 
-    New-FileWithContent -filePath "$QuickFunctionsRoot\$FunctionName.ps1" -fileText $newCode
+    if (!(Test-Path $QuickPackageModuleContainerPath\$QuickModule)) {
+        $Continue = $Host.UI.PromptForChoice("No Module by the name '$QuickModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
+        if ($Continue -eq 0) {
+            New-QuickModule $QuickModule;
+        } else {
+            return;
+        }
+    }
+    New-FileWithContent -filePath "$QuickPackageModuleContainerPath\$QuickModule\Functions\$FunctionName.ps1" -fileText $newCode
     Invoke-Expression $newCode
 
-    #Export Member to Module
-    $psd1Location = "$(Split-Path (Get-Module Quick-Package).Path)\Quick-Package.psd1"
-    $psd1Content = (Get-Content $psd1Location | Out-String)
-    $psd1 = (Invoke-Expression $psd1Content)
-    $NewFunctionsToExport = New-Object System.Collections.ArrayList($null)
-    $NewFunctionsToExport.AddRange($psd1.FunctionsToExport)
-    $NewFunctionsToExport.Add($FunctionName) | Out-Null
-    $psd1.FunctionsToExport = $NewFunctionsToExport;
-    Set-Content $psd1Location (ConvertTo-PowershellEncodedString $psd1)
 @"
 
 "@

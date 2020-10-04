@@ -1,13 +1,14 @@
-$QuickPowershellUserProfileRoot = Split-Path $profile
-$QuickFunctionsRoot = "$QuickPowershellUserProfileRoot\Modules\Quick-Package\Functions"
-$QuickAliasesRoot = "$QuickPowershellUserProfileRoot\Modules\Quick-Package\Aliases"
-$QuickConfigurationsFile = "$QuickPowershellUserProfileRoot\Modules\Quick-Package\Configuration\Configuration.ps1"
-$QuickHelpersRoot = "$QuickPowershellUserProfileRoot\Modules\Quick-Package\Required"
+$QuickPackageModuleFolder =  "$PSScriptRoot\..\.."
+$QuickPackageModuleName = (Get-Item $QuickPackageModuleFolder).Name
+$QuickPackageModuleContainerPath = "$QuickPackageModuleFolder\Modules"
+# $QuickFunctionsRoot = "$QuickPackageModuleFolder\Functions"
+# $QuickAliasesRoot = "$QuickPackageModuleFolder\Aliases"
+# $QuickHelpersRoot = "$QuickPackageModuleFolder\Root"
 $QuickReservedHelpersRoot = "$QuickHelpersRoot\Reserved"
 $QuickUtilityBeltFunctionsRoot = "$QuickReservedHelpersRoot\UtilityBelt\Functions"
 $QuickUtilityBeltAliasesRoot = "$QuickReservedHelpersRoot\UtilityBelt\Aliases"
 $QuickPowershellProfilePath = $profile
-$QuickPowershellModulePath = "$QuickPowershellUserProfileRoot\Modules\Quick-Package\Quick-Package.psm1"
+$QuickPowershellModulePath = "$QuickPackageModuleFolder\$QuickPackageModuleName.psm1"
 $QuickUtilityBeltCommandIdentifier = "##PREINSTALLED##"
 $QuickImportedFunctionIdentifier = "##IMPORTED##"
 

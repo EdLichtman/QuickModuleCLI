@@ -6,7 +6,6 @@ function global:Rename-QuickCommand {
 
     . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1
     . $QuickReservedHelpersRoot\Test-QuickFunctionVariable.ps1
-    . $QuickReservedHelpersRoot\New-FileWithContent.ps1
 
     $commandName = Test-QuickFunctionVariable $PSBoundParameters 'commandName' 'Please enter the function/alias name to be renamed'
     $replacement = Test-QuickFunctionVariable $PSBoundParameters 'replacement' 'Please enter the replacement'

@@ -5,7 +5,6 @@ function global:Add-QuickUtility {
     )
     . "$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1"
     . "$QuickReservedHelpersRoot\New-FileWithContent.ps1"
-    . "$QuickReservedHelpersRoot\Show-Menu.ps1"
     
     $QuickForceText = if ($Force) { '-force' } else { '' }
     
@@ -34,7 +33,7 @@ function global:Add-QuickUtility {
         $UtilityBeltCommands.Add($obj) | Out-Null;
     }
     
-    if ($InstallEntireBelt) {
+    if ($True) {
         foreach($tool in $UtilityBeltCommands) {
             $InstallLocation = $tool.InstallLocation
             $InstallerLocation = $tool.InstallerLocation
@@ -42,6 +41,8 @@ function global:Add-QuickUtility {
             Invoke-Expression "New-FileWithContent -FilePath $InstallLocation -FileText $fileText $QuickForceText"
         }
     } else {
+        #todo: Replace this with the thing to dynamically generate a list of valid options from a 
+        #string array type that I learned about the other day.
         $MenuOptions = @{}
         $MenuOptionMappings = @{}
         $UtilityBeltCommands | ForEach-Object {
