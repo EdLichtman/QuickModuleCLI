@@ -1,7 +1,7 @@
 function global:Reset-QuickCommand {
     param(
-        [required][string]$QuickModule,
-        [required][string]$commandName
+        [Parameter(Mandatory=$true)][string]$QuickModule,
+        [Parameter(Mandatory=$true)][string]$commandName
     )
 
     . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1

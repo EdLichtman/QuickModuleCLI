@@ -40,12 +40,12 @@ https://github.com/EdLichtman/Quick-Package
 #>
 function global:Add-QuickFunction {
     param(
-        [required]
+        [Parameter(Mandatory=$true)]
         [string]
         #Specifies the name of the Module this functions should be added to. This helps keep a separation of 
         #concern over which functions belong with which module behaviors.
         $QuickModule,
-        [required]
+        [Parameter(Mandatory=$true)]
         [string]
         #Specifies the name of the new function
         $functionName,
@@ -63,7 +63,6 @@ function global:Add-QuickFunction {
     Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
     Invoke-Expression ". '$QuickReservedHelpersRoot\New-FileWithContent.ps1'"
     Invoke-Expression ". '$QuickHelpersRoot\New-QuickModule.ps1'"
-    Invoke-Expression ". '$QuickHelpersRoot\Add-QuickModuleFunction.ps1'"
 
     if (Exit-AfterImport) {
         Test-ImportCompleted
@@ -120,6 +119,5 @@ function global:$FunctionName {
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
     }
 
-    Add-QuickModuleExport -QuickModule $QuickModule -FunctionToExport $FunctionName
     Reset-QuickCommand -QuickModule $QuickModule -commandName $FunctionName
 }

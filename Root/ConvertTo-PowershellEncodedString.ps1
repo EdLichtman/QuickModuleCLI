@@ -9,13 +9,14 @@ function global:ConvertTo-PowershellEncodedString {
         if ($objectHasProperties) {
             return @"
 @{
-    $(($object.Keys | ForEach-Object {"$_ = $(ConvertTo-PowershellEncodedString $object[$_])"}) -join ';')
+    $(($object.Keys | ForEach-Object {"$_ = $(ConvertTo-PowershellEncodedString $object[$_])"}) -join "`r`n")
 }
+
 "@;
         } elseif ($objectIsArray) {
             return @"
 @(
-    $(($object | ForEach-Object {ConvertTo-PowershellEncodedString $_}) -join ',')
+    $(($object | ForEach-Object {ConvertTo-PowershellEncodedString $_}) -join ",`r`n")
 )
 "@;
         } else {

@@ -1,8 +1,8 @@
 function global:Rename-QuickCommand {
     param(
-        [required][string] $QuickModule,
-        [required][string] $commandName,
-        [required][string] $replacement
+        [Parameter(Mandatory=$true)][string] $QuickModule,
+        [Parameter(Mandatory=$true)][string] $commandName,
+        [Parameter(Mandatory=$true)][string] $replacement
     )
 
     . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1

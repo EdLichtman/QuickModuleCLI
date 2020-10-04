@@ -1,6 +1,6 @@
 function Add-QuickModuleExport {
     param(
-        [required][string] $QuickModule,
+        [Parameter(Mandatory=$true)][string] $QuickModule,
         [string]$FunctionToExport,
         [string]$AliasToExport
     )
