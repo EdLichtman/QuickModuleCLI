@@ -3,6 +3,7 @@ function New-QuickModule {
         [Parameter(Mandatory=$true)][string] $QuickModule
     )
     Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
+    Invoke-Expression ". '$QuickReservedHelpersRoot\Update-QuickModuleCLI'"
 
     $ModuleDirectory = "$QuickPackageModuleContainerPath\$QuickModule"
     $ModuleFile = "$ModuleDirectory\$QuickModule.psm1";
@@ -54,15 +55,5 @@ foreach($alias in $aliases) {
             -CmdletsToExport @() `
     }
 
-    #Export Member to Module
-    $psd1Location = "$QuickPackageModuleFolder\$QuickPackageModuleName.psd1"
-    $psd1Content = (Get-Content $psd1Location | Out-String)
-    $psd1 = (Invoke-Expression $psd1Content)
-    $NewNestedModules = New-Object System.Collections.ArrayList($null)
-    $NewNestedModules.AddRange($psd1.NestedModules)
-    if (!$NewNestedModules.Contains("Modules\$QuickModule\$QuickModule")) {
-        $NewNestedModules.Add("Modules\$QuickModule\$QuickModule") | Out-Null
-    }
-    $psd1.NestedModules = $NewNestedModules;
-    Set-Content $psd1Location (ConvertTo-PowershellEncodedString $psd1)
+    Update-QuickModuleCLI
 }

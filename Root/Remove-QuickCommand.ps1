@@ -6,6 +6,7 @@ function Remove-QuickCommand {
 
     . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1
     Invoke-Expression ". '$QuickHelpersRoot\Update-QuickModule.ps1'"
+    Invoke-Expression ". '$QuickReservedHelpersRoot\Update-QuickModuleCLI'"
 
     if(Test-Path "$QuickPackageModuleContainerPath\$QuickModule\Functions\$commandName.ps1") {
         Remove-Item -Path "$QuickPackageModuleContainerPath\$QuickModule\Functions\$commandName.ps1"    
@@ -15,6 +16,7 @@ function Remove-QuickCommand {
         }
 
         Update-QuickModule -QuickModule $QuickModule
+        Update-QuickModuleCLI
     }
     elseif(Test-Path "$QuickPackageModuleContainerPath\$QuickModule\Aliases\$commandName.ps1") {
         Remove-Item -Path "$QuickPackageModuleContainerPath\$QuickModule\Aliases\$commandName.ps1"
@@ -24,6 +26,7 @@ function Remove-QuickCommand {
         }
 
         Update-QuickModule -QuickModule $QuickModule
+        Update-QuickModuleCLI
     } else {
         Write-Output "Command '$commandName' not found."
         return;

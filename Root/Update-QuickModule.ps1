@@ -31,5 +31,5 @@ function Update-QuickModule {
     }
     $psd1.AliasesToExport = $AliasesToExport
 
-    Set-Content $psd1Location (ConvertTo-PowershellEncodedString $psd1)
+    Set-Content $psd1Location (ConvertTo-PSON $psd1)
 }

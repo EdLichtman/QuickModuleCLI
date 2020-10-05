@@ -64,6 +64,7 @@ function Add-QuickFunction {
     Invoke-Expression ". '$QuickReservedHelpersRoot\New-FileWithContent.ps1'"
     Invoke-Expression ". '$QuickHelpersRoot\New-QuickModule.ps1'"
     Invoke-Expression ". '$QuickHelpersRoot\Update-QuickModule.ps1'"
+    Invoke-Expression ". '$QuickReservedHelpersRoot\Update-QuickModuleCLI'"
 
     if (Exit-AfterImport) {
         Test-ImportCompleted
@@ -121,5 +122,6 @@ function $FunctionName {
     }
 
     Update-QuickModule -QuickModule $QuickModule
+    Update-QuickModuleCLI
     Reset-QuickCommand -QuickModule $QuickModule -commandName $FunctionName
 }
