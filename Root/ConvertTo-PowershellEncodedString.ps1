@@ -7,18 +7,23 @@ function global:ConvertTo-PowershellEncodedString {
         $objectIsArray = $objectType.ImplementedInterfaces.Contains([System.Collections.IList]);
         
         if ($objectHasProperties) {
-            return @"
+            if ($object.Keys) {
+                return @"
 @{
     $(($object.Keys | ForEach-Object {"$_ = $(ConvertTo-PowershellEncodedString $object[$_])"}) -join "`r`n")
-}
-
+}               
 "@;
+            }
+            return "@{}";
         } elseif ($objectIsArray) {
-            return @"
+            if ($object.Count) {
+                return @"
 @(
     $(($object | ForEach-Object {ConvertTo-PowershellEncodedString $_}) -join ",`r`n")
 )
 "@;
+            }
+           return "@()"
         } else {
             if ($objectType -eq [String]) {
                 return "'$object'"
