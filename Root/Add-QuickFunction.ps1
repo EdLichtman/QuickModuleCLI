@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
 
-Adds a User-Defined function to the QuickPackage Module.
+Adds a User-Defined function to a QuickModuleCLI submodule.
 
 .DESCRIPTION
 
-Adds a User-Defined function to the QuickPackage Module to later be used globally. 
-Once the function is part of the QuickPackage Module, it will be imported every time 
+Adds a User-Defined function to a QuickModuleCLI submodule to later be used globally. 
+Once the function is part of a QuickModuleCLI submodule, it will be imported every time 
 you open a new PowerShell Session.
 
 .NOTES
@@ -35,7 +35,7 @@ PS> Add-QuickFunction Write-Echo 'Please enter the Function: Write-Output (Read-
 
 .LINK
 
-https://github.com/EdLichtman/Quick-Package
+https://github.com/EdLichtman/QuickModuleCLI
 
 #>
 function global:Add-QuickFunction {
