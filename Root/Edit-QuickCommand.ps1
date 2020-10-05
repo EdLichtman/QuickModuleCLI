@@ -14,13 +14,13 @@ function global:Edit-QuickCommand {
         . powershell_ise.exe "$QuickPackageModuleContainerPath\$QuickModule\Functions\$commandName.ps1" 
         Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-        Reset-QuickCommand -commandName $commandName
+        Reset-QuickCommand -QuickModule $QuickModule -commandName $commandName
     }
     elseif(Test-Path "$QuickPackageModuleContainerPath\$QuickModule\Aliases\$AliasName.ps1") {
         . powershell_ise.exe "$QuickPackageModuleContainerPath\$QuickModule\Aliases\$AliasName.ps1"
         Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-        Reset-QuickCommand -commandName $commandName
+        Reset-QuickCommand -QuickModule $QuickModule -commandName $commandName
     } else {
         Write-Output "Command '$commandName' not found."
         return;
