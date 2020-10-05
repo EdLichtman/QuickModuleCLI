@@ -1,1 +1,0 @@
-Set-Alias show Show-CommandContent -Scope Global
