@@ -1,4 +1,4 @@
-function global:Edit-QuickCommand {
+function Edit-QuickCommand {
     param(
         [Parameter(Mandatory=$true)]
         [string]$QuickModule,

@@ -1,4 +1,4 @@
-function global:Rename-QuickCommand {
+function Rename-QuickCommand {
     param(
         [Parameter(Mandatory=$true)][string] $QuickModule,
         [Parameter(Mandatory=$true)][string] $commandName,

@@ -38,7 +38,7 @@ PS> Add-QuickFunction Write-Echo 'Please enter the Function: Write-Output (Read-
 https://github.com/EdLichtman/QuickModuleCLI
 
 #>
-function global:Add-QuickFunction {
+function Add-QuickFunction {
     param(
         [Parameter(Mandatory=$true)]
         [string]
@@ -107,7 +107,7 @@ function global:Add-QuickFunction {
             }
         }
         $newCode = @"
-function global:$FunctionName {
+function $FunctionName {
     $newFunctionText
 }
 "@

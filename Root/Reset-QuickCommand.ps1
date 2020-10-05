@@ -1,4 +1,4 @@
-function global:Reset-QuickCommand {
+function Reset-QuickCommand {
     param(
         [Parameter(Mandatory=$true)][string]$QuickModule,
         [Parameter(Mandatory=$true)][string]$commandName

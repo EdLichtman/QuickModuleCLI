@@ -63,7 +63,7 @@ PS C:\Program Files\Path-To-My-Application>
 https://github.com/EdLichtman/Quick-Package
 
 #>
-function global:Set-Env {
+function Set-Env {
     param (
         [String] $variable,
         [String] $value,

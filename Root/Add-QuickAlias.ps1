@@ -1,4 +1,4 @@
-function global:Add-QuickAlias {
+function Add-QuickAlias {
     param(
         [Parameter(Mandatory=$true)][string]$QuickModule,
         [Parameter(Mandatory=$true)][string]$AliasName,
@@ -34,7 +34,7 @@ function global:Add-QuickAlias {
     if (!$Raw){
         $newCode = 
 @"
-Set-Alias $AliasName $AliasText -Scope Global
+Set-Alias $AliasName $AliasText
 "@
     }
 
