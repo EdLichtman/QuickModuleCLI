@@ -115,7 +115,7 @@ function $FunctionName {
     }
 
     New-FileWithContent -filePath "$NestedModulesFolder\$NestedModule\Functions\$FunctionName.ps1" -fileText $newCode
-    if ([String]::IsNullOrWhiteSpace($newFunctionText)) {
+    if ([String]::IsNullOrWhiteSpace($newCode)) {
         powershell_ise.exe "$NestedModulesFolder\$NestedModule\Functions\$FunctionName.ps1"
         Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')

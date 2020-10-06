@@ -29,39 +29,44 @@ function Update-QuickModule {
         $Aliases | ForEach-Object {$AliasesToExport.Add("$($_.BaseName)")} | Out-Null
     }
 
-    New-ModuleManifest -Path $psd1Location `
-    -FunctionsToExport $FunctionsToExport `
-    -AliasesToExport $AliasesToExport `
-    -NestedModules $psd1.NestedModules `
-    -Author $psd1.Author `
-    -Description $psd1.Description `
-    -RootModule $psd1.RootModule `
-    -ModuleVersion $psd1.ModuleVersion `
-    -PowerShellVersion $psd1.PowerShellVersion `
-    -CompatiblePSEditions $psd1.CompatiblePSEditions `
-    -CmdletsToExport $psd1.CmdletsToExport `
-    -Guid $psd1.Guid `
-    -CompanyName $psd1.CompanyName `
-    -Copyright $psd1.Copyright `
-    -ProcessorArchitecture $psd1.ProcessorArchitecture `
-    -ClrVersion $psd1.ClrVersion `
-    -DotNetFrameworkVersion $psd1.DotNetFrameworkVersion `
-    -PowerShellHostName $psd1.PowerShellHostName `
-    -PowerShellHostVersion $psd1.PowerShellHostVersion `
-    -RequiredModules $psd1.RequiredModules `
-    -TypesToProcess $psd1.TypesToProcess `
-    -FormatsToProcess $psd1.FormatsToProcess `
-    -ScriptsToProcess $psd1.ScriptsToProcess `
-    -RequiredAssemblies $psd1.RequiredAssemblies `
-    -FileList $psd1.FileList `
-    -ModuleList $psd1.ModuleList `
-    -VariablesToExport $psd1.VariablesToExport `
-    -DscResourcesToExport $psd1.DscResourcesToExport `
-    -PrivateData $psd1.PrivateData `
-    -Tags $psd1.Tags `
-    -ProjectUri $psd1.ProjectUri `
-    -LicenseUri $psd1.LicenseUri `
-    -IconUri $psd1.IconUri `
-    -ReleaseNotes $psd1.ReleaseNotes `
-    -HelpInfoUri $psd1.HelpInfoUri 
+    $ManifestProperties = @{
+        Path = $psd1Location
+        FunctionsToExport = $FunctionsToExport
+        AliasesToExport = $AliasesToExport
+
+        NestedModules = $psd1.NestedModules
+        Author = $psd1.Author
+        Description = $psd1.Description
+        RootModule = $psd1.RootModule
+        ModuleVersion = $psd1.ModuleVersion
+        PowerShellVersion = $psd1.PowerShellVersion
+        CompatiblePSEditions = $psd1.CompatiblePSEditions
+        CmdletsToExport = $psd1.CmdletsToExport
+        Guid = $psd1.Guid
+        CompanyName = $psd1.CompanyName
+        Copyright = $psd1.Copyright
+        ClrVersion = $psd1.ClrVersion
+        DotNetFrameworkVersion = $psd1.DotNetFrameworkVersion
+        PowerShellHostName = $psd1.PowerShellHostName
+        PowerShellHostVersion = $psd1.PowerShellHostVersion
+        RequiredModules = $psd1.RequiredModules
+        TypesToProcess = $psd1.TypesToProcess
+        FormatsToProcess = $psd1.FormatsToProcess
+        ScriptsToProcess = $psd1.ScriptsToProcess
+        RequiredAssemblies = $psd1.RequiredAssemblies
+        FileList = $psd1.FileList
+        ModuleList = $psd1.ModuleList
+        VariablesToExport = $psd1.VariablesToExport
+        DscResourcesToExport = $psd1.DscResourcesToExport
+        HelpInfoUri = $psd1.HelpInfoUri 
+    }
+
+    $PrivateData = $psd1.PrivateData.PSData;
+    if ($PrivateData.Tags) { $ManifestProperties.Add('Tags', $PrivateData.Tags) }
+    if ($PrivateData.IconUri) { $ManifestProperties.Add('IconUri', $PrivateData.IconUri) }
+    if ($PrivateData.ReleaseNotes) { $ManifestProperties.Add('ReleaseNotes', $PrivateData.ReleaseNotes) }
+    if ($PrivateData.ProjectUri) { $ManifestProperties.Add('ProjectUri', $PrivateData.ProjectUri) }
+    if ($PrivateData.LicenseUri) { $ManifestProperties.Add('LicenseUri', $PrivateData.LicenseUri) }
+
+    New-ModuleManifest @ManifestProperties
 }
