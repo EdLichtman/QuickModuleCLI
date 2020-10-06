@@ -38,13 +38,13 @@ PS> Add-QuickFunction Write-Echo 'Please enter the Function: Write-Output (Read-
 https://github.com/EdLichtman/QuickModuleCLI
 
 #>
-function global:Add-QuickFunction {
+function Add-QuickFunction {
     param(
         [Parameter(Mandatory=$true)]
         [string]
         #Specifies the name of the Module this functions should be added to. This helps keep a separation of 
         #concern over which functions belong with which module behaviors.
-        $QuickModule,
+        $NestedModule,
         [Parameter(Mandatory=$true)]
         [string]
         #Specifies the name of the new function
@@ -61,9 +61,10 @@ function global:Add-QuickFunction {
     )
     
     Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
-    Invoke-Expression ". '$QuickReservedHelpersRoot\New-FileWithContent.ps1'"
-    Invoke-Expression ". '$QuickHelpersRoot\New-QuickModule.ps1'"
-    Invoke-Expression ". '$QuickHelpersRoot\Update-QuickModule.ps1'"
+    Invoke-Expression ". '$PrivateFunctionsFolder\New-FileWithContent.ps1'"
+    Invoke-Expression ". '$FunctionsFolder\New-QuickModule.ps1'"
+    Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
+    Invoke-Expression ". '$PrivateFunctionsFolder\Update-QuickModuleCLI'"
 
     if (Exit-AfterImport) {
         Test-ImportCompleted
@@ -79,10 +80,10 @@ function global:Add-QuickFunction {
         return;
     }
 
-    if (!(Test-Path $QuickPackageModuleContainerPath\$QuickModule)) {
-        $Continue = $Host.UI.PromptForChoice("No Module by the name '$QuickModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
+    if (!(Test-Path $NestedModulesFolder\$NestedModule)) {
+        $Continue = $Host.UI.PromptForChoice("No Module by the name '$NestedModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
         if ($Continue -eq 0) {
-            New-QuickModule $QuickModule;
+            New-QuickModule -NestedModule $NestedModule;
         } else {
             return;
         }
@@ -107,19 +108,20 @@ function global:Add-QuickFunction {
             }
         }
         $newCode = @"
-function global:$FunctionName {
+function $FunctionName {
     $newFunctionText
 }
 "@
     }
 
-    New-FileWithContent -filePath "$QuickPackageModuleContainerPath\$QuickModule\Functions\$FunctionName.ps1" -fileText $newCode
-    if ([String]::IsNullOrWhiteSpace($newFunctionText)) {
-        powershell_ise.exe "$QuickPackageModuleContainerPath\$QuickModule\Functions\$FunctionName.ps1"
+    New-FileWithContent -filePath "$NestedModulesFolder\$NestedModule\Functions\$FunctionName.ps1" -fileText $newCode
+    if ([String]::IsNullOrWhiteSpace($newCode)) {
+        powershell_ise.exe "$NestedModulesFolder\$NestedModule\Functions\$FunctionName.ps1"
         Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
     }
 
-    Update-QuickModule -QuickModule $QuickModule
-    Reset-QuickCommand -QuickModule $QuickModule -commandName $FunctionName
+    Update-QuickModule -NestedModule $NestedModule
+    Update-QuickModuleCLI
+    Reset-QuickCommand -NestedModule $NestedModule -commandName $FunctionName
 }

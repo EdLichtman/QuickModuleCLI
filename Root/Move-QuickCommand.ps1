@@ -1,8 +1,8 @@
-function Rename-QuickCommand {
+function Move-QuickCommand {
     param(
         [Parameter(Mandatory=$true)][string] $NestedModule,
         [Parameter(Mandatory=$true)][string] $commandName,
-        [Parameter(Mandatory=$true)][string] $replacement
+        [Parameter(Mandatory=$true)][string] $DestinationNestedModule
     )
 
     . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1
@@ -12,19 +12,16 @@ function Rename-QuickCommand {
 
     if(Test-Path $Function) {
         $FunctionBlock = Get-Content $Function -Raw
-        $NewFunctionBlock = $FunctionBlock -Replace "$commandName", "$replacement" 
         
         Remove-QuickCommand -NestedModule $NestedModule -commandName $commandName
-        Add-QuickFunction -NestedModule $NestedModule -functionName $replacement -functionText $NewFunctionBlock -Raw
+        Add-QuickFunction -NestedModule $DestinationNestedModule -functionName $commandName -functionText $FunctionBlock -Raw
     } elseif (Test-Path $Alias) {
         $aliasBlock = Get-Content $Alias -Raw
-        $NewAliasBlock = $aliasBlock -Replace "Set-Alias $commandName", "Set-Alias $replacement" 
         
         Remove-QuickCommand -NestedModule $NestedModule -commandName $commandName
-        Add-QuickAlias -NestedModule $NestedModule -aliasName $replacement -aliasText $NewAliasBlock -Raw
+        Add-QuickAlias -NestedModule $DestinationNestedModule -aliasName $commandName -aliasText $aliasBlock -Raw
     } else {
         Write-Output "Command '$commandName' not found."
         return;
     }
-
 }

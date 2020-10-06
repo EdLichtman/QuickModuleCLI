@@ -1,28 +1,28 @@
-function global:Add-QuickAlias {
+function Add-QuickAlias {
     param(
-        [Parameter(Mandatory=$true)][string]$QuickModule,
+        [Parameter(Mandatory=$true)][string]$NestedModule,
         [Parameter(Mandatory=$true)][string]$AliasName,
         [Parameter(Mandatory=$true)][string]$AliasText,
         [Switch]$Raw
     )
     
     . "$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1"
-    . "$QuickReservedHelpersRoot\Test-CommandExists.ps1"
-    . "$QuickReservedHelpersRoot\New-FileWithContent.ps1"
-    Invoke-Expression ". '$QuickHelpersRoot\New-QuickModule.ps1'"
-    Invoke-Expression ". '$QuickHelpersRoot\Update-QuickModule.ps1'"
+    . "$PrivateFunctionsFolder\Test-CommandExists.ps1"
+    . "$PrivateFunctionsFolder\New-FileWithContent.ps1"
+    Invoke-Expression ". '$FunctionsFolder\New-QuickModule.ps1'"
+    Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
     
-    if (!(Test-Path $QuickPackageModuleContainerPath\$QuickModule)) {
-        $Continue = $Host.UI.PromptForChoice("No Module by the name '$QuickModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
+    if (!(Test-Path $NestedModulesFolder\$NestedModule)) {
+        $Continue = $Host.UI.PromptForChoice("No Module by the name '$NestedModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
         if ($Continue -eq 0) {
-            New-QuickModule $QuickModule;
+            New-QuickModule -NestedModule $NestedModule;
         } else {
             return;
         }
     }
 
     if (Test-CommandExists $aliasName) {
-        Write-Output "That alias already exists as a command. $QuickPackageModuleName does not support Clobber."
+        Write-Output "That alias already exists as a command. $BaseModuleName does not support Clobber."
         return
     }
     if (!(Test-CommandExists $aliasText)) {
@@ -34,17 +34,17 @@ function global:Add-QuickAlias {
     if (!$Raw){
         $newCode = 
 @"
-Set-Alias $AliasName $AliasText -Scope Global
+Set-Alias $AliasName $AliasText
 "@
     }
 
-    New-FileWithContent -filePath "$QuickPackageModuleContainerPath\$QuickModule\Aliases\$AliasName.ps1" -fileText $newCode
+    New-FileWithContent -filePath "$NestedModulesFolder\$NestedModule\Aliases\$AliasName.ps1" -fileText $newCode
     if ([String]::IsNullOrWhiteSpace($AliasText)) {
-        powershell_ise.exe "$QuickPackageModuleContainerPath\$QuickModule\Aliases\$AliasName.ps1"
+        powershell_ise.exe "$NestedModulesFolder\$NestedModule\Aliases\$AliasName.ps1"
         Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
     }
 
-    Update-QuickModule -QuickModule $QuickModule
-    Reset-QuickCommand -QuickModule $QuickModule -commandName $AliasName
+    Update-QuickModule -NestedModule $NestedModule
+    Reset-QuickCommand -NestedModule $NestedModule -commandName $AliasName
 }

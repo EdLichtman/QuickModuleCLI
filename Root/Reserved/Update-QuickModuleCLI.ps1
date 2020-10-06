@@ -1,40 +1,43 @@
-function Update-QuickModule {
-    param (
-        [Parameter(Mandatory=$true)]
-        [string]
-        $NestedModule
-    )
-
-    Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
-    
-    #Remove Exported Member from Module
-    $NestedModuleLocation = "$NestedModulesFolder\$NestedModule"
-    if (!(Test-Path $NestedModuleLocation)) {
-        Write-Output "No Quick Module found by the name '$NestedModule'"
-        return;
-    }
-    $psd1Location = "$NestedModuleLocation\$NestedModule.psd1"
+function Update-QuickModuleCLI {
+    Invoke-Expression ". '$PSScriptRoot\Get-QuickEnvironment.ps1'"
+    $psd1Location = "$BaseFolder\$BaseModuleName.psd1"
     $psd1Content = (Get-Content $psd1Location | Out-String)
     $psd1 = (Invoke-Expression $psd1Content)
-    
+
     $FunctionsToExport = New-Object System.Collections.ArrayList($null)
-    $Functions = Get-ChildItem "$NestedModuleLocation\Functions";
+    $Functions = Get-ChildItem "$FunctionsFolder" -File
     if ($Functions) {
         $Functions | ForEach-Object {$FunctionsToExport.Add("$($_.BaseName)")} | Out-Null
     }
 
     $AliasesToExport = New-Object System.Collections.ArrayList($null)
-    $Aliases = Get-ChildItem "$NestedModuleLocation\Aliases";
-    if ($Aliases) {
-        $Aliases | ForEach-Object {$AliasesToExport.Add("$($_.BaseName)")} | Out-Null
+
+    $NestedModules = New-Object System.Collections.ArrayList($null)
+    foreach($Module in Get-ChildItem $NestedModulesFolder) {
+        $ModuleName = $Module.BaseName;
+        $NestedModules.Add("Modules\$ModuleName\$ModuleName") | Out-Null
+        $QuickModuleLocation = "$NestedModulesFolder\$ModuleName"
+        if (Test-Path "$QuickModuleLocation\Functions") {
+            $Functions = Get-ChildItem "$QuickModuleLocation\Functions" -File;
+            if ($Functions) {
+                $Functions | ForEach-Object {$FunctionsToExport.Add("$($_.BaseName)")} | Out-Null
+            }
+        }
+
+        if (Test-Path "$QuickModuleLocation\Aliases") {
+            $Aliases = Get-ChildItem "$QuickModuleLocation\Aliases" -File;
+            if ($Aliases) {
+                $Aliases | ForEach-Object {$AliasesToExport.Add("$($_.BaseName)")} | Out-Null
+            }
+        }
     }
 
     $ManifestProperties = @{
         Path = $psd1Location
+        NestedModules = $NestedModules
         FunctionsToExport = $FunctionsToExport
         AliasesToExport = $AliasesToExport
 
-        NestedModules = $psd1.NestedModules
         Author = $psd1.Author
         Description = $psd1.Description
         RootModule = $psd1.RootModule
@@ -60,7 +63,7 @@ function Update-QuickModule {
         DscResourcesToExport = $psd1.DscResourcesToExport
         HelpInfoUri = $psd1.HelpInfoUri 
     }
-
+    
     $PrivateData = $psd1.PrivateData.PSData;
     if ($PrivateData.Tags) { $ManifestProperties.Add('Tags', $PrivateData.Tags) }
     if ($PrivateData.IconUri) { $ManifestProperties.Add('IconUri', $PrivateData.IconUri) }
