@@ -1,13 +1,13 @@
 function New-QuickModule {
     param(
-        [Parameter(Mandatory=$true)][string] $QuickModule
+        [Parameter(Mandatory=$true)][string] $NestedModule
     )
     Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
-    Invoke-Expression ". '$QuickReservedHelpersRoot\Update-QuickModuleCLI'"
+    Invoke-Expression ". '$PrivateFunctionsFolder\Update-QuickModuleCLI'"
 
-    $ModuleDirectory = "$QuickPackageModuleContainerPath\$QuickModule"
-    $ModuleFile = "$ModuleDirectory\$QuickModule.psm1";
-    $ModuleDeclarationFile = "$ModuleDirectory\$QuickModule.psd1";
+    $ModuleDirectory = "$NestedModulesFolder\$NestedModule"
+    $ModuleFile = "$ModuleDirectory\$NestedModule.psm1";
+    $ModuleDeclarationFile = "$ModuleDirectory\$NestedModule.psd1";
     
     if (!(Test-Path "$ModuleDirectory")) {
         New-Item "$ModuleDirectory" -ItemType Directory | Out-Null
@@ -23,10 +23,7 @@ function New-QuickModule {
         $ModuleFileContent = @'
 $functions = Get-ChildItem $PSScriptRoot\Functions -Filter "*.ps1"
 foreach($function in $functions) {
-    $functionName = $function.BaseName;
-    if (!$functionName.EndsWith('.Tests')) {
-        . $PSScriptRoot\Functions\$function
-    }
+    . $PSScriptRoot\Functions\$function
 }
 
 $aliases = Get-ChildItem $PSScriptRoot\Aliases -Filter "*.ps1"
@@ -46,7 +43,7 @@ foreach($alias in $aliases) {
         New-ModuleManifest -Path $ModuleDeclarationFile `
             -Author 'TODO' `
             -Description 'TODO' `
-            -RootModule "$QuickModule.psm1" `
+            -RootModule "$NestedModule.psm1" `
             -ModuleVersion '0.0.1' `
             -PowerShellVersion "$currentPowershellVersion" `
             -CompatiblePSEditions "Desktop" `

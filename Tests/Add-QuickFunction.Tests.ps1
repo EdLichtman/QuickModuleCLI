@@ -141,7 +141,7 @@
 #         #Overwrite Environment variables. Double up Parameter for Safety precautions. 
 #         $TestFunctionsRoot = "$PSScriptRoot\..\Test"
 #         $QuickFunctionsRoot = $TestFunctionsRoot
-#         $QuickReservedHelpersRoot = "$PSScriptRoot\Reserved"
+#         $PrivateFunctionsFolder = "$PSScriptRoot\Reserved"
         
 #         # Create Test Folder
 #         New-Item $QuickFunctionsRoot -ItemType 'Container'

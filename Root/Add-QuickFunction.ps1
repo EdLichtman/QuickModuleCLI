@@ -44,7 +44,7 @@ function Add-QuickFunction {
         [string]
         #Specifies the name of the Module this functions should be added to. This helps keep a separation of 
         #concern over which functions belong with which module behaviors.
-        $QuickModule,
+        $NestedModule,
         [Parameter(Mandatory=$true)]
         [string]
         #Specifies the name of the new function
@@ -61,10 +61,10 @@ function Add-QuickFunction {
     )
     
     Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
-    Invoke-Expression ". '$QuickReservedHelpersRoot\New-FileWithContent.ps1'"
-    Invoke-Expression ". '$QuickHelpersRoot\New-QuickModule.ps1'"
-    Invoke-Expression ". '$QuickHelpersRoot\Update-QuickModule.ps1'"
-    Invoke-Expression ". '$QuickReservedHelpersRoot\Update-QuickModuleCLI'"
+    Invoke-Expression ". '$PrivateFunctionsFolder\New-FileWithContent.ps1'"
+    Invoke-Expression ". '$FunctionsFolder\New-QuickModule.ps1'"
+    Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
+    Invoke-Expression ". '$PrivateFunctionsFolder\Update-QuickModuleCLI'"
 
     if (Exit-AfterImport) {
         Test-ImportCompleted
@@ -80,10 +80,10 @@ function Add-QuickFunction {
         return;
     }
 
-    if (!(Test-Path $QuickPackageModuleContainerPath\$QuickModule)) {
-        $Continue = $Host.UI.PromptForChoice("No Module by the name '$QuickModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
+    if (!(Test-Path $NestedModulesFolder\$NestedModule)) {
+        $Continue = $Host.UI.PromptForChoice("No Module by the name '$NestedModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
         if ($Continue -eq 0) {
-            New-QuickModule $QuickModule;
+            New-QuickModule -NestedModule $NestedModule;
         } else {
             return;
         }
@@ -114,14 +114,14 @@ function $FunctionName {
 "@
     }
 
-    New-FileWithContent -filePath "$QuickPackageModuleContainerPath\$QuickModule\Functions\$FunctionName.ps1" -fileText $newCode
+    New-FileWithContent -filePath "$NestedModulesFolder\$NestedModule\Functions\$FunctionName.ps1" -fileText $newCode
     if ([String]::IsNullOrWhiteSpace($newFunctionText)) {
-        powershell_ise.exe "$QuickPackageModuleContainerPath\$QuickModule\Functions\$FunctionName.ps1"
+        powershell_ise.exe "$NestedModulesFolder\$NestedModule\Functions\$FunctionName.ps1"
         Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
     }
 
-    Update-QuickModule -QuickModule $QuickModule
+    Update-QuickModule -NestedModule $NestedModule
     Update-QuickModuleCLI
-    Reset-QuickCommand -QuickModule $QuickModule -commandName $FunctionName
+    Reset-QuickCommand -NestedModule $NestedModule -commandName $FunctionName
 }

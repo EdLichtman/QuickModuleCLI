@@ -1,28 +1,29 @@
 function Edit-QuickCommand {
     param(
         [Parameter(Mandatory=$true)]
-        [string]$QuickModule,
+        [string]$NestedModule,
         [Parameter(Mandatory=$true)]
         [string]$commandName
         
     )
 
     . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1
-    . $QuickHelpersRoot\Reset-QuickCommand.ps1
+    . $FunctionsFolder\Reset-QuickCommand.ps1
 
-    if(Test-Path "$QuickPackageModuleContainerPath\$QuickModule\Functions\$commandName.ps1") {
-        . powershell_ise.exe "$QuickPackageModuleContainerPath\$QuickModule\Functions\$commandName.ps1" 
-        Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
-        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-        Reset-QuickCommand -QuickModule $QuickModule -commandName $commandName
-    }
-    elseif(Test-Path "$QuickPackageModuleContainerPath\$QuickModule\Aliases\$AliasName.ps1") {
-        . powershell_ise.exe "$QuickPackageModuleContainerPath\$QuickModule\Aliases\$AliasName.ps1"
-        Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
-        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-        Reset-QuickCommand -QuickModule $QuickModule -commandName $commandName
-    } else {
+    $Function = "$NestedModulesFolder\$NestedModule\Functions\$commandName.ps1"
+    $Alias = "$NestedModulesFolder\$NestedModule\Aliases\$AliasName.ps1"
+    if (!(Test-Path $Function) -and !(Test-Path $Alias)) {
         Write-Output "Command '$commandName' not found."
         return;
     }
+    if(Test-Path "$Function") {
+        . powershell_ise.exe "$Function" 
+    }
+    elseif(Test-Path "$Alias") {
+        . powershell_ise.exe "$Alias"
+    } 
+
+    Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
+    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+    Reset-QuickCommand -QuickModule $NestedModule -commandName $commandName
 }
