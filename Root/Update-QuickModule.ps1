@@ -1,12 +1,55 @@
+
 function Update-QuickModule {
+    [CmdletBinding(PositionalBinding=$false)]
     param (
-        [Parameter(Mandatory=$true)]
-        [string]
-        $NestedModule
+        [Parameter(Mandatory=$true)][string]
+        $NestedModule,
+
+        [String] 
+        
+        $Author,
+        [String]
+
+        $CompanyName,
+        [String]
+
+        $Copyright,
+        [Version]
+
+        $ModuleVersion,
+        [String]
+
+        $Description,
+        [String[]]
+
+        $Tags,
+        [Uri]
+
+        $ProjectUri,
+        [Uri]
+
+        $LicenseUri,
+        [Uri]
+
+        $IconUri,
+        [String]
+
+        $ReleaseNotes,
+        [String]
+
+        $HelpInfoUri
     )
 
     Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
-    
+    function Get-CoalescedVariable {
+        param(
+            [Hashtable] $BoundParameters,
+            [String] $Key,
+            [Object] $Replacement
+        )
+        if ($BoundParameters.ContainsKey($Key)) { return $BoundParameters[$Key] }
+        return $Replacement
+    }
     #Remove Exported Member from Module
     $NestedModuleLocation = "$NestedModulesFolder\$NestedModule"
     if (!(Test-Path $NestedModuleLocation)) {
@@ -35,16 +78,16 @@ function Update-QuickModule {
         AliasesToExport = $AliasesToExport
 
         NestedModules = $psd1.NestedModules
-        Author = $psd1.Author
-        Description = $psd1.Description
+        Author = (Get-CoalescedVariable $PSBoundParameters 'Author' $psd1.Author)
+        Description = (Get-CoalescedVariable $PSBoundParameters 'Description' $psd1.Description)
         RootModule = $psd1.RootModule
-        ModuleVersion = $psd1.ModuleVersion
+        ModuleVersion = (Get-CoalescedVariable $PSBoundParameters 'ModuleVersion' $psd1.ModuleVersion)
         PowerShellVersion = $psd1.PowerShellVersion
         CompatiblePSEditions = $psd1.CompatiblePSEditions
         CmdletsToExport = $psd1.CmdletsToExport
         Guid = $psd1.Guid
-        CompanyName = $psd1.CompanyName
-        Copyright = $psd1.Copyright
+        CompanyName = (Get-CoalescedVariable $PSBoundParameters 'CompanyName' $psd1.CompanyName)
+        Copyright = (Get-CoalescedVariable $PSBoundParameters 'Copyright' $psd1.Copyright)
         ClrVersion = $psd1.ClrVersion
         DotNetFrameworkVersion = $psd1.DotNetFrameworkVersion
         PowerShellHostName = $psd1.PowerShellHostName
@@ -58,15 +101,21 @@ function Update-QuickModule {
         ModuleList = $psd1.ModuleList
         VariablesToExport = $psd1.VariablesToExport
         DscResourcesToExport = $psd1.DscResourcesToExport
-        HelpInfoUri = $psd1.HelpInfoUri 
+        HelpInfoUri = (Get-CoalescedVariable $PSBoundParameters 'HelpInfoUri' $psd1.HelpInfoUri)
     }
 
     $PrivateData = $psd1.PrivateData.PSData;
-    if ($PrivateData.Tags) { $ManifestProperties.Add('Tags', $PrivateData.Tags) }
-    if ($PrivateData.IconUri) { $ManifestProperties.Add('IconUri', $PrivateData.IconUri) }
-    if ($PrivateData.ReleaseNotes) { $ManifestProperties.Add('ReleaseNotes', $PrivateData.ReleaseNotes) }
-    if ($PrivateData.ProjectUri) { $ManifestProperties.Add('ProjectUri', $PrivateData.ProjectUri) }
-    if ($PrivateData.LicenseUri) { $ManifestProperties.Add('LicenseUri', $PrivateData.LicenseUri) }
+    $Tags = (Get-CoalescedVariable $PSBoundParameters 'Tags' $PrivateData.Tags)
+    $IconUri = (Get-CoalescedVariable $PSBoundParameters 'IconUri' $PrivateData.IconUri)
+    $ReleaseNotes = (Get-CoalescedVariable $PSBoundParameters 'ReleaseNotes' $PrivateData.ReleaseNotes)
+    $ProjectUri = (Get-CoalescedVariable $PSBoundParameters 'ProjectUri' $PrivateData.ProjectUri)
+    $LicenseUri = (Get-CoalescedVariable $PSBoundParameters 'LicenseUri' $PrivateData.LicenseUri)
+
+    if ($Tags) { $ManifestProperties.Add('Tags', $Tags) }
+    if ($IconUri) { $ManifestProperties.Add('IconUri', $IconUri) }
+    if ($ReleaseNotes) { $ManifestProperties.Add('ReleaseNotes', $ReleaseNotes) }
+    if ($ProjectUri) { $ManifestProperties.Add('ProjectUri', $ProjectUri) }
+    if ($LicenseUri) { $ManifestProperties.Add('LicenseUri', $LicenseUri) }
 
     New-ModuleManifest @ManifestProperties
 }
