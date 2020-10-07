@@ -115,7 +115,7 @@ function $FunctionName {
     }
 
     New-FileWithContent -filePath "$NestedModulesFolder\$NestedModule\Functions\$FunctionName.ps1" -fileText $newCode
-    if ([String]::IsNullOrWhiteSpace($newCode)) {
+    if ([String]::IsNullOrWhiteSpace($newFunctionText)) {
         powershell_ise.exe "$NestedModulesFolder\$NestedModule\Functions\$FunctionName.ps1"
         Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
@@ -123,5 +123,5 @@ function $FunctionName {
 
     Update-QuickModule -NestedModule $NestedModule
     Update-QuickModuleCLI
-    Reset-QuickCommand -NestedModule $NestedModule -commandName $FunctionName
+    Import-Module $BaseModuleName -Force
 }

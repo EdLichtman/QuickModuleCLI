@@ -46,5 +46,5 @@ Set-Alias $AliasName $AliasText
     }
 
     Update-QuickModule -NestedModule $NestedModule
-    Reset-QuickCommand -NestedModule $NestedModule -commandName $AliasName
+    Import-Module $BaseModuleName -Force
 }
