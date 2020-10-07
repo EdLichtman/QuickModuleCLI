@@ -32,4 +32,5 @@ function Remove-QuickCommand {
 
     Update-QuickModule -NestedModule $NestedModule
     Update-QuickModuleCLI
+    Import-Module $BaseModuleName -Force
 }

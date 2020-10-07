@@ -1,4 +1,4 @@
-$BaseFolder =  Split-Path (Get-Module -Name QuickModuleCLI).Path
+$BaseFolder =  "$PSScriptRoot\..\.."
 $BaseModuleName = "QuickModuleCLI"
 $NestedModulesFolder = "$BaseFolder\Modules"
 $FunctionsFolder = "$BaseFolder\Root"

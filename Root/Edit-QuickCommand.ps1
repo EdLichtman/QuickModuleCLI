@@ -8,7 +8,6 @@ function Edit-QuickCommand {
     )
 
     . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1
-    . $FunctionsFolder\Reset-QuickCommand.ps1
 
     $Function = "$NestedModulesFolder\$NestedModule\Functions\$commandName.ps1"
     $Alias = "$NestedModulesFolder\$NestedModule\Aliases\$AliasName.ps1"
@@ -25,5 +24,6 @@ function Edit-QuickCommand {
 
     Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
     $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-    Reset-QuickCommand -QuickModule $NestedModule -commandName $commandName
+
+    Import-Module $BaseModuleName -Force
 }

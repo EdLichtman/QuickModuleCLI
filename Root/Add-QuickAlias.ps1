@@ -1,13 +1,54 @@
+<#
+.SYNOPSIS
+
+Adds an alias to a QuickModuleCLI nested module.
+
+.DESCRIPTION
+
+Adds an alias to a QuickModuleCLI nested module that can later be auto-loaded based on your $PSModuleAutoLoadingPreference.
+
+.NOTES
+
+Once created, every time you open a new Powershell window the alias will be exported for you to use. Once you attempt to use an alias for the first time
+in a powershell session it will auto-import the rest of the module for you.
+
+.INPUTS
+
+None. You cannot pipe objects to Add-QuickAlias.
+
+.OUTPUTS
+
+None. Add-QuickAlias creates a new alias that you can later use.
+
+.EXAMPLE
+
+PS> Add-QuickAlias -NestedModule Default -AliasName echo -AliasMappedFunction 'Write-Output'
+
+.EXAMPLE
+
+PS> Add-QuickAlias Default echo Write-Output
+
+.LINK
+
+https://github.com/EdLichtman/QuickModuleCLI
+
+#>
 function Add-QuickAlias {
     param(
-        [Parameter(Mandatory=$true)][string]$NestedModule,
-        [Parameter(Mandatory=$true)][string]$AliasName,
-        [Parameter(Mandatory=$true)][string]$AliasText,
-        [Switch]$Raw
-    )
+        [Parameter(Mandatory=$true)][string]
+        #Specifies the name of the NestedModule in which this function belongs.
+        $NestedModule,
+        [Parameter(Mandatory=$true)][string]
+        #Specifies the name of the new alias.
+        $AliasName,
+        [Parameter(Mandatory=$true)][string]
+        #Specifies the name of the function to which this alias maps.
+        $AliasMappedFunction
+    )    
     
     . "$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1"
     . "$PrivateFunctionsFolder\Test-CommandExists.ps1"
+    Invoke-Expression ". '$PrivateFunctionsFolder\Test-QuickCommandExists.ps1'"
     . "$PrivateFunctionsFolder\New-FileWithContent.ps1"
     Invoke-Expression ". '$FunctionsFolder\New-QuickModule.ps1'"
     Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
@@ -21,30 +62,19 @@ function Add-QuickAlias {
         }
     }
 
-    if (Test-CommandExists $aliasName) {
-        Write-Output "That alias already exists as a command. $BaseModuleName does not support Clobber."
-        return
-    }
-    if (!(Test-CommandExists $aliasText)) {
+    Test-QuickCommandExists $AliasName
+    if (!(Test-CommandExists $AliasMappedFunction)) {
         Write-Output "That Function does not exist."
         return
     }
 
-    $newCode = $AliasText
-    if (!$Raw){
-        $newCode = 
-@"
-Set-Alias $AliasName $AliasText
+
+    $newCode = @"
+Set-Alias $AliasName $AliasMappedFunction
 "@
-    }
 
     New-FileWithContent -filePath "$NestedModulesFolder\$NestedModule\Aliases\$AliasName.ps1" -fileText $newCode
-    if ([String]::IsNullOrWhiteSpace($AliasText)) {
-        powershell_ise.exe "$NestedModulesFolder\$NestedModule\Aliases\$AliasName.ps1"
-        Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
-        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-    }
 
     Update-QuickModule -NestedModule $NestedModule
-    Reset-QuickCommand -NestedModule $NestedModule -commandName $AliasName
+    Import-Module $BaseModuleName -Force
 }
