@@ -24,5 +24,6 @@ function Edit-QuickCommand {
 
     Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
     $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+
     Import-Module $BaseModuleName -Force
 }
