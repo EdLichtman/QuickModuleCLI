@@ -63,6 +63,10 @@ function Split-QuickModule {
         return;
     }
 
+    if ((Get-Module -ListAvailable $NestedModule)) {
+        throw [System.ArgumentException] "A module is already available by the name '$NestedModule'. This module does not support clobber and Prefixes."
+    }
+
     $ManifestProperties = @{};
     Add-ManifestProperties $PSBoundParameters $ManifestProperties @('Author','CompanyName','Copyright','ModuleVersion','Description','Tags','ProjectUri','LicenseUri','IconUri','ReleaseNotes','HelpInfoUri')
     Update-QuickModule -NestedModule $NestedModule @ManifestProperties 
