@@ -1,4 +1,5 @@
 function Copy-QuickCommand {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][String]$SourceNestedModule,
         [Parameter(Mandatory=$true)][String]$SourceCommandName,

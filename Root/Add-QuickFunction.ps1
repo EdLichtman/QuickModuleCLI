@@ -43,6 +43,7 @@ https://github.com/EdLichtman/QuickModuleCLI
 
 #>
 function Add-QuickFunction {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
         [string]

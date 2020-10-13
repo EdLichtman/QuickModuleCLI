@@ -34,6 +34,7 @@ https://github.com/EdLichtman/QuickModuleCLI
 
 #>
 function Add-QuickAlias {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][string]
         #Specifies the name of the NestedModule in which this function belongs.

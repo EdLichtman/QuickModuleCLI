@@ -1,4 +1,5 @@
 function Edit-QuickCommand {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
         [string]$NestedModule,

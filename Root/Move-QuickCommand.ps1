@@ -1,4 +1,5 @@
 function Move-QuickCommand {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][string] $NestedModule,
         [Parameter(Mandatory=$true)][string] $commandName,
