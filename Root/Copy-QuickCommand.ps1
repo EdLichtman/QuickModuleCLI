@@ -1,4 +1,5 @@
 function Copy-QuickCommand {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][String]$SourceNestedModule,
         [Parameter(Mandatory=$true)][String]$SourceCommandName,
@@ -24,6 +25,9 @@ function Copy-QuickCommand {
     }
 
     if (!(Test-Path $NestedModulesFolder\$DestinationNestedModule)) {
+        if ((Get-Module -ListAvailable $NestedModule)) {
+            throw [System.ArgumentException] "A module is already available by the name '$NestedModule'. This module does not support clobber and Prefixes."
+        }
         $Continue = $Host.UI.PromptForChoice("No Module by the name '$DestinationNestedModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
         if ($Continue -eq 0) {
             New-QuickModule -NestedModule $DestinationNestedModule;

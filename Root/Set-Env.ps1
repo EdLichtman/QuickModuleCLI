@@ -64,6 +64,7 @@ https://github.com/EdLichtman/Quick-Package
 
 #>
 function Set-Env {
+    [CmdletBinding()]
     param (
         [String] $variable,
         [String] $value,

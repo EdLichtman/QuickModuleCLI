@@ -34,6 +34,7 @@ https://github.com/EdLichtman/QuickModuleCLI
 
 #>
 function Add-QuickAlias {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][string]
         #Specifies the name of the NestedModule in which this function belongs.
@@ -54,6 +55,9 @@ function Add-QuickAlias {
     Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
     
     if (!(Test-Path $NestedModulesFolder\$NestedModule)) {
+        if ((Get-Module -ListAvailable $NestedModule)) {
+            throw [System.ArgumentException] "A module is already available by the name '$NestedModule'. This module does not support clobber and Prefixes."
+        }
         $Continue = $Host.UI.PromptForChoice("No Module by the name '$NestedModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
         if ($Continue -eq 0) {
             New-QuickModule -NestedModule $NestedModule;

@@ -1,4 +1,6 @@
 function Update-QuickModuleCLI {
+    [CmdletBinding()]param()
+
     Invoke-Expression ". '$PSScriptRoot\Get-QuickEnvironment.ps1'"
     $psd1Location = "$BaseFolder\$BaseModuleName.psd1"
     $psd1Content = (Get-Content $psd1Location | Out-String)

@@ -1,4 +1,5 @@
 function New-QuickModule {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][string] $NestedModule
     )
