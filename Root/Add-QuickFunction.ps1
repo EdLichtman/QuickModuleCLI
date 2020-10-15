@@ -52,26 +52,16 @@ function Add-QuickFunction {
         [Parameter(Mandatory=$true)]
         [string]
         #Specifies the name of the new function
-        $functionName,
+        $FunctionName,
         [string]
         #Specifies the content that should go in the function. Line breaks will automatically 
         #be added after semi semicolons.
-        $functionText
+        $FunctionText
     )
     
-    Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
-    Invoke-Expression ". '$PrivateFunctionsFolder\New-FileWithContent.ps1'"
-    Invoke-Expression ". '$PrivateFunctionsFolder\Update-QuickModuleCLI.ps1'"
-    Invoke-Expression ". '$PrivateFunctionsFolder\Test-QuickCommandExists.ps1'"
-    Invoke-Expression ". '$FunctionsFolder\New-QuickModule.ps1'"
+    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
     Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
 
-
-    if (Exit-AfterImport) {
-        Test-ImportCompleted
-        return;
-    }
-    
     $ApprovedVerbs = [System.Collections.Generic.HashSet[String]]::new();
     (Get-Verb | Select-Object -Property Verb) | ForEach-Object {$ApprovedVerbs.Add($_.Verb)} | Out-Null;
     $chosenVerb = $functionName.Split('-')[0]
@@ -81,18 +71,8 @@ function Add-QuickFunction {
         return;
     }
 
-    Test-QuickCommandExists $functionName
-    if (!(Test-Path $NestedModulesFolder\$NestedModule)) {
-        if ((Get-Module -ListAvailable $NestedModule)) {
-            throw [System.ArgumentException] "A module is already available by the name '$NestedModule'. This module does not support clobber and Prefixes."
-        }
-        $Continue = $Host.UI.PromptForChoice("No Module by the name '$NestedModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
-        if ($Continue -eq 0) {
-            New-QuickModule -NestedModule $NestedModule;
-        } else {
-            return;
-        }
-    }
+    Assert-CanCreateQuickCommand -CommandName $functionName
+    Assert-TryCreateModule -NestedModule $NestedModule
 
     $newFunctionText = ""
 

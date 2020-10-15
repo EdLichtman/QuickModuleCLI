@@ -43,32 +43,32 @@ function Export-QuickModule {
         $HelpInfoUri
     )
 
-    Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
+    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
     Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
 
-    function Add-ManifestProperties {
-        [CmdletBinding()]
-        param(
-            [Hashtable] $BoundParameters,
-            [Object] $ManifestProperties,
-            [String[]] $Keys
-        )
-        foreach($Key in $Keys) {
-            if ($BoundParameters.ContainsKey($Key)) { $ManifestProperties[$Key] = $BoundParameters[$Key] }
-        }
-
-    }
-
+    
     #Remove Exported Member from Module
     $NestedModuleLocation = "$NestedModulesFolder\$NestedModule"
-    if (!(Test-Path $NestedModuleLocation)) {
-        Write-Output "No Quick Module found by the name '$NestedModule'"
-        return;
-    }
+    Assert-ModuleAlreadyExists $NestedModule
 
-    $ManifestProperties = @{};
-    Add-ManifestProperties $PSBoundParameters $ManifestProperties @('Author','CompanyName','Copyright','ModuleVersion','Description','Tags','ProjectUri','LicenseUri','IconUri','ReleaseNotes','HelpInfoUri')
-    Update-QuickModule -NestedModule $NestedModule @ManifestProperties 
+    $ModuleManifestParameters = @{}
+    Add-InputParametersToObject -BoundParameters $PSBoundParameters `
+        -ObjectToPopulate $ModuleManifestParameters `
+        -Keys @(
+            'Author',
+            'CompanyName',
+            'Copyright',
+            'ModuleVersion',
+            'Description',
+            'Tags',
+            'ProjectUri',
+            'LicenseUri',
+            'IconUri',
+            'ReleaseNotes',
+            'HelpInfoUri'
+        )
+
+    Update-QuickModule -NestedModule $NestedModule @ModuleManifestParameters 
 
     $ModuleDirectories = $env:PSModulePath.Split(';')
     if ($ModuleDirectories -contains $Destination) {

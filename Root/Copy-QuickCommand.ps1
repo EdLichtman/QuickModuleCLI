@@ -7,34 +7,17 @@ function Copy-QuickCommand {
         [Parameter(Mandatory=$true)][String]$DestinationCommandName
     )
 
-    . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1
+    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
     Invoke-Expression ". '$FunctionsFolder\Edit-QuickCommand.ps1'"
-    Invoke-Expression ". '$PrivateFunctionsFolder\New-FileWithContent.ps1'"
-    Invoke-Expression ". '$PrivateFunctionsFolder\Test-QuickCommandExists.ps1'"
     Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
-    Invoke-Expression ". '$PrivateFunctionsFolder\Update-QuickModuleCLI.ps1'"
 
-    Test-QuickCommandExists $DestinationCommandName
+    Assert-CanCreateQuickCommand $DestinationCommandName
 
     $Function = "$NestedModulesFolder\$SourceNestedModule\Functions\$SourceCommandName.ps1"
     $Alias = "$NestedModulesFolder\$SourceNestedModule\Aliases\$SourceCommandName.ps1"
 
-    if (!(Test-Path $Function) -and !(Test-Path $Alias)) {
-        Write-Output "Command '$SourceCommandName' not found."
-        return;
-    }
-
-    if (!(Test-Path $NestedModulesFolder\$DestinationNestedModule)) {
-        if ((Get-Module -ListAvailable $NestedModule)) {
-            throw [System.ArgumentException] "A module is already available by the name '$NestedModule'. This module does not support clobber and Prefixes."
-        }
-        $Continue = $Host.UI.PromptForChoice("No Module by the name '$DestinationNestedModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
-        if ($Continue -eq 0) {
-            New-QuickModule -NestedModule $DestinationNestedModule;
-        } else {
-            return;
-        }
-    }
+    Assert-CanFindQuickCommand -NestedModule $SourceNestedModule -CommandName $SourceCommandName
+    Assert-TryCreateModule -NestedModule $DestinationNestedModule
 
     if(Test-Path $Function) {
         $FunctionBlock = Get-Content $Function -Raw

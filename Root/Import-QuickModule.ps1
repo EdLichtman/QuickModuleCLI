@@ -6,19 +6,10 @@ function Import-QuickModule {
         $Path
     )
 
-    Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
-    Invoke-Expression ". '$PrivateFunctionsFolder\Update-QuickModuleCLI.ps1'"
+    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
 
     $NestedModule = (Split-Path $Path -Leaf)
-    #Remove Exported Member from Module
-    $NestedModuleLocation = "$NestedModulesFolder\$NestedModule"
-    if ((Test-Path $NestedModuleLocation)) {
-        throw [System.ArgumentException] "A Nested Module is already available by the name '$NestedModule'. This module does not support clobber and Prefixes."
-    }
-    #todo: Better verbiage
-    if ((Get-Module -ListAvailable $NestedModule)) {
-        throw [System.ArgumentException] "A module is already available by the name '$NestedModule'. This module does not support clobber and Prefixes."
-    }
+    Assert-CanCreateModule -NestedModule $NestedModule
 
     if (!(Test-Path "$Path\$NestedModule.psd1") `
         -or !(Test-Path "$Path\$NestedModule.psm1") `

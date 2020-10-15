@@ -3,25 +3,21 @@ function New-QuickModule {
     param(
         [Parameter(Mandatory=$true)][string] $NestedModule
     )
-    Invoke-Expression ". '$PSScriptRoot\Reserved\Get-QuickEnvironment.ps1'"
-    Invoke-Expression ". '$PrivateFunctionsFolder\Update-QuickModuleCLI'"
+    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
 
-    $ModuleDirectory = "$NestedModulesFolder\$NestedModule"
+    Assert-CanCreateModule -NestedModule $NestedModule
+
+    $ModuleDirectory = Get-NestedModuleLocation $NestedModule
     $ModuleFile = "$ModuleDirectory\$NestedModule.psm1";
     $ModuleDeclarationFile = "$ModuleDirectory\$NestedModule.psd1";
+    $FunctionsDirectory = Get-QuickFunctionsLocation -NestedModule $NestedModule
+    $AliasesDirectory = Get-QuickAliasesLocation -NestedModule $NestedModule
     
-    if (!(Test-Path "$ModuleDirectory")) {
-        New-Item "$ModuleDirectory" -ItemType Directory | Out-Null
-    }
-    if (!(Test-Path "$ModuleDirectory\Functions")) {
-        New-Item "$ModuleDirectory\Functions" -ItemType Directory | Out-Null
-    }
-    if (!(Test-Path "$ModuleDirectory\Aliases")) {
-        New-Item "$ModuleDirectory\Aliases" -ItemType Directory | Out-Null
-    }
+    New-Item "$ModuleDirectory" -ItemType Directory | Out-Null
+    New-Item "$FunctionsDirectory" -ItemType Directory | Out-Null
+    New-Item "$AliasesDirectory" -ItemType Directory | Out-Null
 
-    if (!(Test-Path $ModuleFile)) {
-        $ModuleFileContent = @'
+    $ModuleFileContent = @'
 $functions = Get-ChildItem $PSScriptRoot\Functions -Filter "*.ps1"
 foreach($function in $functions) {
     . $PSScriptRoot\Functions\$function
@@ -33,25 +29,21 @@ foreach($alias in $aliases) {
 }
         
 '@
-        New-Item $ModuleFile | Out-Null
-        Add-Content -Path $ModuleFile -Value $ModuleFileContent
-    } else {
-        Write-Output 'Module already exists.'
-    }
+    New-Item $ModuleFile | Out-Null
+    Add-Content -Path $ModuleFile -Value $ModuleFileContent
 
-    if (!(Test-Path $ModuleDeclarationFile)) {
-        $currentPowershellVersion = "$($PSVersionTable.PSVersion.Major).$($PSVersionTable.PSVersion.Minor)"
-        New-ModuleManifest -Path $ModuleDeclarationFile `
-            -Author 'TODO' `
-            -Description 'TODO' `
-            -RootModule "$NestedModule.psm1" `
-            -ModuleVersion '0.0.1' `
-            -PowerShellVersion "$currentPowershellVersion" `
-            -CompatiblePSEditions "Desktop" `
-            -FunctionsToExport @() `
-            -AliasesToExport @() `
-            -CmdletsToExport @() `
-    }
+    $currentPowershellVersion = "$($PSVersionTable.PSVersion.Major).$($PSVersionTable.PSVersion.Minor)"
+    New-ModuleManifest -Path $ModuleDeclarationFile `
+        -Author 'TODO' `
+        -Description 'TODO' `
+        -RootModule "$NestedModule.psm1" `
+        -ModuleVersion '0.0.1' `
+        -PowerShellVersion "$currentPowershellVersion" `
+        -CompatiblePSEditions "Desktop" `
+        -FunctionsToExport @() `
+        -AliasesToExport @() `
+        -CmdletsToExport @() `
+
 
     Update-QuickModuleCLI
 }

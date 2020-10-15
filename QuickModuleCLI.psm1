@@ -5,3 +5,6 @@ foreach($helperFunction in $helperFunctions) {
 if (!(Test-Path "$PSScriptRoot\Modules")) {
         New-Item "$PSScriptRoot\Modules" -ItemType Directory
 }
+
+#In theory this will not change the Global Error Action Preference, but will scope this action preference to all of the Module Functions.
+$ErrorActionPreference = "Stop"

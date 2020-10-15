@@ -4,18 +4,17 @@ function Edit-QuickCommand {
         [Parameter(Mandatory=$true)]
         [string]$NestedModule,
         [Parameter(Mandatory=$true)]
-        [string]$commandName
+        [string]$CommandName
         
     )
 
-    . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1
+    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
 
-    $Function = "$NestedModulesFolder\$NestedModule\Functions\$commandName.ps1"
-    $Alias = "$NestedModulesFolder\$NestedModule\Aliases\$AliasName.ps1"
-    if (!(Test-Path $Function) -and !(Test-Path $Alias)) {
-        Write-Output "Command '$commandName' not found."
-        return;
-    }
+    $Function = "$NestedModulesFolder\$NestedModule\Functions\$CommandName.ps1"
+    $Alias = "$NestedModulesFolder\$NestedModule\Aliases\$CommandName.ps1"
+
+    Assert-CanFindQuickCommand -NestedModule $NestedModule -CommandName $CommandName
+
     if(Test-Path "$Function") {
         . powershell_ise.exe "$Function" 
     }

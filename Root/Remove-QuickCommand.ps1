@@ -2,33 +2,22 @@ function Remove-QuickCommand {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][string]$NestedModule,
-        [Parameter(Mandatory=$true)][string]$commandName
+        [Parameter(Mandatory=$true)][string]$CommandName
     )
 
-    . $PSScriptRoot\Reserved\Get-QuickEnvironment.ps1
+    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
     Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
-    Invoke-Expression ". '$PrivateFunctionsFolder\Update-QuickModuleCLI'"
 
-    $Function = "$NestedModulesFolder\$NestedModule\Functions\$commandName.ps1"
-    $Alias ="$NestedModulesFolder\$NestedModule\Aliases\$commandName.ps1"
-
-    if (!(Test-Path $Function) -and !(Test-Path $Alias)) {
-        Write-Output "Command '$commandName' not found."
-        return;
-    }
+    Assert-CanFindQuickCommand -NestedModule $NestedModule -CommandName $CommandName
+    
+    $Function = Get-QuickFunctionLocation -NestedModule $NestedModule -CommandName $CommandName
+    $Alias = Get-QuickAliasLocation -NestedModule $NestedModule -CommandName $CommandName
+    
     if(Test-Path $Function) {
         Remove-Item -Path $Function    
-
-        if (Test-Path function:\$commandName) {
-            Remove-Item function:\$commandName
-        }
     }
     elseif(Test-Path $Alias) {
         Remove-Item -Path $Alias
-        
-        if (Test-Path alias:\$commandName) {
-            Remove-Item alias:\$commandName
-        }
     } 
 
     Update-QuickModule -NestedModule $NestedModule
