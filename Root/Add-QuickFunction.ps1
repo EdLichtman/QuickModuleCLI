@@ -1,62 +1,11 @@
-<#
-.SYNOPSIS
-
-Adds a function to a QuickModuleCLI nested module.
-
-.DESCRIPTION
-
-Adds a function to a QuickModuleCLI nested module that can later be auto-loaded based on your $PSModuleAutoLoadingPreference.
-
-.NOTES
-
-Once created, every time you open a new Powershell window the function will be exported for you to use. Once you attempt to use a function for the first time
-in a powershell session it will auto-import the rest of the module for you.
-
-If you use this function with the $functionText parameter, then your function will be automatically formatted with line breaks, wherever you had included semi-colons (;).
-Additionally, if you do not include the $functionText parameter, then this function will open your Powershell ISE for you to modify the function there.
-
-.INPUTS
-
-None. You cannot pipe objects to Add-QuickFunction.
-
-.OUTPUTS
-
-None. Add-QuickFunction creates a new function that you can later use.
-
-.EXAMPLE
-
-PS> Add-QuickFunction -NestedModule Default -functionName Write-Echo -functionText 'Write-Output (Read-Host "Are you my echo?")'
-
-.EXAMPLE
-
-PS> Add-QuickFunction Default Write-Echo 'Please enter the Function: Write-Output (Read-Host "Are you my echo?")'
-
-.EXAMPLE
-
-PS> Add-QuickFunction Default Write-Echo 
-[PS ISE opens...]
-Press any key when you are finished editing...
-
-.LINK
-
-https://github.com/EdLichtman/QuickModuleCLI
-
-#>
 function Add-QuickFunction {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
-        [string]
-        #Specifies the name of the NestedModule in which this function belongs.
-        $NestedModule,
+        [string] $NestedModule,
         [Parameter(Mandatory=$true)]
-        [string]
-        #Specifies the name of the new function
-        $FunctionName,
-        [string]
-        #Specifies the content that should go in the function. Line breaks will automatically 
-        #be added after semi semicolons.
-        $FunctionText
+        [string] $FunctionName,
+        [string] $FunctionText
     )
     
     Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
