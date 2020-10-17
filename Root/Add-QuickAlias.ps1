@@ -51,10 +51,7 @@ function Add-QuickAlias {
     Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
     
     Assert-CanFindCommand -CommandName $AliasMappedFunction
-    Assert-CanCreateQuickCommand -CommandName $AliasName
-    Assert-TryCreateModule -NestedModule $NestedModule
-
-
+    Assert-CanCreateQuickCommand -CommandName $AliasName -NestedModule $NestedModule
 
     $newCode = @"
 Set-Alias $AliasName $AliasMappedFunction

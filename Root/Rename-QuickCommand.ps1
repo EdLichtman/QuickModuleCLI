@@ -10,7 +10,7 @@ function Rename-QuickCommand {
     Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
     
     Assert-CanFindQuickCommand -NestedModule $NestedModule -CommandName $CommandName
-    Assert-CanCreateQuickCommand -CommandName $Replacement
+    Assert-CanCreateQuickCommand -CommandName $Replacement -NestedModule $NestedModule
 
     $Function = Get-QuickFunctionLocation -NestedModule $NestedModule -CommandName $CommandName
     $Alias = Get-QuickAliasLocation -NestedModule $NestedModule -CommandName $CommandName

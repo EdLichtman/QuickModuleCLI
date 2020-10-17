@@ -11,13 +11,12 @@ function Copy-QuickCommand {
     Invoke-Expression ". '$FunctionsFolder\Edit-QuickCommand.ps1'"
     Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
 
-    Assert-CanCreateQuickCommand $DestinationCommandName
+    Assert-CanCreateQuickCommand $DestinationCommandName -NestedModule $DestinationNestedModule
 
     $Function = "$NestedModulesFolder\$SourceNestedModule\Functions\$SourceCommandName.ps1"
     $Alias = "$NestedModulesFolder\$SourceNestedModule\Aliases\$SourceCommandName.ps1"
 
     Assert-CanFindQuickCommand -NestedModule $SourceNestedModule -CommandName $SourceCommandName
-    Assert-TryCreateModule -NestedModule $DestinationNestedModule
 
     if(Test-Path $Function) {
         $FunctionBlock = Get-Content $Function -Raw

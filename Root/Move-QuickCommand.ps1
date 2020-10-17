@@ -15,7 +15,6 @@ function Move-QuickCommand {
     $DestinationAliasPath = Get-QuickAliasLocation -NestedModule $DestinationNestedModule -CommandName $CommandName
 
     Assert-CanFindQuickCommand -NestedModule $NestedModule -CommandName $CommandName
-    Assert-TryCreateModule -NestedModule $NestedModule
 
     if(Test-Path $Function) {
         $FunctionBlock = Get-Content $Function -Raw

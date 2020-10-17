@@ -21,8 +21,7 @@ function Add-QuickFunction {
         return;
     }
 
-    Assert-CanCreateQuickCommand -CommandName $functionName
-    Assert-TryCreateModule -NestedModule $NestedModule
+    Assert-CanCreateQuickCommand -CommandName $functionName -NestedModule $NestedModule
 
     $newFunctionText = ""
 

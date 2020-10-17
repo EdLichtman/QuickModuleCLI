@@ -136,10 +136,6 @@ describe 'Private Functions' {
 
     }
 
-    describe 'Assert-TryCreateModule' {
-
-    }
-
     describe 'Assert-ModuleAlreadyExists' {
 
     }

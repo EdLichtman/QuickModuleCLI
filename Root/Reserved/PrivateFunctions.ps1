@@ -113,9 +113,16 @@ function Get-QuickAliasLocation {
 
 <# Assertions: Throw Errors if False#>
 function Assert-CanCreateQuickCommand {
-    param([Parameter(Mandatory=$true)][String]$CommandName)
+    param(
+        [Parameter(Mandatory=$true)][String]$CommandName,
+        [Parameter(Mandatory=$true)][String]$NestedModule
+    )
 
     $NestedModules = Get-NestedModules
+
+    if (!(Test-Path (Get-NestedModuleLocation -NestedModule $NestedModule))) {
+        throw "'$NestedModule' does not exist. Please use 'New-ModuleProject' to create it."
+    }
     foreach($NestedModule in $NestedModules) {
         $Functions = Get-QuickFunctionLocations -NestedModule $NestedModule
         $Aliases = Get-QuickAliasesLocations -NestedModule $NestedModule
@@ -158,23 +165,6 @@ function Assert-CanCreateModule {
     #todo: Better verbiage
     if ((Get-Module -ListAvailable $NestedModule)) {
         throw [System.ArgumentException] "An installed module is already available by the name '$NestedModule'. This module does not support clobber and Prefixes."
-    }
-}
-
-function Assert-TryCreateModule {
-    param([Parameter(Mandatory=$true)][String]$NestedModule)
-    . $FunctionsFolder\New-QuickModule.ps1
-
-    if (!(Test-Path (Get-NestedModuleLocation -NestedModule $NestedModule))) {
-        if ((Get-Module -ListAvailable $NestedModule)) {
-            throw [System.ArgumentException] "A module is already available by the name '$NestedModule'. This module does not support clobber and Prefixes."
-        }
-        $Continue = $Host.UI.PromptForChoice("No Module by the name '$NestedModule' exists.", "Would you like to create a new one?", @('&Yes','&No'), 0)
-        if ($Continue -eq 0) {
-            New-QuickModule -NestedModule $NestedModule;
-        } else {
-            throw "Please create your module using New-QuickModule"
-        }
     }
 }
 
@@ -320,4 +310,16 @@ function Update-QuickModuleCLI {
     }
 
     Edit-ModuleManifest -psd1Location $psd1Location -NestedModules $NestedModules -FunctionsToExport $FunctionsToExport -AliasesToExport $AliasesToExport
+}
+
+function Register-SubModuleArgumentCompleter {
+    param(
+        [String] $CommandName
+    )
+    $ParameterName = 'NestedModule'
+    if ((Get-Command $CommandName).Parameters.Keys.Contains($ParameterName)) {
+        $ScriptBlock = {Get-NestedModules | Select-Object -ExpandProperty Name}
+        
+        Register-ArgumentCompleter -CommandName $CommandName -ParameterName $ParameterName -ScriptBlock $ScriptBlock
+    }
 }
