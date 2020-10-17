@@ -1,4 +1,3 @@
-
 function Export-QuickModule {
     [CmdletBinding(PositionalBinding=$false)]
     param (

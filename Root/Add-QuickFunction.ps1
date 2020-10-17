@@ -1,3 +1,4 @@
+# .ExternalHelp ..\AutoDocs\ExternalHelp\QuickModuleCLI-Help.xml
 function Add-QuickFunction {
     [CmdletBinding()]
     param(
