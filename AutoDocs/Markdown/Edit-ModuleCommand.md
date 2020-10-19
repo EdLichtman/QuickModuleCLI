@@ -5,7 +5,7 @@ online version: https://github.com/EdLichtman/QuickModuleCLI
 schema: 2.0.0
 ---
 
-# Rename-QuickCommand
+# Edit-ModuleCommand
 
 ## SYNOPSIS
 {{ Fill in the Synopsis }}
@@ -13,8 +13,7 @@ schema: 2.0.0
 ## SYNTAX
 
 ```
-Rename-QuickCommand [-NestedModule] <String> [-CommandName] <String> [-Replacement] <String>
- [<CommonParameters>]
+Edit-ModuleCommand [-NestedModule] <String> [-CommandName] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -56,21 +55,6 @@ Aliases:
 
 Required: True
 Position: 0
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Replacement
-{{ Fill Replacement Description }}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

@@ -1,12 +1,9 @@
 
-function Import-QuickModule {
+function Import-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param (
-        [Parameter(Mandatory=$true)][string]
-        $Path
+        [Parameter(Mandatory=$true)][string] $Path
     )
-
-    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
 
     $NestedModule = (Split-Path $Path -Leaf)
     Assert-CanCreateModule -NestedModule $NestedModule
@@ -21,6 +18,6 @@ function Import-QuickModule {
 
     Copy-Item -Path $Path -Destination $NestedModulesFolder -Recurse;
 
-    Update-QuickModuleCLI
+    Update-ModuleProjectCLI
     Import-Module $BaseModuleName -Force
 }

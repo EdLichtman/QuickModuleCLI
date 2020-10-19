@@ -5,7 +5,7 @@ online version: https://github.com/EdLichtman/QuickModuleCLI
 schema: 2.0.0
 ---
 
-# Add-QuickAlias
+# Add-ModuleAlias
 
 ## SYNOPSIS
 Adds an alias to a QuickModuleCLI nested module.
@@ -13,7 +13,7 @@ Adds an alias to a QuickModuleCLI nested module.
 ## SYNTAX
 
 ```
-Add-QuickAlias [-NestedModule] <String> [-AliasName] <String> [-AliasMappedFunction] <String>
+Add-ModuleAlias [-NestedModule] <String> [-AliasName] <String> [-AliasMappedFunction] <String>
  [<CommonParameters>]
 ```
 
@@ -24,12 +24,12 @@ Adds an alias to a QuickModuleCLI nested module that can later be auto-loaded ba
 
 ### EXAMPLE 1
 ```
-Add-QuickAlias -NestedModule Default -AliasName echo -AliasMappedFunction 'Write-Output'
+Add-ModuleAlias -NestedModule Default -AliasName echo -AliasMappedFunction 'Write-Output'
 ```
 
 ### EXAMPLE 2
 ```
-Add-QuickAlias Default echo Write-Output
+Add-ModuleAlias Default echo Write-Output
 ```
 
 ## PARAMETERS
@@ -84,10 +84,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None. You cannot pipe objects to Add-QuickAlias.
+### None. You cannot pipe objects to Add-ModuleAlias.
 ## OUTPUTS
 
-### None. Add-QuickAlias creates a new alias that you can later use.
+### None. Add-ModuleAlias creates a new alias that you can later use.
 ## NOTES
 Once created, every time you open a new Powershell window the alias will be exported for you to use.
 Once you attempt to use an alias for the first time

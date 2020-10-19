@@ -1,4 +1,4 @@
-function Copy-QuickCommand {
+function Copy-ModuleCommand {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][String]$SourceNestedModule,
@@ -7,16 +7,12 @@ function Copy-QuickCommand {
         [Parameter(Mandatory=$true)][String]$DestinationCommandName
     )
 
-    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
-    Invoke-Expression ". '$FunctionsFolder\Edit-QuickCommand.ps1'"
-    Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
-
-    Assert-CanCreateQuickCommand $DestinationCommandName -NestedModule $DestinationNestedModule
+    Assert-CanCreateModuleCommand $DestinationCommandName -NestedModule $DestinationNestedModule
 
     $Function = "$NestedModulesFolder\$SourceNestedModule\Functions\$SourceCommandName.ps1"
     $Alias = "$NestedModulesFolder\$SourceNestedModule\Aliases\$SourceCommandName.ps1"
 
-    Assert-CanFindQuickCommand -NestedModule $SourceNestedModule -CommandName $SourceCommandName
+    Assert-CanFindModuleCommand -NestedModule $SourceNestedModule -CommandName $SourceCommandName
 
     if(Test-Path $Function) {
         $FunctionBlock = Get-Content $Function -Raw
@@ -28,8 +24,8 @@ function Copy-QuickCommand {
         New-FileWithContent -filePath "$NestedModulesFolder\$DestinationNestedModule\Aliases\$DestinationCommandName.ps1" -fileText $NewAliasBlock
     } 
 
-    Update-QuickModule -NestedModule $DestinationNestedModule
-    Update-QuickModuleCLI
+    Update-ModuleProject -NestedModule $DestinationNestedModule
+    Update-ModuleProjectCLI
 
-    Edit-QuickCommand -NestedModule $DestinationNestedModule -commandName $DestinationCommandName
+    Edit-ModuleCommand -NestedModule $DestinationNestedModule -commandName $DestinationCommandName
 }

@@ -5,7 +5,7 @@ online version: https://github.com/EdLichtman/QuickModuleCLI
 schema: 2.0.0
 ---
 
-# Import-QuickModule
+# Rename-ModuleProject
 
 ## SYNOPSIS
 {{ Fill in the Synopsis }}
@@ -13,7 +13,7 @@ schema: 2.0.0
 ## SYNTAX
 
 ```
-Import-QuickModule -Path <String> [<CommonParameters>]
+Rename-ModuleProject [-NestedModule] <String> [-DestinationNestedModule] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -30,8 +30,8 @@ PS C:\> {{ Add example code here }}
 
 ## PARAMETERS
 
-### -Path
-{{ Fill Path Description }}
+### -DestinationNestedModule
+{{ Fill DestinationNestedModule Description }}
 
 ```yaml
 Type: String
@@ -39,7 +39,22 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NestedModule
+{{ Fill NestedModule Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 0
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

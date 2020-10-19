@@ -1,12 +1,9 @@
-function Rename-QuickModule {
+function Rename-ModuleProject {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][string] $NestedModule,
         [Parameter(Mandatory=$true)][string] $DestinationNestedModule
     )
-
-    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
-    Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
 
     Assert-CanCreateModule -NestedModule $NestedModule
 
@@ -19,6 +16,6 @@ function Rename-QuickModule {
     Rename-Item -Path "$DestinationModuleDirectory\$NestedModule.psm1" -NewName "$DestinationModuleDirectory\$DestinationNestedModule.psm1"
 
     Edit-ModuleManifest -psd1Location "$DestinationModuleDirectory\$DestinationNestedModule.psd1" -RootModule "$DestinationNestedModule.psm1"
-    Update-QuickModuleCLI
+    Update-ModuleProjectCLI
     Import-Module $BaseModuleName -Force
 }

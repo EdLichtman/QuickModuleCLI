@@ -1,53 +1,27 @@
 
-function Update-QuickModule {
+function Update-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param (
-        [Parameter(Mandatory=$true)][string]
-        $NestedModule,
-
-        [String] 
-        
-        $Author,
-        [String]
-
-        $CompanyName,
-        [String]
-
-        $Copyright,
-        [Version]
-
-        $ModuleVersion,
-        [String]
-
-        $Description,
-        [String[]]
-
-        $Tags,
-        [Uri]
-
-        $ProjectUri,
-        [Uri]
-
-        $LicenseUri,
-        [Uri]
-
-        $IconUri,
-        [String]
-
-        $ReleaseNotes,
-        [String]
-
-        $HelpInfoUri
+        [Parameter(Mandatory=$true)][string] $NestedModule,
+        [String]  $Author,
+        [String] $CompanyName,
+        [String] $Copyright,
+        [Version] $ModuleVersion,
+        [String] $Description,
+        [String[]] $Tags,
+        [Uri] $ProjectUri,
+        [Uri] $LicenseUri,
+        [Uri] $IconUri,
+        [String] $ReleaseNotes,
+        [String] $HelpInfoUri
     )
-
-    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
    
     Assert-ModuleAlreadyExists -NestedModule $NestedModule
     $NestedModuleLocation = Get-NestedModuleLocation -NestedModule $NestedModule
     $psd1Location = "$NestedModuleLocation\$NestedModule.psd1"
 
-    $FunctionsToExport = Get-QuickFunctions -NestedModule $NestedModule
-    $AliasesToExport = Get-QuickAliases -NestedModule $NestedModule
+    $FunctionsToExport = Get-ModuleFunctions -NestedModule $NestedModule
+    $AliasesToExport = Get-ModuleAliases -NestedModule $NestedModule
     
     $ModuleManifestParameters = @{}
     Add-InputParametersToObject -BoundParameters $PSBoundParameters `

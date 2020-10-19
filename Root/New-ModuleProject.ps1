@@ -3,15 +3,13 @@ function New-ModuleProject {
     param(
         [Parameter(Mandatory=$true)][string] $NestedModule
     )
-    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
-
     Assert-CanCreateModule -NestedModule $NestedModule
 
     $ModuleDirectory = Get-NestedModuleLocation $NestedModule
     $ModuleFile = "$ModuleDirectory\$NestedModule.psm1";
     $ModuleDeclarationFile = "$ModuleDirectory\$NestedModule.psd1";
-    $FunctionsDirectory = Get-QuickFunctionsLocation -NestedModule $NestedModule
-    $AliasesDirectory = Get-QuickAliasesLocation -NestedModule $NestedModule
+    $FunctionsDirectory = Get-ModuleFunctionsLocation -NestedModule $NestedModule
+    $AliasesDirectory = Get-ModuleAliasesLocation -NestedModule $NestedModule
     
     New-Item "$ModuleDirectory" -ItemType Directory | Out-Null
     New-Item "$FunctionsDirectory" -ItemType Directory | Out-Null
@@ -45,5 +43,5 @@ foreach($alias in $aliases) {
         -CmdletsToExport @() `
 
 
-    Update-QuickModuleCLI
+    Update-ModuleProjectCLI
 }

@@ -5,7 +5,7 @@ online version: https://github.com/EdLichtman/QuickModuleCLI
 schema: 2.0.0
 ---
 
-# Move-QuickCommand
+# Copy-ModuleCommand
 
 ## SYNOPSIS
 {{ Fill in the Synopsis }}
@@ -13,8 +13,8 @@ schema: 2.0.0
 ## SYNTAX
 
 ```
-Move-QuickCommand [-NestedModule] <String> [-CommandName] <String> [-DestinationNestedModule] <String>
- [<CommonParameters>]
+Copy-ModuleCommand [-SourceNestedModule] <String> [-SourceCommandName] <String>
+ [-DestinationNestedModule] <String> [-DestinationCommandName] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -31,8 +31,8 @@ PS C:\> {{ Add example code here }}
 
 ## PARAMETERS
 
-### -CommandName
-{{ Fill CommandName Description }}
+### -DestinationCommandName
+{{ Fill DestinationCommandName Description }}
 
 ```yaml
 Type: String
@@ -40,7 +40,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 1
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -61,8 +61,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -NestedModule
-{{ Fill NestedModule Description }}
+### -SourceCommandName
+{{ Fill SourceCommandName Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SourceNestedModule
+{{ Fill SourceNestedModule Description }}
 
 ```yaml
 Type: String
@@ -89,3 +104,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[https://github.com/EdLichtman/QuickModuleCLI](https://github.com/EdLichtman/QuickModuleCLI)

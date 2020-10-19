@@ -5,7 +5,7 @@ online version: https://github.com/EdLichtman/QuickModuleCLI
 schema: 2.0.0
 ---
 
-# Rename-QuickModule
+# Move-ModuleCommand
 
 ## SYNOPSIS
 {{ Fill in the Synopsis }}
@@ -13,7 +13,8 @@ schema: 2.0.0
 ## SYNTAX
 
 ```
-Rename-QuickModule [-NestedModule] <String> [-DestinationNestedModule] <String> [<CommonParameters>]
+Move-ModuleCommand [-NestedModule] <String> [-CommandName] <String> [-DestinationNestedModule] <String>
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -30,6 +31,21 @@ PS C:\> {{ Add example code here }}
 
 ## PARAMETERS
 
+### -CommandName
+{{ Fill CommandName Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -DestinationNestedModule
 {{ Fill DestinationNestedModule Description }}
 
@@ -39,7 +55,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 1
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

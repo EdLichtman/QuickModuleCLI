@@ -1,45 +1,19 @@
-function Split-QuickModule {
+function Split-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param (
-        [Parameter(Mandatory=$true)][string]
-        $NestedModule,
-
-        [String] 
-        
-        $Author,
-        [String]
-
-        $CompanyName,
-        [String]
-
-        $Copyright,
-        [Version]
-
-        $ModuleVersion,
-        [String]
-
-        $Description,
-        [String[]]
-
-        $Tags,
-        [Uri]
-
-        $ProjectUri,
-        [Uri]
-
-        $LicenseUri,
-        [Uri]
-
-        $IconUri,
-        [String]
-
-        $ReleaseNotes,
-        [String]
-
-        $HelpInfoUri
+        [Parameter(Mandatory=$true)][string] $NestedModule,
+        [String] $Author,
+        [String] $CompanyName,
+        [String] $Copyright,
+        [Version] $ModuleVersion,
+        [String] $Description,
+        [String[]] $Tags,
+        [Uri] $ProjectUri,
+        [Uri] $LicenseUri,
+        [Uri] $IconUri,
+        [String] $ReleaseNotes,
+        [String] $HelpInfoUri
     )
-
-    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
 
     Assert-CanCreateModule -NestedModule $NestedModule
 
@@ -70,6 +44,6 @@ function Split-QuickModule {
 
     Move-Item -Path $NestedModuleLocation -Destination $ModulesDirectory;
 
-    Update-QuickModuleCLI
+    Update-ModuleProjectCLI
     Import-Module $BaseModuleName -force
 }

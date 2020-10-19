@@ -2,9 +2,9 @@
 <helpItems schema="maml" xmlns="http://msh">
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Add-QuickAlias</command:name>
+      <command:name>Add-ModuleAlias</command:name>
       <command:verb>Add</command:verb>
-      <command:noun>QuickAlias</command:noun>
+      <command:noun>ModuleAlias</command:noun>
       <maml:description>
         <maml:para>Adds an alias to a QuickModuleCLI nested module.</maml:para>
       </maml:description>
@@ -14,7 +14,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Add-QuickAlias</maml:name>
+        <maml:name>Add-ModuleAlias</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>NestedModule</maml:name>
           <maml:Description>
@@ -94,7 +94,7 @@
     <command:inputTypes>
       <command:inputType>
         <dev:type>
-          <maml:name>None. You cannot pipe objects to Add-QuickAlias.</maml:name>
+          <maml:name>None. You cannot pipe objects to Add-ModuleAlias.</maml:name>
         </dev:type>
         <maml:description>
           <maml:para></maml:para>
@@ -104,7 +104,7 @@
     <command:returnValues>
       <command:returnValue>
         <dev:type>
-          <maml:name>None. Add-QuickAlias creates a new alias that you can later use.</maml:name>
+          <maml:name>None. Add-ModuleAlias creates a new alias that you can later use.</maml:name>
         </dev:type>
         <maml:description>
           <maml:para></maml:para>
@@ -119,14 +119,14 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>Add-QuickAlias -NestedModule Default -AliasName echo -AliasMappedFunction 'Write-Output'</dev:code>
+        <dev:code>Add-ModuleAlias -NestedModule Default -AliasName echo -AliasMappedFunction 'Write-Output'</dev:code>
         <dev:remarks>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
-        <dev:code>Add-QuickAlias Default echo Write-Output</dev:code>
+        <dev:code>Add-ModuleAlias Default echo Write-Output</dev:code>
         <dev:remarks>
           <maml:para></maml:para>
         </dev:remarks>
@@ -141,9 +141,9 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Add-QuickFunction</command:name>
+      <command:name>Add-ModuleFunction</command:name>
       <command:verb>Add</command:verb>
-      <command:noun>QuickFunction</command:noun>
+      <command:noun>ModuleFunction</command:noun>
       <maml:description>
         <maml:para>Adds a function to a QuickModuleCLI nested module.</maml:para>
       </maml:description>
@@ -153,7 +153,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Add-QuickFunction</maml:name>
+        <maml:name>Add-ModuleFunction</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>NestedModule</maml:name>
           <maml:Description>
@@ -233,7 +233,7 @@
     <command:inputTypes>
       <command:inputType>
         <dev:type>
-          <maml:name>None. You cannot pipe objects to Add-QuickFunction.</maml:name>
+          <maml:name>None. You cannot pipe objects to Add-ModuleFunction.</maml:name>
         </dev:type>
         <maml:description>
           <maml:para></maml:para>
@@ -243,7 +243,7 @@
     <command:returnValues>
       <command:returnValue>
         <dev:type>
-          <maml:name>None. Add-QuickFunction creates a new function that you can later use.</maml:name>
+          <maml:name>None. Add-ModuleFunction creates a new function that you can later use.</maml:name>
         </dev:type>
         <maml:description>
           <maml:para></maml:para>
@@ -259,21 +259,21 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
-        <dev:code>Add-QuickFunction -NestedModule Default -functionName Write-Echo -functionText 'Write-Output (Read-Host "Are you my echo?")'</dev:code>
+        <dev:code>Add-ModuleFunction -NestedModule Default -functionName Write-Echo -functionText 'Write-Output (Read-Host "Are you my echo?")'</dev:code>
         <dev:remarks>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 2 --------------------------</maml:title>
-        <dev:code>Add-QuickFunction Default Write-Echo 'Please enter the Function: Write-Output (Read-Host "Are you my echo?")'</dev:code>
+        <dev:code>Add-ModuleFunction Default Write-Echo 'Please enter the Function: Write-Output (Read-Host "Are you my echo?")'</dev:code>
         <dev:remarks>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
         <maml:title>-------------------------- EXAMPLE 3 --------------------------</maml:title>
-        <dev:code>Add-QuickFunction Default Write-Echo</dev:code>
+        <dev:code>Add-ModuleFunction Default Write-Echo</dev:code>
         <dev:remarks>
           <maml:para>[PS ISE opens...] Press any key when you are finished editing...</maml:para>
         </dev:remarks>
@@ -288,9 +288,9 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Copy-QuickCommand</command:name>
+      <command:name>Copy-ModuleCommand</command:name>
       <command:verb>Copy</command:verb>
-      <command:noun>QuickCommand</command:noun>
+      <command:noun>ModuleCommand</command:noun>
       <maml:description>
         <maml:para>{{ Fill in the Synopsis }}</maml:para>
       </maml:description>
@@ -300,7 +300,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Copy-QuickCommand</maml:name>
+        <maml:name>Copy-ModuleCommand</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>SourceNestedModule</maml:name>
           <maml:Description>
@@ -444,9 +444,9 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Edit-QuickCommand</command:name>
+      <command:name>Edit-ModuleCommand</command:name>
       <command:verb>Edit</command:verb>
-      <command:noun>QuickCommand</command:noun>
+      <command:noun>ModuleCommand</command:noun>
       <maml:description>
         <maml:para>{{ Fill in the Synopsis }}</maml:para>
       </maml:description>
@@ -456,7 +456,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Edit-QuickCommand</maml:name>
+        <maml:name>Edit-ModuleCommand</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>NestedModule</maml:name>
           <maml:Description>
@@ -660,7 +660,7 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Export-QuickModule</command:name>
+      <command:name>Export-ModuleProject</command:name>
       <command:verb>Export</command:verb>
       <command:noun>QuickModule</command:noun>
       <maml:description>
@@ -672,7 +672,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Export-QuickModule</maml:name>
+        <maml:name>Export-ModuleProject</maml:name>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Author</maml:name>
           <maml:Description>
@@ -1032,7 +1032,7 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Get-QuickModule</command:name>
+      <command:name>Get-ModuleProject</command:name>
       <command:verb>Get</command:verb>
       <command:noun>QuickModule</command:noun>
       <maml:description>
@@ -1044,7 +1044,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Get-QuickModule</maml:name>
+        <maml:name>Get-ModuleProject</maml:name>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>CommandName</maml:name>
           <maml:Description>
@@ -1163,7 +1163,7 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Import-QuickModule</command:name>
+      <command:name>Import-ModuleProject</command:name>
       <command:verb>Import</command:verb>
       <command:noun>QuickModule</command:noun>
       <maml:description>
@@ -1175,7 +1175,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Import-QuickModule</maml:name>
+        <maml:name>Import-ModuleProject</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Path</maml:name>
           <maml:Description>
@@ -1247,9 +1247,9 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Move-QuickCommand</command:name>
+      <command:name>Move-ModuleCommand</command:name>
       <command:verb>Move</command:verb>
-      <command:noun>QuickCommand</command:noun>
+      <command:noun>ModuleCommand</command:noun>
       <maml:description>
         <maml:para>{{ Fill in the Synopsis }}</maml:para>
       </maml:description>
@@ -1259,7 +1259,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Move-QuickCommand</maml:name>
+        <maml:name>Move-ModuleCommand</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>NestedModule</maml:name>
           <maml:Description>
@@ -1522,9 +1522,9 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Remove-QuickCommand</command:name>
+      <command:name>Remove-ModuleCommand</command:name>
       <command:verb>Remove</command:verb>
-      <command:noun>QuickCommand</command:noun>
+      <command:noun>ModuleCommand</command:noun>
       <maml:description>
         <maml:para>{{ Fill in the Synopsis }}</maml:para>
       </maml:description>
@@ -1534,7 +1534,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Remove-QuickCommand</maml:name>
+        <maml:name>Remove-ModuleCommand</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>NestedModule</maml:name>
           <maml:Description>
@@ -1630,7 +1630,7 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Remove-QuickModule</command:name>
+      <command:name>Remove-ModuleProject</command:name>
       <command:verb>Remove</command:verb>
       <command:noun>QuickModule</command:noun>
       <maml:description>
@@ -1642,7 +1642,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Remove-QuickModule</maml:name>
+        <maml:name>Remove-ModuleProject</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>NestedModule</maml:name>
           <maml:Description>
@@ -1714,9 +1714,9 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Rename-QuickCommand</command:name>
+      <command:name>Rename-ModuleCommand</command:name>
       <command:verb>Rename</command:verb>
-      <command:noun>QuickCommand</command:noun>
+      <command:noun>ModuleCommand</command:noun>
       <maml:description>
         <maml:para>{{ Fill in the Synopsis }}</maml:para>
       </maml:description>
@@ -1726,7 +1726,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Rename-QuickCommand</maml:name>
+        <maml:name>Rename-ModuleCommand</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>NestedModule</maml:name>
           <maml:Description>
@@ -1846,7 +1846,7 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Rename-QuickModule</command:name>
+      <command:name>Rename-ModuleProject</command:name>
       <command:verb>Rename</command:verb>
       <command:noun>QuickModule</command:noun>
       <maml:description>
@@ -1858,7 +1858,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Rename-QuickModule</maml:name>
+        <maml:name>Rename-ModuleProject</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>NestedModule</maml:name>
           <maml:Description>
@@ -2112,7 +2112,7 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Split-QuickModule</command:name>
+      <command:name>Split-ModuleProject</command:name>
       <command:verb>Split</command:verb>
       <command:noun>QuickModule</command:noun>
       <maml:description>
@@ -2124,7 +2124,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Split-QuickModule</maml:name>
+        <maml:name>Split-ModuleProject</maml:name>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Author</maml:name>
           <maml:Description>
@@ -2460,7 +2460,7 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Update-QuickModule</command:name>
+      <command:name>Update-ModuleProject</command:name>
       <command:verb>Update</command:verb>
       <command:noun>QuickModule</command:noun>
       <maml:description>
@@ -2472,7 +2472,7 @@
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Update-QuickModule</maml:name>
+        <maml:name>Update-ModuleProject</maml:name>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Author</maml:name>
           <maml:Description>

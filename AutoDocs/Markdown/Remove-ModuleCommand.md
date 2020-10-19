@@ -5,7 +5,7 @@ online version: https://github.com/EdLichtman/QuickModuleCLI
 schema: 2.0.0
 ---
 
-# Edit-QuickCommand
+# Remove-ModuleCommand
 
 ## SYNOPSIS
 {{ Fill in the Synopsis }}
@@ -13,7 +13,7 @@ schema: 2.0.0
 ## SYNTAX
 
 ```
-Edit-QuickCommand [-NestedModule] <String> [-CommandName] <String> [<CommonParameters>]
+Remove-ModuleCommand [-NestedModule] <String> [-CommandName] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION

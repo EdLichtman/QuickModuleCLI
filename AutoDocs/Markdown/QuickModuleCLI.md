@@ -11,31 +11,31 @@ Locale: en-US
 {{ Fill in the Description }}
 
 ## QuickModuleCLI Cmdlets
-### [Add-QuickAlias](Add-QuickAlias.md)
+### [Add-ModuleAlias](Add-ModuleAlias.md)
 {{ Fill in the Description }}
 
-### [Add-QuickFunction](Add-QuickFunction.md)
+### [Add-ModuleFunction](Add-ModuleFunction.md)
 {{ Fill in the Description }}
 
-### [Copy-QuickCommand](Copy-QuickCommand.md)
+### [Copy-ModuleCommand](Copy-ModuleCommand.md)
 {{ Fill in the Description }}
 
-### [Edit-QuickCommand](Edit-QuickCommand.md)
+### [Edit-ModuleCommand](Edit-ModuleCommand.md)
 {{ Fill in the Description }}
 
 ### [Enter-QuickDocumentation](Enter-QuickDocumentation.md)
 {{ Fill in the Description }}
 
-### [Export-QuickModule](Export-QuickModule.md)
+### [Export-ModuleProject](Export-ModuleProject.md)
 {{ Fill in the Description }}
 
-### [Get-QuickModule](Get-QuickModule.md)
+### [Get-ModuleProject](Get-ModuleProject.md)
 {{ Fill in the Description }}
 
-### [Import-QuickModule](Import-QuickModule.md)
+### [Import-ModuleProject](Import-ModuleProject.md)
 {{ Fill in the Description }}
 
-### [Move-QuickCommand](Move-QuickCommand.md)
+### [Move-ModuleCommand](Move-ModuleCommand.md)
 {{ Fill in the Description }}
 
 ### [New-QuickModule](New-QuickModule.md)
@@ -44,25 +44,25 @@ Locale: en-US
 ### [Open-LANoire](Open-LANoire.md)
 {{ Fill in the Description }}
 
-### [Remove-QuickCommand](Remove-QuickCommand.md)
+### [Remove-ModuleCommand](Remove-ModuleCommand.md)
 {{ Fill in the Description }}
 
-### [Remove-QuickModule](Remove-QuickModule.md)
+### [Remove-ModuleProject](Remove-ModuleProject.md)
 {{ Fill in the Description }}
 
-### [Rename-QuickCommand](Rename-QuickCommand.md)
+### [Rename-ModuleCommand](Rename-ModuleCommand.md)
 {{ Fill in the Description }}
 
-### [Rename-QuickModule](Rename-QuickModule.md)
+### [Rename-ModuleProject](Rename-ModuleProject.md)
 {{ Fill in the Description }}
 
 ### [Set-Env](Set-Env.md)
 {{ Fill in the Description }}
 
-### [Split-QuickModule](Split-QuickModule.md)
+### [Split-ModuleProject](Split-ModuleProject.md)
 {{ Fill in the Description }}
 
-### [Update-QuickModule](Update-QuickModule.md)
+### [Update-ModuleProject](Update-ModuleProject.md)
 {{ Fill in the Description }}
 
 ### [Write-Test](Write-Test.md)

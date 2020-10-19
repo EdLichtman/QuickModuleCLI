@@ -5,7 +5,7 @@ online version: https://github.com/EdLichtman/Quick-Package
 schema: 2.0.0
 ---
 
-# Update-QuickModule
+# Split-ModuleProject
 
 ## SYNOPSIS
 {{ Fill in the Synopsis }}
@@ -13,7 +13,7 @@ schema: 2.0.0
 ## SYNTAX
 
 ```
-Update-QuickModule -NestedModule <String> [-Author <String>] [-CompanyName <String>] [-Copyright <String>]
+Split-ModuleProject -NestedModule <String> [-Author <String>] [-CompanyName <String>] [-Copyright <String>]
  [-ModuleVersion <Version>] [-Description <String>] [-Tags <String[]>] [-ProjectUri <Uri>] [-LicenseUri <Uri>]
  [-IconUri <Uri>] [-ReleaseNotes <String>] [-HelpInfoUri <String>] [<CommonParameters>]
 ```

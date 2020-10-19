@@ -42,22 +42,22 @@ function Get-NestedModules {
     return Get-ChildItem $NestedModulesFolder
 }
 
-function Get-QuickFunctionLocations {
+function Get-ModuleFunctionLocations {
     param([Parameter(Mandatory=$true)][String]$NestedModule)
     $ModuleLocation = Get-NestedModuleLocation -NestedModule $NestedModule
     return Get-ChildItem "$ModuleLocation\Functions"
 }
 
-function Get-QuickAliasesLocations {
+function Get-ModuleAliasesLocations {
     param([Parameter(Mandatory=$true)][String]$NestedModule)
     $ModuleLocation = Get-NestedModuleLocation -NestedModule $NestedModule
     return Get-ChildItem "$ModuleLocation\Aliases"
 }
-function Get-QuickFunctions {
+function Get-ModuleFunctions {
     param([Parameter(Mandatory=$true)][String]$NestedModule)
 
     $NestedFunctions = New-Object System.Collections.ArrayList($null)
-    $Functions = Get-QuickFunctionLocations -NestedModule $NestedModule
+    $Functions = Get-ModuleFunctionLocations -NestedModule $NestedModule
     if ($Functions) {
         $Functions | ForEach-Object {$NestedFunctions.Add("$($_.BaseName)")} | Out-Null
     }
@@ -65,11 +65,11 @@ function Get-QuickFunctions {
     return $NestedFunctions
 }
 
-function Get-QuickAliases {
+function Get-ModuleAliases {
     param([Parameter(Mandatory=$true)][String]$NestedModule)
 
     $NestedAliases = New-Object System.Collections.ArrayList($null)
-    $Aliases = Get-QuickAliasesLocations -NestedModule $NestedModule
+    $Aliases = Get-ModuleAliasesLocations -NestedModule $NestedModule
     if ($Aliases) {
         $Aliases | ForEach-Object {$NestedAliases.Add("$($_.BaseName)")} | Out-Null
     }
@@ -77,7 +77,7 @@ function Get-QuickAliases {
     return $NestedAliases
 }
 
-function Get-QuickFunctionsLocation {
+function Get-ModuleFunctionsLocation {
     param(
         [Parameter(Mandatory=$true)][String]$NestedModule
         )
@@ -85,7 +85,7 @@ function Get-QuickFunctionsLocation {
     return "$ModuleLocation\Functions\"
 }
 
-function Get-QuickAliasesLocation {
+function Get-ModuleAliasesLocation {
     param(
         [Parameter(Mandatory=$true)][String]$NestedModule
         )
@@ -93,7 +93,7 @@ function Get-QuickAliasesLocation {
     return "$ModuleLocation\Aliases\"
 }
 
-function Get-QuickFunctionLocation {
+function Get-ModuleFunctionLocation {
     param(
         [Parameter(Mandatory=$true)][String]$NestedModule,
         [Parameter(Mandatory=$true)][String]$CommandName
@@ -102,7 +102,7 @@ function Get-QuickFunctionLocation {
     return "$ModuleLocation\Functions\$CommandName.ps1"
 }
 
-function Get-QuickAliasLocation {
+function Get-ModuleAliasLocation {
     param(
         [Parameter(Mandatory=$true)][String]$NestedModule,
         [Parameter(Mandatory=$true)][String]$CommandName
@@ -112,7 +112,7 @@ function Get-QuickAliasLocation {
 }
 
 <# Assertions: Throw Errors if False#>
-function Assert-CanCreateQuickCommand {
+function Assert-CanCreateModuleCommand {
     param(
         [Parameter(Mandatory=$true)][String]$CommandName,
         [Parameter(Mandatory=$true)][String]$NestedModule
@@ -124,8 +124,8 @@ function Assert-CanCreateQuickCommand {
         throw "'$NestedModule' does not exist. Please use 'New-ModuleProject' to create it."
     }
     foreach($NestedModule in $NestedModules) {
-        $Functions = Get-QuickFunctionLocations -NestedModule $NestedModule
-        $Aliases = Get-QuickAliasesLocations -NestedModule $NestedModule
+        $Functions = Get-ModuleFunctionLocations -NestedModule $NestedModule
+        $Aliases = Get-ModuleAliasesLocations -NestedModule $NestedModule
         foreach($Function in $Functions) {
             if ($Function.BaseName -eq $CommandName) {
                 throw "'$CommandName' already exists as a function in '$NestedModule'! Cannot create command with existing name, to prevent clashing."
@@ -144,7 +144,7 @@ function Assert-CanFindCommand {
     Get-Command $CommandName -ErrorAction 'Stop' | Out-Null
 }
 
-function Assert-CanFindQuickCommand {
+function Assert-CanFindModuleCommand {
     param(
         [Parameter(Mandatory=$true)][String]$NestedModule,
         [Parameter(Mandatory=$true)][String]$CommandName
@@ -277,7 +277,7 @@ function Edit-ModuleManifest {
         
     New-ModuleManifest @ManifestProperties
 }
-function Update-QuickModuleCLI {
+function Update-ModuleProjectCLI {
     [CmdletBinding()]param()
     $psd1Location = "$BaseFolder\$BaseModuleName.psd1"
 

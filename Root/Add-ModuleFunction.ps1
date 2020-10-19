@@ -1,5 +1,5 @@
 # .ExternalHelp ..\AutoDocs\ExternalHelp\QuickModuleCLI-Help.xml
-function Add-QuickFunction {
+function Add-ModuleFunction {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
@@ -8,9 +8,6 @@ function Add-QuickFunction {
         [string] $FunctionName,
         [string] $FunctionText
     )
-    
-    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
-    Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
 
     $ApprovedVerbs = [System.Collections.Generic.HashSet[String]]::new();
     (Get-Verb | Select-Object -Property Verb) | ForEach-Object {$ApprovedVerbs.Add($_.Verb)} | Out-Null;
@@ -21,7 +18,7 @@ function Add-QuickFunction {
         return;
     }
 
-    Assert-CanCreateQuickCommand -CommandName $functionName -NestedModule $NestedModule
+    Assert-CanCreateModuleCommand -CommandName $functionName -NestedModule $NestedModule
 
     $newFunctionText = ""
 
@@ -54,7 +51,7 @@ function $FunctionName {
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
     }
 
-    Update-QuickModule -NestedModule $NestedModule
-    Update-QuickModuleCLI
+    Update-ModuleProject -NestedModule $NestedModule
+    Update-ModuleProjectCLI
     Import-Module $BaseModuleName -Force
 }

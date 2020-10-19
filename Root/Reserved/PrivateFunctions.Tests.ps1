@@ -58,34 +58,34 @@ describe 'Private Functions' {
 
     }
 
-    describe 'Get-QuickFunctionLocations' {
+    describe 'Get-ModuleFunctionLocations' {
 
     }
 
-    describe 'Get-QuickAliasesLocations' {
+    describe 'Get-ModuleAliasesLocations' {
 
     }
-    describe 'Get-QuickFunctions' {
-
-    }
-
-    describe 'Get-QuickAliases' {
+    describe 'Get-ModuleFunctions' {
 
     }
 
-    describe 'Get-QuickFunctionsLocation' {
+    describe 'Get-ModuleAliases' {
 
     }
 
-    describe 'Get-QuickAliasesLocation' {
+    describe 'Get-ModuleFunctionsLocation' {
 
     }
 
-    describe 'Get-QuickFunctionLocation' {
+    describe 'Get-ModuleAliasesLocation' {
 
     }
 
-    describe 'Get-QuickAliasLocation' {
+    describe 'Get-ModuleFunctionLocation' {
+
+    }
+
+    describe 'Get-ModuleAliasLocation' {
 
     }
 
@@ -95,7 +95,7 @@ describe 'Private Functions' {
     }
 
     <# Assertions: Throw Errors if False#>
-    describe 'Assert-CanCreateQuickCommand' {
+    describe 'Assert-CanCreateModuleCommand' {
 
     }
 
@@ -108,27 +108,27 @@ describe 'Private Functions' {
         }
     }
 
-    describe 'Assert-CanFindQuickCommand' {
+    describe 'Assert-CanFindModuleCommand' {
         it "Can find if a quick function exists" {
             $NestedModuleFolder = "$(Get-SandboxNestedModulesFolder)\Test"
             New-Item $NestedModuleFolder -ItemType Directory -Force
             New-Item "$NestedModuleFolder\Functions" -ItemType Directory -Force
-            New-Item "$NestedModuleFolder\Functions\Write-AssertCanFindQuickCommand.ps1" -ItemType File -Force
+            New-Item "$NestedModuleFolder\Functions\Write-AssertCanFindModuleCommand.ps1" -ItemType File -Force
 
-            { Assert-CanFindQuickCommand -NestedModule 'Test' -CommandName Write-AssertCanFindQuickCommand } | Should -Not -Throw
+            { Assert-CanFindModuleCommand -NestedModule 'Test' -CommandName Write-AssertCanFindModuleCommand } | Should -Not -Throw
         }
 
         it "Can find if a quick alias exists" {
             $NestedModuleFolder = "$(Get-SandboxNestedModulesFolder)\Test"
             New-Item $NestedModuleFolder -ItemType Directory -Force
             New-Item "$NestedModuleFolder\Aliases" -ItemType Directory -Force
-            New-Item "$NestedModuleFolder\Aliases\AssertCanFindQuickCommand.ps1" -ItemType File -Force
+            New-Item "$NestedModuleFolder\Aliases\AssertCanFindModuleCommand.ps1" -ItemType File -Force
 
-            { Assert-CanFindQuickCommand -NestedModule 'Test' -CommandName AssertCanFindQuickCommand } | Should -Not -Throw
+            { Assert-CanFindModuleCommand -NestedModule 'Test' -CommandName AssertCanFindModuleCommand } | Should -Not -Throw
         }
 
         it "Can find if a quick command does not exist" {
-            { Assert-CanFindQuickCommand -NestedModule 'Test' -CommandName Write-AssertCantFindQuickCommand } | Should -Throw -ExceptionType 'System.Management.Automation.ItemNotFoundException'
+            { Assert-CanFindModuleCommand -NestedModule 'Test' -CommandName Write-AssertCantFindModuleCommand } | Should -Throw -ExceptionType 'System.Management.Automation.ItemNotFoundException'
         }
     }
 
@@ -143,7 +143,7 @@ describe 'Private Functions' {
     describe 'Edit-ModuleManifest' {
 
     }
-    describe 'Update-QuickModuleCLI' {
+    describe 'Update-ModuleProjectCLI' {
 
     }
 

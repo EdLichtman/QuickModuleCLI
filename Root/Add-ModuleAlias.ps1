@@ -14,26 +14,26 @@ in a powershell session it will auto-import the rest of the module for you.
 
 .INPUTS
 
-None. You cannot pipe objects to Add-QuickAlias.
+None. You cannot pipe objects to Add-ModuleAlias.
 
 .OUTPUTS
 
-None. Add-QuickAlias creates a new alias that you can later use.
+None. Add-ModuleAlias creates a new alias that you can later use.
 
 .EXAMPLE
 
-PS> Add-QuickAlias -NestedModule Default -AliasName echo -AliasMappedFunction 'Write-Output'
+PS> Add-ModuleAlias -NestedModule Default -AliasName echo -AliasMappedFunction 'Write-Output'
 
 .EXAMPLE
 
-PS> Add-QuickAlias Default echo Write-Output
+PS> Add-ModuleAlias Default echo Write-Output
 
 .LINK
 
 https://github.com/EdLichtman/QuickModuleCLI
 
 #>
-function Add-QuickAlias {
+function Add-ModuleAlias {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][string]
@@ -47,11 +47,8 @@ function Add-QuickAlias {
         $AliasMappedFunction
     )    
     
-    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
-    Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
-    
     Assert-CanFindCommand -CommandName $AliasMappedFunction
-    Assert-CanCreateQuickCommand -CommandName $AliasName -NestedModule $NestedModule
+    Assert-CanCreateModuleCommand -CommandName $AliasName -NestedModule $NestedModule
 
     $newCode = @"
 Set-Alias $AliasName $AliasMappedFunction
@@ -59,6 +56,6 @@ Set-Alias $AliasName $AliasMappedFunction
 
     New-FileWithContent -filePath "$NestedModulesFolder\$NestedModule\Aliases\$AliasName.ps1" -fileText $newCode
 
-    Update-QuickModule -NestedModule $NestedModule
+    Update-ModuleProject -NestedModule $NestedModule
     Import-Module $BaseModuleName -Force
 }

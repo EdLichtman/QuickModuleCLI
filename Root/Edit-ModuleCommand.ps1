@@ -1,4 +1,4 @@
-function Edit-QuickCommand {
+function Edit-ModuleCommand {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
@@ -8,12 +8,10 @@ function Edit-QuickCommand {
         
     )
 
-    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
-
     $Function = "$NestedModulesFolder\$NestedModule\Functions\$CommandName.ps1"
     $Alias = "$NestedModulesFolder\$NestedModule\Aliases\$CommandName.ps1"
 
-    Assert-CanFindQuickCommand -NestedModule $NestedModule -CommandName $CommandName
+    Assert-CanFindModuleCommand -NestedModule $NestedModule -CommandName $CommandName
 
     if(Test-Path "$Function") {
         . powershell_ise.exe "$Function" 

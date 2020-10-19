@@ -1,16 +1,10 @@
-function Get-QuickModule {
+function Get-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param(
-        [String] 
-        
-        $NestedModule,
-        [String]
-        $CommandName,
-        [Switch]
-        $Summary
+        [String] $NestedModule,
+        [String] $CommandName,
+        [Switch] $Summary
     )
-
-    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
 
     $Modules = New-Object System.Collections.ArrayList;
 
@@ -24,8 +18,8 @@ function Get-QuickModule {
     $NestedModules = Get-NestedModules
     foreach($Module in $NestedModules) {
         if (!$LimitToNestedModule -or ($LimitToNestedModule -and ($Module.Name -eq $NestedModule))) {
-            $Functions = Get-QuickFunctionLocations -NestedModule $Module.Name
-            $Aliases = Get-QuickAliasesLocations -NestedModule $Module.Name
+            $Functions = Get-ModuleFunctionLocations -NestedModule $Module.Name
+            $Aliases = Get-ModuleAliasesLocations -NestedModule $Module.Name
 
             if (!$Summary) {
                 if (($Functions.Count -eq 0) -and ($Aliases.Count -eq 0)) {

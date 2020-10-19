@@ -5,7 +5,7 @@ online version: https://github.com/EdLichtman/QuickModuleCLI
 schema: 2.0.0
 ---
 
-# Copy-QuickCommand
+# Rename-ModuleCommand
 
 ## SYNOPSIS
 {{ Fill in the Synopsis }}
@@ -13,8 +13,8 @@ schema: 2.0.0
 ## SYNTAX
 
 ```
-Copy-QuickCommand [-SourceNestedModule] <String> [-SourceCommandName] <String>
- [-DestinationNestedModule] <String> [-DestinationCommandName] <String> [<CommonParameters>]
+Rename-ModuleCommand [-NestedModule] <String> [-CommandName] <String> [-Replacement] <String>
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -31,38 +31,8 @@ PS C:\> {{ Add example code here }}
 
 ## PARAMETERS
 
-### -DestinationCommandName
-{{ Fill DestinationCommandName Description }}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -DestinationNestedModule
-{{ Fill DestinationNestedModule Description }}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -SourceCommandName
-{{ Fill SourceCommandName Description }}
+### -CommandName
+{{ Fill CommandName Description }}
 
 ```yaml
 Type: String
@@ -76,8 +46,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -SourceNestedModule
-{{ Fill SourceNestedModule Description }}
+### -NestedModule
+{{ Fill NestedModule Description }}
 
 ```yaml
 Type: String
@@ -86,6 +56,21 @@ Aliases:
 
 Required: True
 Position: 0
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Replacement
+{{ Fill Replacement Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -104,5 +89,3 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
-
-[https://github.com/EdLichtman/QuickModuleCLI](https://github.com/EdLichtman/QuickModuleCLI)

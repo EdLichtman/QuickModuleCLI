@@ -5,7 +5,7 @@ online version: https://github.com/EdLichtman/QuickModuleCLI
 schema: 2.0.0
 ---
 
-# Add-QuickFunction
+# Add-ModuleFunction
 
 ## SYNOPSIS
 Adds a function to a QuickModuleCLI nested module.
@@ -13,7 +13,7 @@ Adds a function to a QuickModuleCLI nested module.
 ## SYNTAX
 
 ```
-Add-QuickFunction [-NestedModule] <String> [-FunctionName] <String> [[-FunctionText] <String>]
+Add-ModuleFunction [-NestedModule] <String> [-FunctionName] <String> [[-FunctionText] <String>]
  [<CommonParameters>]
 ```
 
@@ -24,17 +24,17 @@ Adds a function to a QuickModuleCLI nested module that can later be auto-loaded 
 
 ### EXAMPLE 1
 ```
-Add-QuickFunction -NestedModule Default -functionName Write-Echo -functionText 'Write-Output (Read-Host "Are you my echo?")'
+Add-ModuleFunction -NestedModule Default -functionName Write-Echo -functionText 'Write-Output (Read-Host "Are you my echo?")'
 ```
 
 ### EXAMPLE 2
 ```
-Add-QuickFunction Default Write-Echo 'Please enter the Function: Write-Output (Read-Host "Are you my echo?")'
+Add-ModuleFunction Default Write-Echo 'Please enter the Function: Write-Output (Read-Host "Are you my echo?")'
 ```
 
 ### EXAMPLE 3
 ```
-Add-QuickFunction Default Write-Echo
+Add-ModuleFunction Default Write-Echo
 ```
 
 \[PS ISE opens...\]
@@ -94,10 +94,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None. You cannot pipe objects to Add-QuickFunction.
+### None. You cannot pipe objects to Add-ModuleFunction.
 ## OUTPUTS
 
-### None. Add-QuickFunction creates a new function that you can later use.
+### None. Add-ModuleFunction creates a new function that you can later use.
 ## NOTES
 Once created, every time you open a new Powershell window the function will be exported for you to use.
 Once you attempt to use a function for the first time

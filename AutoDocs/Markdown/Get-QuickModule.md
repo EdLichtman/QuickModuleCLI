@@ -5,7 +5,7 @@ online version: https://github.com/EdLichtman/QuickModuleCLI
 schema: 2.0.0
 ---
 
-# Get-QuickModule
+# Get-ModuleProject
 
 ## SYNOPSIS
 {{ Fill in the Synopsis }}
@@ -13,7 +13,7 @@ schema: 2.0.0
 ## SYNTAX
 
 ```
-Get-QuickModule [-NestedModule <String>] [-CommandName <String>] [-Summary] [<CommonParameters>]
+Get-ModuleProject [-NestedModule <String>] [-CommandName <String>] [-Summary] [<CommonParameters>]
 ```
 
 ## DESCRIPTION

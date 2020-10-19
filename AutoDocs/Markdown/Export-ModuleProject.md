@@ -1,11 +1,11 @@
 ﻿---
 external help file: QuickModuleCLI-help.xml
 Module Name: QuickModuleCLI
-online version: https://github.com/EdLichtman/Quick-Package
+online version: https://github.com/EdLichtman/QuickModuleCLI
 schema: 2.0.0
 ---
 
-# Split-QuickModule
+# Export-ModuleProject
 
 ## SYNOPSIS
 {{ Fill in the Synopsis }}
@@ -13,9 +13,10 @@ schema: 2.0.0
 ## SYNTAX
 
 ```
-Split-QuickModule -NestedModule <String> [-Author <String>] [-CompanyName <String>] [-Copyright <String>]
- [-ModuleVersion <Version>] [-Description <String>] [-Tags <String[]>] [-ProjectUri <Uri>] [-LicenseUri <Uri>]
- [-IconUri <Uri>] [-ReleaseNotes <String>] [-HelpInfoUri <String>] [<CommonParameters>]
+Export-ModuleProject -NestedModule <String> -Destination <String> [-Author <String>] [-CompanyName <String>]
+ [-Copyright <String>] [-ModuleVersion <Version>] [-Description <String>] [-Tags <String[]>]
+ [-ProjectUri <Uri>] [-LicenseUri <Uri>] [-IconUri <Uri>] [-ReleaseNotes <String>] [-HelpInfoUri <String>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -86,6 +87,21 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Destination
+{{ Fill Destination Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
 Position: Named
 Default value: None
 Accept pipeline input: False

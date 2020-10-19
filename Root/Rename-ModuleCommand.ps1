@@ -1,21 +1,18 @@
-function Rename-QuickCommand {
+function Rename-ModuleCommand {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][string] $NestedModule,
         [Parameter(Mandatory=$true)][string] $CommandName,
         [Parameter(Mandatory=$true)][string] $Replacement
     )
-
-    Invoke-Expression ". '$PSScriptRoot\Reserved\PrivateFunctions.ps1'"
-    Invoke-Expression ". '$FunctionsFolder\Update-QuickModule.ps1'"
     
-    Assert-CanFindQuickCommand -NestedModule $NestedModule -CommandName $CommandName
-    Assert-CanCreateQuickCommand -CommandName $Replacement -NestedModule $NestedModule
+    Assert-CanFindModuleCommand -NestedModule $NestedModule -CommandName $CommandName
+    Assert-CanCreateModuleCommand -CommandName $Replacement -NestedModule $NestedModule
 
-    $Function = Get-QuickFunctionLocation -NestedModule $NestedModule -CommandName $CommandName
-    $Alias = Get-QuickAliasLocation -NestedModule $NestedModule -CommandName $CommandName
-    $ReplacementFunctionPath = Get-QuickFunctionLocation -NestedModule $NestedModule -CommandName $Replacement
-    $ReplacementAliasPath = Get-QuickAliasLocation -NestedModule $NestedModule -CommandName $Replacement
+    $Function = Get-ModuleFunctionLocation -NestedModule $NestedModule -CommandName $CommandName
+    $Alias = Get-ModuleAliasLocation -NestedModule $NestedModule -CommandName $CommandName
+    $ReplacementFunctionPath = Get-ModuleFunctionLocation -NestedModule $NestedModule -CommandName $Replacement
+    $ReplacementAliasPath = Get-ModuleAliasLocation -NestedModule $NestedModule -CommandName $Replacement
 
     if(Test-Path $Function) {
         $FunctionBlock = Get-Content $Function -Raw
@@ -31,8 +28,8 @@ function Rename-QuickCommand {
         New-FileWithContent -filePath $ReplacementAliasPath -fileText $NewAliasBlock
     } 
 
-    Update-QuickModule -NestedModule $NestedModule
-    Update-QuickModuleCLI
+    Update-ModuleProject -NestedModule $NestedModule
+    Update-ModuleProjectCLI
     Import-Module $BaseModuleName -Force
 
 }
