@@ -177,6 +177,23 @@ function Assert-ModuleAlreadyExists {
 
 }
 
+<# For ValidateScript and ArgumentCompleter Attributes #>
+function Get-NestedModuleChoices {
+    $Choices = (Get-NestedModules | ForEach-Object {"$($_.Name)"})
+    if (!$Choices) {
+        throw 'No viable Modules. Please create one with New-ModuleProject!'
+    }
+    return $Choices
+}
+function Assert-NestedModuleExists {
+    param([String] $Module)
+    if ($Module -in (Get-NestedModuleChoices)) {
+        $True
+    } else {
+        throw [ArgumentException] "Parameter must be one of the following choices: $(Get-NestedModuleChoices)"
+    }
+}
+
 <# Utilities #>
 function Add-InputParametersToObject {
     <#

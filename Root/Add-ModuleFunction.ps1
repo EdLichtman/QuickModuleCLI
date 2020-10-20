@@ -3,6 +3,8 @@ function Add-ModuleFunction {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
+        [ValidateScript({Assert-NestedModuleExists $_})]
+        [ArgumentCompleter({(Get-NestedModuleChoices)})]
         [string] $NestedModule,
         [Parameter(Mandatory=$true)]
         [string] $FunctionName,
@@ -17,8 +19,6 @@ function Add-ModuleFunction {
         throw [System.ArgumentException] "$chosenVerb is not a common accepted verb. Please find an appropriate verb by using the command 'Get-Verb'." 
         return;
     }
-
-    Assert-CanCreateModuleCommand -CommandName $functionName -NestedModule $NestedModule
 
     $newFunctionText = ""
 

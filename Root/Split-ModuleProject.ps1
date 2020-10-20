@@ -15,7 +15,7 @@ function Split-ModuleProject {
         [String] $HelpInfoUri
     )
 
-    Assert-CanCreateModule -NestedModule $NestedModule
+    Assert-CanCreateModule -NestedModule $NestedModule #todo: Fix this, it keeps erroring because it checks to see if Module already exists, which by default it does, and that's a problem here.
 
     $NestedModuleDirectory = Get-NestedModuleLocation -NestedModule $NestedModule
     $psd1Location = "$NestedModuleDirectory\$NestedModule.psd1"
@@ -42,7 +42,10 @@ function Split-ModuleProject {
     $ModuleDirectories = $env:PSModulePath.Split(';')
     $ModulesDirectory = $ModuleDirectories | Where-Object {$_.StartsWith((Split-Path $Profile))}
 
-    Move-Item -Path $NestedModuleLocation -Destination $ModulesDirectory;
+    if (!(Test-Path "$ModulesDirectory\$NestedModule")) {
+        New-Item -Path "$ModulesDirectory\$NestedModule" -ItemType Directory
+    }
+    Move-Item -Path $NestedModuleDirectory -Destination $ModulesDirectory;
 
     Update-ModuleProjectCLI
     Import-Module $BaseModuleName -force
