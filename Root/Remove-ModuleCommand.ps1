@@ -1,7 +1,11 @@
 function Remove-ModuleCommand {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)][string]$NestedModule,
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        [string]$NestedModule,
+        
         [Parameter(Mandatory=$true)][string]$CommandName
     )
 

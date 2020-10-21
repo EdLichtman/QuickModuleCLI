@@ -1,8 +1,11 @@
-. "$PSScriptRoot\Root\Reserved\PrivateFunctions.ps1"
+. "$PSScriptRoot\Root\Reserved\Variables.ps1"
+. "$PSScriptRoot\Root\Reserved\Environment.ps1"
+. "$PSScriptRoot\Root\Reserved\ArgumentCompleters.ps1"
+. "$PSScriptRoot\Root\Reserved\Validators.ps1"
+
 $helperFunctions = Get-ChildItem "$PSScriptRoot\Root" -Filter "*.ps1"
 foreach($helperFunction in $helperFunctions) {
         . "$PSScriptRoot\Root\$helperFunction"
-        Register-SubModuleArgumentCompleter -CommandName $helperFunction.BaseName
 }
 if (!(Test-Path "$PSScriptRoot\Modules")) {
         New-Item "$PSScriptRoot\Modules" -ItemType Directory

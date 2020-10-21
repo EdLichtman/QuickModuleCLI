@@ -37,8 +37,8 @@ function Add-ModuleAlias {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][string]
-        [ValidateScript({Assert-NestedModuleExists $_})]
-        [ArgumentCompleter({(Get-NestedModuleChoices)})]
+        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
         #Specifies the name of the NestedModule in which this function belongs.
         $NestedModule,
         [Parameter(Mandatory=$true)][string]

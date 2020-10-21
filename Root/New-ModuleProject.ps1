@@ -1,9 +1,10 @@
 function New-ModuleProject {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)][string] $NestedModule
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({(Assert-ModuleProjectDoesNotExist)})]
+        [string] $NestedModule
     )
-    Assert-CanCreateModule -NestedModule $NestedModule
 
     $ModuleDirectory = Get-NestedModuleLocation $NestedModule
     $ModuleFile = "$ModuleDirectory\$NestedModule.psm1";

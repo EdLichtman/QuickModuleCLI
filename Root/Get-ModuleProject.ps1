@@ -1,7 +1,10 @@
 function Get-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param(
+        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
         [String] $NestedModule,
+        
         [String] $CommandName,
         [Switch] $Summary
     )

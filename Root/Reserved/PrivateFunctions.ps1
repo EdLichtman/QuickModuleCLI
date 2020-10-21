@@ -1,9 +1,4 @@
 <# ENVIRONMENT VARIABLES #>
-$BaseFolder =  "$PSScriptRoot\..\.."
-$BaseModuleName = "QuickModuleCLI"
-$NestedModulesFolder = "$BaseFolder\Modules"
-$FunctionsFolder = "$BaseFolder\Root"
-$PrivateFunctionsFolder = "$FunctionsFolder\Reserved"
 
 <# INTERNAL FUNCTIONS #>
 function New-FileWithContent {
@@ -33,83 +28,7 @@ function New-FileWithContent {
 }
 
 <# Interpolations #>
-function Get-NestedModuleLocation {
-    param([Parameter(Mandatory=$true)][String]$NestedModule)
-    return "$NestedModulesFolder\$NestedModule"
-}
 
-function Get-NestedModules {
-    return Get-ChildItem $NestedModulesFolder
-}
-
-function Get-ModuleFunctionLocations {
-    param([Parameter(Mandatory=$true)][String]$NestedModule)
-    $ModuleLocation = Get-NestedModuleLocation -NestedModule $NestedModule
-    return Get-ChildItem "$ModuleLocation\Functions"
-}
-
-function Get-ModuleAliasesLocations {
-    param([Parameter(Mandatory=$true)][String]$NestedModule)
-    $ModuleLocation = Get-NestedModuleLocation -NestedModule $NestedModule
-    return Get-ChildItem "$ModuleLocation\Aliases"
-}
-function Get-ModuleFunctions {
-    param([Parameter(Mandatory=$true)][String]$NestedModule)
-
-    $NestedFunctions = New-Object System.Collections.ArrayList($null)
-    $Functions = Get-ModuleFunctionLocations -NestedModule $NestedModule
-    if ($Functions) {
-        $Functions | ForEach-Object {$NestedFunctions.Add("$($_.BaseName)")} | Out-Null
-    }
-
-    return $NestedFunctions
-}
-
-function Get-ModuleAliases {
-    param([Parameter(Mandatory=$true)][String]$NestedModule)
-
-    $NestedAliases = New-Object System.Collections.ArrayList($null)
-    $Aliases = Get-ModuleAliasesLocations -NestedModule $NestedModule
-    if ($Aliases) {
-        $Aliases | ForEach-Object {$NestedAliases.Add("$($_.BaseName)")} | Out-Null
-    }
-
-    return $NestedAliases
-}
-
-function Get-ModuleFunctionsLocation {
-    param(
-        [Parameter(Mandatory=$true)][String]$NestedModule
-        )
-    $ModuleLocation = Get-NestedModuleLocation -NestedModule $NestedModule
-    return "$ModuleLocation\Functions\"
-}
-
-function Get-ModuleAliasesLocation {
-    param(
-        [Parameter(Mandatory=$true)][String]$NestedModule
-        )
-    $ModuleLocation = Get-NestedModuleLocation -NestedModule $NestedModule
-    return "$ModuleLocation\Aliases\"
-}
-
-function Get-ModuleFunctionLocation {
-    param(
-        [Parameter(Mandatory=$true)][String]$NestedModule,
-        [Parameter(Mandatory=$true)][String]$CommandName
-        )
-    $ModuleLocation = Get-NestedModuleLocation -NestedModule $NestedModule
-    return "$ModuleLocation\Functions\$CommandName.ps1"
-}
-
-function Get-ModuleAliasLocation {
-    param(
-        [Parameter(Mandatory=$true)][String]$NestedModule,
-        [Parameter(Mandatory=$true)][String]$CommandName
-        )
-    $ModuleLocation = Get-NestedModuleLocation -NestedModule $NestedModule
-    return "$ModuleLocation\Aliases\$CommandName.ps1"
-}
 
 <# Assertions: Throw Errors if False#>
 function Assert-CanCreateModuleCommand {
@@ -117,6 +36,7 @@ function Assert-CanCreateModuleCommand {
         [Parameter(Mandatory=$true)][String]$CommandName,
         [Parameter(Mandatory=$true)][String]$NestedModule
     )
+    throw 'TODO: MOVE THIS TO VALIDATESCRIPT'
 
     $NestedModules = Get-NestedModules
 
@@ -165,32 +85,6 @@ function Assert-CanCreateModule {
     #todo: Better verbiage
     if ((Get-Module -ListAvailable $NestedModule)) {
         throw [System.ArgumentException] "An installed module is already available by the name '$NestedModule'. This module does not support clobber and Prefixes."
-    }
-}
-
-function Assert-ModuleAlreadyExists {
-    param([Parameter(Mandatory=$true)][String]$NestedModule)
-    $NestedModuleLocation = "$NestedModulesFolder\$NestedModule"
-    if (!(Test-Path $NestedModuleLocation)) {
-        throw [ArgumentException]"No Quick Module found by the name '$NestedModule'"
-    }
-
-}
-
-<# For ValidateScript and ArgumentCompleter Attributes #>
-function Get-NestedModuleChoices {
-    $Choices = (Get-NestedModules | ForEach-Object {"$($_.Name)"})
-    if (!$Choices) {
-        throw 'No viable Modules. Please create one with New-ModuleProject!'
-    }
-    return $Choices
-}
-function Assert-NestedModuleExists {
-    param([String] $Module)
-    if ($Module -in (Get-NestedModuleChoices)) {
-        $True
-    } else {
-        throw [ArgumentException] "Parameter must be one of the following choices: $(Get-NestedModuleChoices)"
     }
 }
 

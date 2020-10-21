@@ -1,37 +1,16 @@
 describe 'Private Functions' {
     BeforeAll {
-        . "$PSScriptRoot\PrivateFunctions.ps1"
-
-        function Get-SandboxBaseFolder { return "$PSScriptRoot\..\..\Tests\Sandbox"; }
-        function Get-SandboxNestedModulesFolder { return "$(Get-SandboxBaseFolder)\Modules"; }
-        function Get-SandboxFunctionsFolder { return "$(Get-SandboxBaseFolder)\Root"; }
-        function Get-SandboxPrivateFunctionsFolder { return "$(Get-SandboxFunctionsFolder)\Reserved" }
-        
-        <# ENVIRONMENT VARIABLES #>
-        $BaseModuleName = "QuickModuleCLITests"
-        $BaseFolder =  Get-SandboxBaseFolder
-        $NestedModulesFolder = Get-SandboxNestedModulesFolder
-        $FunctionsFolder = Get-SandboxFunctionsFolder
-        $PrivateFunctionsFolder = Get-SandboxPrivateFunctionsFolder
-        
-
-        New-Item -Path (Get-SandboxBaseFolder) -ItemType Directory
-        New-Item -Path (Get-SandboxNestedModulesFolder) -ItemType Directory
-        New-Item -Path (Get-SandboxFunctionsFolder) -ItemType Directory
-        New-Item -Path (Get-SandboxPrivateFunctionsFolder) -ItemType Directory
+        . "$PSScriptRoot\_TestEnvironment.ps1"
+        Test-BeforeAll
     }
-
     BeforeEach {
-        
+        Test-BeforeEach
     }
-
+    AfterEach {
+        Test-AfterEach
+    }
     AfterAll {
-        $SandboxBase = Get-SandboxBaseFolder
-        if (![String]::IsNullOrWhiteSpace($SandboxBase)) {
-            Remove-Item -Path $SandboxBase -Recurse -Force
-        } else {
-            throw 'Scoping Exception! Get-SandboxBaseFolder is empty!'
-        }
+        Test-AfterAll
     }
     <# INTERNAL FUNCTIONS #>
     describe 'New-FileWithContent' {
@@ -140,12 +119,11 @@ describe 'Private Functions' {
 
     }
 
+
     describe 'Edit-ModuleManifest' {
 
     }
     describe 'Update-ModuleProjectCLI' {
 
     }
-
-
 }

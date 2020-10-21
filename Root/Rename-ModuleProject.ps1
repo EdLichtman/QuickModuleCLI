@@ -1,8 +1,14 @@
 function Rename-ModuleProject {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)][string] $NestedModule,
-        [Parameter(Mandatory=$true)][string] $DestinationNestedModule
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        [string] $NestedModule,
+
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({(Assert-ModuleProjectDoesNotExist)})]
+        [string] $DestinationNestedModule
     )
 
     Assert-CanCreateModule -NestedModule $NestedModule

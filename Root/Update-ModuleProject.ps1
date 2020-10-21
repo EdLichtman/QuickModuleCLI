@@ -2,7 +2,11 @@
 function Update-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param (
-        [Parameter(Mandatory=$true)][string] $NestedModule,
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        [string] $NestedModule,
+        
         [String]  $Author,
         [String] $CompanyName,
         [String] $Copyright,
@@ -15,8 +19,6 @@ function Update-ModuleProject {
         [String] $ReleaseNotes,
         [String] $HelpInfoUri
     )
-   
-    Assert-ModuleAlreadyExists -NestedModule $NestedModule
     $NestedModuleLocation = Get-NestedModuleLocation -NestedModule $NestedModule
     $psd1Location = "$NestedModuleLocation\$NestedModule.psd1"
 

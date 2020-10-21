@@ -1,9 +1,18 @@
 function Move-ModuleCommand {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)][string] $NestedModule,
-        [Parameter(Mandatory=$true)][string] $CommandName,
-        [Parameter(Mandatory=$true)][string] $DestinationNestedModule
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        [string] $NestedModule,
+
+        [Parameter(Mandatory=$true)]
+        [string] $CommandName,
+
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        [string] $DestinationNestedModule
     )
     
     $Function = Get-ModuleFunctionLocation -NestedModule $NestedModule -CommandName $CommandName

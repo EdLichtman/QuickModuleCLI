@@ -3,22 +3,17 @@ function Add-ModuleFunction {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
-        [ValidateScript({Assert-NestedModuleExists $_})]
-        [ArgumentCompleter({(Get-NestedModuleChoices)})]
+        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
         [string] $NestedModule,
+
         [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({(Assert-ParameterStartsWithVerb)})]
         [string] $FunctionName,
+
         [string] $FunctionText
     )
-
-    $ApprovedVerbs = [System.Collections.Generic.HashSet[String]]::new();
-    (Get-Verb | Select-Object -Property Verb) | ForEach-Object {$ApprovedVerbs.Add($_.Verb)} | Out-Null;
-    $chosenVerb = $functionName.Split('-')[0]
-
-    if (!$ApprovedVerbs.Contains($chosenVerb)) {
-        throw [System.ArgumentException] "$chosenVerb is not a common accepted verb. Please find an appropriate verb by using the command 'Get-Verb'." 
-        return;
-    }
 
     $newFunctionText = ""
 

@@ -1,10 +1,26 @@
 function Copy-ModuleCommand {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)][String]$SourceNestedModule,
-        [Parameter(Mandatory=$true)][String]$SourceCommandName,
-        [Parameter(Mandatory=$true)][String]$DestinationNestedModule,
-        [Parameter(Mandatory=$true)][String]$DestinationCommandName
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        [String]$SourceNestedModule,
+
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({(Assert-ModuleCommandExists)})]
+        [String]$SourceCommandName,
+
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({(Assert-ModuleProjectDoesNotExist)})]
+        [String]$DestinationNestedModule,
+
+        [Parameter(Mandatory=$true)][String]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({(Assert-ModuleCommandDoesNotExist)})]
+        $DestinationCommandName
     )
 
     Assert-CanCreateModuleCommand $DestinationCommandName -NestedModule $DestinationNestedModule

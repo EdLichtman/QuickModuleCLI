@@ -1,7 +1,11 @@
 function Export-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param (
-        [Parameter(Mandatory=$true)][string] $NestedModule,
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        [string] $NestedModule,
+
         [Parameter(Mandatory=$true)][string] $Destination,
         [String] $Author,
         [String] $CompanyName,
@@ -16,7 +20,6 @@ function Export-ModuleProject {
         [String] $HelpInfoUri
     )  
     $NestedModuleLocation = Get-NestedModuleLocation -NestedModule $NestedModule
-    Assert-ModuleAlreadyExists $NestedModule
 
     $ModuleManifestParameters = @{}
     Add-InputParametersToObject -BoundParameters $PSBoundParameters `
