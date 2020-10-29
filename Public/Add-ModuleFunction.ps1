@@ -5,7 +5,7 @@ function Add-ModuleFunction {
         [Parameter(Mandatory=$true)]
         [ValidateModuleProjectExists()]
         [ArgumentCompleter([ModuleProjectArgument])]
-        [string] $NestedModule,
+        [string] $ModuleProject,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
@@ -17,17 +17,15 @@ function Add-ModuleFunction {
         $FunctionText
     )
 
-    
-       
-
-    New-FileWithContent -filePath "$NestedModulesFolder\$NestedModule\Functions\$FunctionName.ps1" -fileText $newCode
+    New-ModuleProjectFunction -ModuleProject $ModuleProject -CommandName $FunctionName -Text $FunctionText
+    $FunctionLocation = Get-ModuleProjectFunctionPath -ModuleProject $ModuleProject -CommandName $FunctionName
     if ([String]::IsNullOrWhiteSpace($newFunctionText)) {
-        powershell_ise.exe "$NestedModulesFolder\$NestedModule\Functions\$FunctionName.ps1"
+        powershell_ise.exe $FunctionLocation
         Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
     }
 
-    Update-ModuleProject -NestedModule $NestedModule
-    Update-ModuleProjectCLI
-    Import-Module $BaseModuleName -Force
+    #Update-ModuleProject -NestedModule $NestedModule
+    #Update-ModuleProjectCLI
+    #Import-Module $BaseModuleName -Force
 }

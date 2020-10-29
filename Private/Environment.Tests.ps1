@@ -251,34 +251,63 @@ Describe 'Environment' {
 
     describe 'New-ModuleProjectFunction' {
         It 'Throws error if module does not exist' {
-            {New-ModuleProjectFunction -ModuleProject $ViableModule -CommandName 'Write-Foo'} | Should -Throw $ParameterBindingException
+            {New-ModuleProjectFunction -ModuleProject $ViableModule -CommandName 'Write-Foo'} | Should -Throw -ExceptionType $ArgumentException
         }
 
         It 'Throws error if function already exists in module' {
-            Add-TestModule -ModuleProject $ViableModule
-            Add-TestFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo'
+            $CommandName = 'Write-Foo'
+            Add-TestModule -Name $ViableModule -IncludeFunctions -IncludeAliases -IncludeManifest -IncludeRoot
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $CommandName 
 
-            {New-ModuleProjectFunction -ModuleProject $ViableModule -CommandName 'Write-Foo'} | Should -Throw $ArgumentException
+            {New-ModuleProjectFunction -ModuleProject $ViableModule -CommandName $CommandName } | Should -Throw -ExceptionType $ArgumentException
         }
 
-        It 'Throws error if function does not start with approved verbs' {
+        It 'Creates new function file' {
+            $CommandName = 'Write-Foo'
+            Add-TestModule -Name $ViableModule -IncludeFunctions -IncludeAliases -IncludeManifest -IncludeRoot
+            New-ModuleProjectFunction -ModuleProject $ViableModule -CommandName $CommandName 
 
-        }
-
-        It 'Creates new function' {
-
+            $FilePath = Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $CommandName 
+            (Test-Path $FilePath) | Should -BeTrue
         }
 
         It 'Adds function template to file' {
+            $CommandName = 'Write-Foo'
+            Add-TestModule -Name $ViableModule -IncludeFunctions -IncludeAliases -IncludeManifest -IncludeRoot
+            New-ModuleProjectFunction -ModuleProject $ViableModule -CommandName $CommandName 
 
+            $FilePath = Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $CommandName 
+            
+            $Content = Get-Content $FilePath 
+            ($Content[0]) | Should -Be "function $CommandName {"
+            ($Content[1].Trim()) | Should -Be ''
+            ($Content[2]) | Should -Be '}'
         }
 
         It 'Adds Text to function template in file' {
+            $CommandName = 'Write-Foo'
+            $expectedContentBetweenTemplate = 'Hello World'
+            Add-TestModule -Name $ViableModule -IncludeFunctions -IncludeAliases -IncludeManifest -IncludeRoot
+            New-ModuleProjectFunction -ModuleProject $ViableModule -CommandName $CommandName  -Text $expectedContentBetweenTemplate
 
+            $FilePath = Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $CommandName 
+            
+            $Content = Get-Content $FilePath 
+            ($Content[0]) | Should -Be "function $CommandName {"
+            ($Content[1].Trim()) | Should -Be $expectedContentBetweenTemplate
+            ($Content[2]) | Should -Be '}'
         }
 
         It 'Supports Raw addition of text for Renaming Functions' {
+            $CommandName = 'Write-Foo'
+            $expectedContent = 'Hello World'
+            Add-TestModule -Name $ViableModule -IncludeFunctions -IncludeAliases -IncludeManifest -IncludeRoot
+            New-ModuleProjectFunction -ModuleProject $ViableModule -CommandName $CommandName  -Text $expectedContent -Raw
 
+            $FilePath = Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $CommandName 
+            
+            $Content = Get-Content $FilePath 
+            ($Content) | Should -Be $expectedContent
         }
     }
 

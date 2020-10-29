@@ -96,7 +96,7 @@ function New-ModuleProjectFunction {
         )
         
     $ModuleProjectPath = Get-ModuleProjectLocation -ModuleProject $ModuleProject
-    if (!Test-Path ($ModuleProjectPath)) {
+    if (!(Test-Path ($ModuleProjectPath))) {
         throw [System.ArgumentException] "Module already exists by the name '$moduleProject'"
     }
 
@@ -115,7 +115,7 @@ function $CommandName {
 "@
     }
     
-    Add-Content -Path $$ModuleFunctionPath -Value $functionContent
+    Add-Content -Path $ModuleFunctionPath -Value $functionContent
 }
 
 <#FULLY TESTED#>
