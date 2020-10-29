@@ -1,7 +1,12 @@
-function Split-ModuleProject {
+function Export-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param (
-        [Parameter(Mandatory=$true)][string] $NestedModule,
+        [Parameter(Mandatory=$true)]
+        [ValidateModuleProjectExists()]
+        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        [string] $NestedModule,
+
+        [Parameter(Mandatory=$true)][string] $Destination,
         [String] $Author,
         [String] $CompanyName,
         [String] $Copyright,
@@ -13,12 +18,8 @@ function Split-ModuleProject {
         [Uri] $IconUri,
         [String] $ReleaseNotes,
         [String] $HelpInfoUri
-    )
-
-    Assert-CanCreateModule -NestedModule $NestedModule #todo: Fix this, it keeps erroring because it checks to see if Module already exists, which by default it does, and that's a problem here.
-
-    $NestedModuleDirectory = Get-NestedModuleLocation -NestedModule $NestedModule
-    $psd1Location = "$NestedModuleDirectory\$NestedModule.psd1"
+    )  
+    $NestedModuleLocation = Get-ModuleProjectLocation -ModuleProject $NestedModule
 
     $ModuleManifestParameters = @{}
     Add-InputParametersToObject -BoundParameters $PSBoundParameters `
@@ -37,16 +38,12 @@ function Split-ModuleProject {
             'HelpInfoUri'
         )
 
-    Edit-ModuleManifest -psd1Location $psd1Location @ModuleManifestParameters 
+    Update-ModuleProject -NestedModule $NestedModule @ModuleManifestParameters 
 
     $ModuleDirectories = $env:PSModulePath.Split(';')
-    $ModulesDirectory = $ModuleDirectories | Where-Object {$_.StartsWith((Split-Path $Profile))}
-
-    if (!(Test-Path "$ModulesDirectory\$NestedModule")) {
-        New-Item -Path "$ModulesDirectory\$NestedModule" -ItemType Directory
+    if ($ModuleDirectories -contains $Destination) {
+        throw 'Cannot export module to a PSModule directory. Export-ModuleProject should be used to export your Nested Module to be imported into the QuickModuleCLI package. If you wish to package the module for import as a separate module, use the command Split-ModuleProject instead.'
     }
-    Move-Item -Path $NestedModuleDirectory -Destination $ModulesDirectory;
 
-    Update-ModuleProjectCLI
-    Import-Module $BaseModuleName -force
+    Copy-Item -Path $NestedModuleLocation -Destination $Destination -Recurse;
 }

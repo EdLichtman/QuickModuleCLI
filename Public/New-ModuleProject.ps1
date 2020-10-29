@@ -2,15 +2,16 @@ function New-ModuleProject {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
-        [ValidateScript({(Assert-ModuleProjectDoesNotExist)})]
-        [string] $NestedModule
+        [ValidateNotNullOrEmpty()]
+        [ValidateModuleProjectDoesNotExist()]
+        [string] $ModuleProject
     )
 
-    $ModuleDirectory = Get-NestedModuleLocation $NestedModule
-    $ModuleFile = "$ModuleDirectory\$NestedModule.psm1";
-    $ModuleDeclarationFile = "$ModuleDirectory\$NestedModule.psd1";
-    $FunctionsDirectory = Get-ModuleFunctionsLocation -NestedModule $NestedModule
-    $AliasesDirectory = Get-ModuleAliasesLocation -NestedModule $NestedModule
+    $ModuleDirectory = Get-ModuleProjectLocation -ModuleProject $ModuleProject
+    $ModuleFile = "$ModuleDirectory\$ModuleProject.psm1";
+    $ModuleDeclarationFile = "$ModuleDirectory\$ModuleProject.psd1";
+    $FunctionsDirectory = Get-ModuleProjectFunctionsFolder -ModuleProject $ModuleProject
+    $AliasesDirectory = Get-ModuleProjectAliasesFolder -ModuleProject $ModuleProject
     
     New-Item "$ModuleDirectory" -ItemType Directory | Out-Null
     New-Item "$FunctionsDirectory" -ItemType Directory | Out-Null
@@ -35,7 +36,7 @@ foreach($alias in $aliases) {
     New-ModuleManifest -Path $ModuleDeclarationFile `
         -Author 'TODO' `
         -Description 'TODO' `
-        -RootModule "$NestedModule.psm1" `
+        -RootModule "$ModuleProject.psm1" `
         -ModuleVersion '0.0.1' `
         -PowerShellVersion "$currentPowershellVersion" `
         -CompatiblePSEditions "Desktop" `

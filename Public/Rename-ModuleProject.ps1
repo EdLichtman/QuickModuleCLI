@@ -2,19 +2,18 @@ function Rename-ModuleProject {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
-        [ValidateScript({(Assert-ModuleProjectExists)})]
-        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        [ValidateModuleProjectExists()]
+        [ArgumentCompleter([ModuleProjectArgument])]
         [string] $NestedModule,
 
         [Parameter(Mandatory=$true)]
-        [ValidateScript({(Assert-ModuleProjectDoesNotExist)})]
+        [ValidateNotNullOrEmpty()]
+        [ValidateModuleProjectDoesNotExist()]
         [string] $DestinationNestedModule
     )
 
-    Assert-CanCreateModule -NestedModule $NestedModule
-
-    $NestedModuleDirectory = Get-NestedModuleLocation -NestedModule $NestedModule
-    $DestinationModuleDirectory = Get-NestedModuleLocation -NestedModule $DestinationNestedModule
+    $NestedModuleDirectory = Get-ModuleProjectLocation -ModuleProject $NestedModule
+    $DestinationModuleDirectory = Get-ModuleProjectLocation -ModuleProject $DestinationNestedModule
     Copy-Item -Path $NestedModuleDirectory -Destination $DestinationModuleDirectory -Recurse
 
     $DestinationPsd1Location = "$DestinationModuleDirectory\$DestinationNestedModule.psd1"

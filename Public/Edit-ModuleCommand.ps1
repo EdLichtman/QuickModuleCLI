@@ -2,19 +2,18 @@ function Edit-ModuleCommand {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
-        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ValidateModuleProjectExists()]
         [ArgumentCompleter({(Get-ModuleProjectChoices)})]
-        [string]$NestedModule,
+        [string]$ModuleProject,
         
         [Parameter(Mandatory=$true)]
         [string]$CommandName
         
     )
+    Assert-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
 
-    $Function = "$NestedModulesFolder\$NestedModule\Functions\$CommandName.ps1"
-    $Alias = "$NestedModulesFolder\$NestedModule\Aliases\$CommandName.ps1"
-
-    Assert-CanFindModuleCommand -NestedModule $NestedModule -CommandName $CommandName
+    $Function = Get-ModuleProjectFunctionPath -ModuleProject $ModuleProject -CommandName $CommandName
+    $Alias = Get-ModuleProjectAliasPath -ModuleProject $ModuleProject -CommandName $CommandName
 
     if(Test-Path "$Function") {
         . powershell_ise.exe "$Function" 

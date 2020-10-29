@@ -27,66 +27,6 @@ function New-FileWithContent {
     }
 }
 
-<# Interpolations #>
-
-
-<# Assertions: Throw Errors if False#>
-function Assert-CanCreateModuleCommand {
-    param(
-        [Parameter(Mandatory=$true)][String]$CommandName,
-        [Parameter(Mandatory=$true)][String]$NestedModule
-    )
-    throw 'TODO: MOVE THIS TO VALIDATESCRIPT'
-
-    $NestedModules = Get-NestedModules
-
-    if (!(Test-Path (Get-NestedModuleLocation -NestedModule $NestedModule))) {
-        throw "'$NestedModule' does not exist. Please use 'New-ModuleProject' to create it."
-    }
-    foreach($NestedModule in $NestedModules) {
-        $Functions = Get-ModuleFunctionLocations -NestedModule $NestedModule
-        $Aliases = Get-ModuleAliasesLocations -NestedModule $NestedModule
-        foreach($Function in $Functions) {
-            if ($Function.BaseName -eq $CommandName) {
-                throw "'$CommandName' already exists as a function in '$NestedModule'! Cannot create command with existing name, to prevent clashing."
-            }
-        }
-        foreach($Alias in $Aliases) {
-            if ($Alias.BaseName -eq $CommandName) {
-                throw "'$CommandName' already exists as an alias in '$NestedModule'! Cannot create command with existing name, to prevent clashing."
-            }
-        }
-    } 
-}
-
-function Assert-CanFindCommand {       
-    param([Parameter(Mandatory=$true)][String]$CommandName) 
-    Get-Command $CommandName -ErrorAction 'Stop' | Out-Null
-}
-
-function Assert-CanFindModuleCommand {
-    param(
-        [Parameter(Mandatory=$true)][String]$NestedModule,
-        [Parameter(Mandatory=$true)][String]$CommandName
-        )
-    $Function = "$NestedModulesFolder\$NestedModule\Functions\$CommandName.ps1"
-    $Alias = "$NestedModulesFolder\$NestedModule\Aliases\$CommandName.ps1"
-
-    if (!(Test-Path $Function) -and !(Test-Path $Alias)) {
-        throw [System.Management.Automation.ItemNotFoundException]"Command '$SourceCommandName' not found."
-    }
-}
-
-function Assert-CanCreateModule {
-    param([Parameter(Mandatory=$true)][String]$NestedModule)
-    if ((Test-Path (Get-NestedModuleLocation -NestedModule $NestedModule))) {
-        throw [System.ArgumentException] "A nested QuickModuleCLI Module is already available by the name '$NestedModule'. This module does not support clobber and Prefixes."
-    }
-    #todo: Better verbiage
-    if ((Get-Module -ListAvailable $NestedModule)) {
-        throw [System.ArgumentException] "An installed module is already available by the name '$NestedModule'. This module does not support clobber and Prefixes."
-    }
-}
 
 <# Utilities #>
 function Add-InputParametersToObject {
@@ -221,16 +161,4 @@ function Update-ModuleProjectCLI {
     }
 
     Edit-ModuleManifest -psd1Location $psd1Location -NestedModules $NestedModules -FunctionsToExport $FunctionsToExport -AliasesToExport $AliasesToExport
-}
-
-function Register-SubModuleArgumentCompleter {
-    param(
-        [String] $CommandName
-    )
-    $ParameterName = 'NestedModule'
-    if ((Get-Command $CommandName).Parameters.Keys.Contains($ParameterName)) {
-        $ScriptBlock = {Get-NestedModules | Select-Object -ExpandProperty Name}
-        
-        Register-ArgumentCompleter -CommandName $CommandName -ParameterName $ParameterName -ScriptBlock $ScriptBlock
-    }
 }

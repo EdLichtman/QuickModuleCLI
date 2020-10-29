@@ -3,32 +3,29 @@ function Copy-ModuleCommand {
     param(
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ValidateModuleProjectExists()]
         [ArgumentCompleter({(Get-ModuleProjectChoices)})]
         [String]$SourceNestedModule,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateScript({(Assert-ModuleCommandExists)})]
+        [ValidateModuleCommandExists()]
         [String]$SourceCommandName,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateScript({(Assert-ModuleProjectDoesNotExist)})]
+        [ValidateModuleProjectDoesNotExist()]
         [String]$DestinationNestedModule,
 
         [Parameter(Mandatory=$true)][String]
         [ValidateNotNullOrEmpty()]
-        [ValidateScript({(Assert-ModuleCommandDoesNotExist)})]
+        [ValidateModuleCommandDoesNotExist()]
         $DestinationCommandName
     )
-
-    Assert-CanCreateModuleCommand $DestinationCommandName -NestedModule $DestinationNestedModule
+    Assert-CommandExistsInModule -ModuleProject $SourceNestedModule -CommandName $SourceCommandName
 
     $Function = "$NestedModulesFolder\$SourceNestedModule\Functions\$SourceCommandName.ps1"
     $Alias = "$NestedModulesFolder\$SourceNestedModule\Aliases\$SourceCommandName.ps1"
-
-    Assert-CanFindModuleCommand -NestedModule $SourceNestedModule -CommandName $SourceCommandName
 
     if(Test-Path $Function) {
         $FunctionBlock = Get-Content $Function -Raw

@@ -1,7 +1,7 @@
 function Get-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param(
-        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ValidateModuleProjectExists()]
         [ArgumentCompleter({(Get-ModuleProjectChoices)})]
         [String] $NestedModule,
         
@@ -18,11 +18,11 @@ function Get-ModuleProject {
         throw 'Cannot display summary if searching for a command!'
     }
 
-    $NestedModules = Get-NestedModules
+    $NestedModules = Get-ValidModuleProjects
     foreach($Module in $NestedModules) {
         if (!$LimitToNestedModule -or ($LimitToNestedModule -and ($Module.Name -eq $NestedModule))) {
-            $Functions = Get-ModuleFunctionLocations -NestedModule $Module.Name
-            $Aliases = Get-ModuleAliasesLocations -NestedModule $Module.Name
+            $Functions = Get-ModuleProjectFunctionsFolder -ModuleProject $Module.Name
+            $Aliases = Get-ModuleProjectAliasesFolder -ModuleProject $Module.Name
 
             if (!$Summary) {
                 if (($Functions.Count -eq 0) -and ($Aliases.Count -eq 0)) {

@@ -2,25 +2,25 @@ function Move-ModuleCommand {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
-        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ValidateModuleProjectExists()]
         [ArgumentCompleter({(Get-ModuleProjectChoices)})]
-        [string] $NestedModule,
+        [string] $ModuleProject,
 
         [Parameter(Mandatory=$true)]
         [string] $CommandName,
 
         [Parameter(Mandatory=$true)]
-        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ValidateModuleProjectExists()]
         [ArgumentCompleter({(Get-ModuleProjectChoices)})]
-        [string] $DestinationNestedModule
+        [string] $DestinationModuleProject
     )
+    Assert-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
     
-    $Function = Get-ModuleFunctionLocation -NestedModule $NestedModule -CommandName $CommandName
-    $Alias = Get-ModuleAliasLocation -NestedModule $NestedModule -CommandName $CommandName
-    $DestinationFunctionPath = Get-ModuleFunctionLocation -NestedModule $DestinationNestedModule -CommandName $CommandName
-    $DestinationAliasPath = Get-ModuleAliasLocation -NestedModule $DestinationNestedModule -CommandName $CommandName
+    $Function = Get-ModuleProjectFunctionPath -ModuleProject $ModuleProject -CommandName $CommandName
+    $Alias = Get-ModuleProjectAliasPath -ModuleProject $ModuleProject -CommandName $CommandName
+    $DestinationFunctionPath = Get-ModuleProjectFunctionPath -ModuleProject $DestinationModuleProject -CommandName $CommandName
+    $DestinationAliasPath = Get-ModuleProjectAliasPath -ModuleProject $DestinationModuleProject -CommandName $CommandName
 
-    Assert-CanFindModuleCommand -NestedModule $NestedModule -CommandName $CommandName
 
     if(Test-Path $Function) {
         $FunctionBlock = Get-Content $Function -Raw
@@ -34,8 +34,8 @@ function Move-ModuleCommand {
         New-FileWithContent -filePath $DestinationAliasPath -fileText $aliasBlock
     } 
 
-    Update-ModuleProject -NestedModule $NestedModule
-    Update-ModuleProject -NestedModule $DestinationNestedModule
+    Update-ModuleProject -ModuleProject $ModuleProject
+    Update-ModuleProject -ModuleProject $DestinationModuleProject
     Update-ModuleProjectCLI
     Import-Module $BaseModuleName -Force
 }

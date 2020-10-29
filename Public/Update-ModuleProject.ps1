@@ -3,9 +3,9 @@ function Update-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param (
         [Parameter(Mandatory=$true)]
-        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ValidateModuleProjectExists()]
         [ArgumentCompleter({(Get-ModuleProjectChoices)})]
-        [string] $NestedModule,
+        [string] $ModuleProject,
         
         [String]  $Author,
         [String] $CompanyName,
@@ -19,11 +19,11 @@ function Update-ModuleProject {
         [String] $ReleaseNotes,
         [String] $HelpInfoUri
     )
-    $NestedModuleLocation = Get-NestedModuleLocation -NestedModule $NestedModule
-    $psd1Location = "$NestedModuleLocation\$NestedModule.psd1"
+    $ModuleProjectLocation = Get-ModuleProjectLocation -ModuleProject $ModuleProject
+    $psd1Location = "$ModuleProjectLocation\$ModuleProject.psd1"
 
-    $FunctionsToExport = Get-ModuleFunctions -NestedModule $NestedModule
-    $AliasesToExport = Get-ModuleAliases -NestedModule $NestedModule
+    $FunctionsToExport = Get-ModuleProjectFunctionNames -ModuleProject $ModuleProject
+    $AliasesToExport = Get-ModuleProjectAliasNames -ModuleProject $ModuleProject
     
     $ModuleManifestParameters = @{}
     Add-InputParametersToObject -BoundParameters $PSBoundParameters `

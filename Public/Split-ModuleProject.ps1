@@ -1,12 +1,13 @@
-function Export-ModuleProject {
+function Split-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param (
         [Parameter(Mandatory=$true)]
-        [ValidateScript({(Assert-ModuleProjectExists)})]
-        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
-        [string] $NestedModule,
+        [ValidateNotNullOrEmpty()]
+        [ValidateModuleProjectExists()]
+        [ValidateModuleDoesNotExist()]
+        [ArgumentCompleter([ModuleProjectArgument])]
+        [string] $ModuleProject,
 
-        [Parameter(Mandatory=$true)][string] $Destination,
         [String] $Author,
         [String] $CompanyName,
         [String] $Copyright,
@@ -18,8 +19,10 @@ function Export-ModuleProject {
         [Uri] $IconUri,
         [String] $ReleaseNotes,
         [String] $HelpInfoUri
-    )  
-    $NestedModuleLocation = Get-NestedModuleLocation -NestedModule $NestedModule
+    )
+
+    $NestedModuleDirectory = Get-ModuleProjectLocation -ModuleProject $NestedModule
+    $psd1Location = "$NestedModuleDirectory\$NestedModule.psd1"
 
     $ModuleManifestParameters = @{}
     Add-InputParametersToObject -BoundParameters $PSBoundParameters `
@@ -38,12 +41,16 @@ function Export-ModuleProject {
             'HelpInfoUri'
         )
 
-    Update-ModuleProject -NestedModule $NestedModule @ModuleManifestParameters 
+    Edit-ModuleManifest -psd1Location $psd1Location @ModuleManifestParameters 
 
     $ModuleDirectories = $env:PSModulePath.Split(';')
-    if ($ModuleDirectories -contains $Destination) {
-        throw 'Cannot export module to a PSModule directory. Export-ModuleProject should be used to export your Nested Module to be imported into the QuickModuleCLI package. If you wish to package the module for import as a separate module, use the command Split-ModuleProject instead.'
-    }
+    $ModulesDirectory = $ModuleDirectories | Where-Object {$_.StartsWith((Split-Path $Profile))}
 
-    Copy-Item -Path $NestedModuleLocation -Destination $Destination -Recurse;
+    if (!(Test-Path "$ModulesDirectory\$NestedModule")) {
+        New-Item -Path "$ModulesDirectory\$NestedModule" -ItemType Directory
+    }
+    Move-Item -Path $NestedModuleDirectory -Destination $ModulesDirectory;
+
+    Update-ModuleProjectCLI
+    Import-Module $BaseModuleName -force
 }

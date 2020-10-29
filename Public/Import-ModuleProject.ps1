@@ -6,6 +6,7 @@ function Import-ModuleProject {
     )
 
     $NestedModule = (Split-Path $Path -Leaf)
+    throw [System.NotImplementedException]
     Assert-CanCreateModule -NestedModule $NestedModule
 
     if (!(Test-Path "$Path\$NestedModule.psd1") `

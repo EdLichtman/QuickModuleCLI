@@ -2,17 +2,16 @@ function Remove-ModuleCommand {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
-        [ValidateScript({(Assert-ModuleProjectExists)})]
+        [ValidateModuleProjectExists()]
         [ArgumentCompleter({(Get-ModuleProjectChoices)})]
-        [string]$NestedModule,
+        [string]$ModuleProject,
         
         [Parameter(Mandatory=$true)][string]$CommandName
     )
-
-    Assert-CanFindModuleCommand -NestedModule $NestedModule -CommandName $CommandName
+    Assert-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
     
-    $Function = Get-ModuleFunctionLocation -NestedModule $NestedModule -CommandName $CommandName
-    $Alias = Get-ModuleAliasLocation -NestedModule $NestedModule -CommandName $CommandName
+    $Function = Get-ModuleProjectFunctionPath -ModuleProject $ModuleProject -CommandName $CommandName
+    $Alias = Get-ModuleProjectAliasPath -ModuleProject $ModuleProject -CommandName $CommandName
     
     if(Test-Path $Function) {
         Remove-Item -Path $Function    
@@ -21,7 +20,7 @@ function Remove-ModuleCommand {
         Remove-Item -Path $Alias
     } 
 
-    Update-ModuleProject -NestedModule $NestedModule
+    Update-ModuleProject -ModuleProject $ModuleProject
     Update-ModuleProjectCLI
     Import-Module $BaseModuleName -Force
 }

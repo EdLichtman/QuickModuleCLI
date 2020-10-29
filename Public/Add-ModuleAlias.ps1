@@ -37,21 +37,27 @@ function Add-ModuleAlias {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][string]
-        [ValidateScript({(Assert-ModuleProjectExists)})]
-        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        [ValidateNotNullOrEmpty()]
+        [ValidateModuleProjectExists()]
+        [ArgumentCompleter([ModuleProjectArgument])]
         #Specifies the name of the NestedModule in which this function belongs.
-        $NestedModule,
-        [Parameter(Mandatory=$true)][string]
+        $ModuleProject,
+
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateModuleCommandDoesNotExist()]
+        [string]
         #Specifies the name of the new alias.
         $AliasName,
-        [Parameter(Mandatory=$true)][string]
+
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateCommandExists()]
+        [string]
         #Specifies the name of the function to which this alias maps.
         $AliasMappedFunction
     )    
     
-    Assert-CanFindCommand -CommandName $AliasMappedFunction
-    Assert-CanCreateModuleCommand -CommandName $AliasName -NestedModule $NestedModule
-
     $newCode = @"
 Set-Alias $AliasName $AliasMappedFunction
 "@
