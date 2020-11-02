@@ -16,7 +16,6 @@ Describe 'Validators' {
         . "$PSScriptRoot\Environment.ps1"
         . "$PSScriptRoot\ArgumentCompleters.ps1"
         . "$PSScriptRoot\Validators.ps1"
-        . "$PSScriptRoot\PrivateFunctions.ps1"
 
         Remove-Sandbox
     }
@@ -228,7 +227,8 @@ Describe 'Validators' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestFunction -ModuleName "_First" -FunctionName 'Get-Foo'
 
-            { Test-CommandExistsInModuleFunction -ModuleProject $ViableModule -CommandName 'Get-Foo' } | Should -Throw -ExceptionType 'System.Management.Automation.ItemNotFoundException'
+            $err = { Test-CommandExistsInModuleFunction -ModuleProject $ViableModule -CommandName 'Get-Foo' } | Should -Throw -PassThru
+            $err.Exception.GetType().Name | Should -Be 'ModuleCommandDoesNotExistException'
         }
 
         it 'Does not error if function exists in Module' {
@@ -245,7 +245,7 @@ Describe 'Validators' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestAlias -ModuleName $ViableModule -AliasName 'Foo'
 
-            { Test-CommandExistsInModuleFunction -ModuleProject $ViableModule -CommandName 'Get-Foo' } | Should -Not -Throw
+            { Test-CommandExistsInModuleFunction -ModuleProject $ViableModule -CommandName 'Foo' } | Should -Not -Throw
         }
 
     }

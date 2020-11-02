@@ -14,7 +14,6 @@ Describe 'Environment' {
         . "$PSScriptRoot\Environment.ps1"
         . "$PSScriptRoot\ArgumentCompleters.ps1"
         . "$PSScriptRoot\Validators.ps1"
-        . "$PSScriptRoot\PrivateFunctions.ps1"
 
         $ViableModule = "Viable"
         $NonviableModule = "Nonviable"
@@ -122,7 +121,7 @@ Describe 'Environment' {
 
             Mock Get-ValidModuleProjects { return @($CustomObject)}
 
-            (Get-ValidModuleProjectNames)[0] | Should -Be $ViableModule
+            (Get-ValidModuleProjectNames) -contains $ViableModule | Should -BeTrue
         }
 
         It 'Gets array of ModuleProjectNames from ValidModuleProjects' {
@@ -161,8 +160,8 @@ Describe 'Environment' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions
             Add-TestFunction -ModuleName $ViableModule -FunctionName $expectedTestFunction
 
-            $Functions = @((Get-ModuleProjectFunctions -ModuleProject $ViableModule) | ForEach-Object {$_.Name})
-            $Functions.Contains("$expectedTestFunction.ps1") | Should -BeTrue
+            $Functions = (Get-ModuleProjectFunctions -ModuleProject $ViableModule).BaseName
+            $expectedTestFunction -in ($Functions) | Should -BeTrue
         }
 
         It 'Should not contain values within other module project' {
@@ -171,7 +170,8 @@ Describe 'Environment' {
             Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions
             Add-TestFunction -ModuleName 'Test' -FunctionName $expectedTestFunction
 
-            (Get-ModuleProjectFunctions -ModuleProject $ViableModule).Contains($expectedTestFunction) | Should -BeFalse
+            $Functions = (Get-ModuleProjectFunctions -ModuleProject $ViableModule).BaseName
+            $expectedTestFunction -in $Functions| Should -BeFalse
         }
 
         It 'Should contain all values within module project' {
@@ -190,7 +190,8 @@ Describe 'Environment' {
 
             Mock Get-ModuleProjectFunctions {return @($CustomObject)} -ParameterFilter { $ModuleProject -eq $ViableModule } 
 
-            (Get-ModuleProjectFunctionNames -ModuleProject $ViableModule).Contains($expectedFunction) | Should -BeTrue
+            $Functions = (Get-ModuleProjectFunctionNames -ModuleProject $ViableModule)
+            $expectedFunction -in $Functions | Should -BeTrue
         }
 
         It 'Should get names from Get-ModuleProjectFunctions using Module' {
@@ -200,15 +201,8 @@ Describe 'Environment' {
             Mock Get-ModuleProjectFunctions {return @($CustomObject)} -ParameterFilter { $ModuleProject -eq 'Test' } 
             Mock Get-ModuleProjectFunctions {return [List[String]]::new()} -ParameterFilter { $ModuleProject -eq $Viable }.GetNewClosure() 
 
-            (Get-ModuleProjectFunctionNames -ModuleProject $ViableModule).Contains($expectedFunction) | Should -BeFalse
-        }
-
-        It 'Should contain an array even if there is only 1 value' {
-            $expectedFunction = 'Get-Test'
-            $CustomObject = Get-MockFileInfo -BaseName $expectedFunction
-            Mock Get-ModuleProjectFunctions {return @($CustomObject)}
-
-            (Get-ModuleProjectFunctionNames -ModuleProject $ViableModule)[0] | Should -Be $expectedFunction
+            $Functions = (Get-ModuleProjectFunctionNames -ModuleProject $ViableModule)
+            $expectedFunction -in $Functions | Should -BeFalse
         }
 
          It 'Should contain all functions within module project' {
@@ -348,7 +342,7 @@ Describe 'Environment' {
             Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestAlias -ModuleName 'Test' -AliasName $expectedTestAlias
 
-            (Get-ModuleProjectAliases -ModuleProject $ViableModule).Contains($expectedTestAlias) | Should -BeFalse
+            $expectedTestAlias -in (Get-ModuleProjectAliases -ModuleProject $ViableModule) | Should -BeFalse
         }
 
         It 'Should contain all values within module project' {
@@ -377,15 +371,7 @@ Describe 'Environment' {
             Mock Get-ModuleProjectAliases {return @($CustomObject)} -ParameterFilter { $ModuleProject -eq 'Test' } 
             Mock Get-ModuleProjectAliases {return [List[String]]::new()} -ParameterFilter { $ModuleProject -eq $Viable }.GetNewClosure() 
 
-            (Get-ModuleProjectAliasNames -ModuleProject $ViableModule).Contains($expectedAlias) | Should -BeFalse
-        }
-
-        It 'Should contain an array even if there is only 1 value' {
-            $expectedAlias = 'Test'
-            $CustomObject = Get-MockFileInfo -BaseName $expectedAlias
-            Mock Get-ModuleProjectAliases {return @($CustomObject)}
-
-            (Get-ModuleProjectAliasNames -ModuleProject $ViableModule)[0] | Should -Be $expectedAlias
+            $expectedAlias -in (Get-ModuleProjectAliasNames -ModuleProject $ViableModule) | Should -BeFalse
         }
 
          It 'Should contain all functions within module project' {
@@ -423,6 +409,43 @@ Describe 'Environment' {
 
         It 'Should end in a file by the expected name' {
             (Get-ModuleProjectAliasPath -ModuleProject $ViableModule -CommandName "Foo").EndsWith("\Foo.ps1") | Should -BeTrue
+        }
+    }
+
+    describe 'New-ModuleProjectAlias' {
+        It 'Throws error if module does not exist' {
+            {New-ModuleProjectAlias -ModuleProject $ViableModule -Alias 'Foo' -CommandName 'Write-Foo'} | Should -Throw -ExceptionType $ArgumentException
+        }
+
+        It 'Throws error if alias already exists in module' {
+            $Alias = 'Foo'
+            $CommandName = 'Foo'
+            Add-TestModule -Name $ViableModule -IncludeFunctions -IncludeAliases -IncludeManifest -IncludeRoot
+            Add-TestAlias -ModuleName $ViableModule -AliasName $Alias -CommandName $CommandName 
+
+            {New-ModuleProjectAlias -ModuleProject $ViableModule -Alias $Alias -CommandName $CommandName } | Should -Throw -ExceptionType $ArgumentException
+        }
+
+        It 'Creates new alias file' {
+            $Alias = 'Foo'
+            $CommandName = 'Write-Foo'
+            Add-TestModule -Name $ViableModule -IncludeFunctions -IncludeAliases -IncludeManifest -IncludeRoot
+            New-ModuleProjectAlias -ModuleProject $ViableModule -Alias $Alias -CommandName $CommandName 
+
+            $FilePath = Get-ModuleProjectAliasPath -ModuleProject $ViableModule -CommandName $Alias 
+            (Test-Path $FilePath) | Should -BeTrue
+        }
+
+        It 'Adds alias template to file' {
+            $Alias = 'Foo'
+            $CommandName = 'Write-Foo'
+            Add-TestModule -Name $ViableModule -IncludeFunctions -IncludeAliases -IncludeManifest -IncludeRoot
+            New-ModuleProjectAlias -ModuleProject $ViableModule -Alias $Alias -CommandName $CommandName
+
+            $FilePath = Get-ModuleProjectAliasPath -ModuleProject $ViableModule -CommandName $Alias 
+            
+            $Content = Get-Content $FilePath 
+            ($Content) | Should -Be "Set-Alias $Alias $CommandName"
         }
     }
 

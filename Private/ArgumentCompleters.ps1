@@ -4,31 +4,22 @@ using namespace System.Management.Automation
 using namespace System.Management.Automation.Language
 
 
-function Get-ModuleProjectChoices {
-    $Choices = Get-ValidModuleProjectNames
-
+function Get-ModuleProjectArgumentCompleter {
+    param(
+        [String]$WordToComplete
+    )
+    $Choices = [List[String]]::new()
+    Get-ValidModuleProjectNames | 
+        Where-Object {$_ -like "$WordToComplete*"} | 
+        ForEach-Object { $Choices.Add("$_") }
     if (!$Choices) {
-        throw [System.Management.Automation.ItemNotFoundException]'No viable Modules. Please create one with New-ModuleProject!'
+        $Choices.Add('[None]')
     }
-    return $Choices
-}
 
+    return @($Choices)
+}
 #https://jamesone111.wordpress.com/2019/09/23/the-classy-way-to-complete-and-validate-powershell-parameters/
 class ModuleProjectArgument : IArgumentCompleter {
-    <# REMEMBER IF TESTING LOCALLY: Dotsource the Get-ValidModuleProjectNames function#>
-    static [IEnumerable[String]] GetArguments(
-        [string] $WordToComplete
-        ) {
-            $Choices = [List[String]]::new()
-            Get-ValidModuleProjectNames | 
-                Where-Object {$_ -like "$WordToComplete*"} | 
-                ForEach-Object { $Choices.Add("$_") }
-            if (!$Choices) {
-                $Choices.Add('[None]')
-            }
-
-            return $Choices
-    }
     [IEnumerable[CompletionResult]] CompleteArgument(
         [string]      $CommandName ,
         [string]      $ParameterName,
@@ -38,24 +29,22 @@ class ModuleProjectArgument : IArgumentCompleter {
     )
     { 
         $CompletionResults = [List[CompletionResult]]::new()
-        [ModuleProjectArgument]::GetArguments($WordToComplete) | ForEach-Object {$CompletionResults.Add([CompletionResult]::new($_))}
+        @(Get-ModuleProjectArgumentCompleter $WordToComplete) | ForEach-Object {$CompletionResults.Add([CompletionResult]::new($_))}
 
         return $CompletionResults
     }
 }
 
-class ApprovedVerbsArgument : IArgumentCompleter {
-    <# REMEMBER IF TESTING LOCALLY: Dotsource Get-ApprovedVerbs Function#>
-    static [IEnumerable[String]] GetArguments(
-        [string] $WordToComplete
-        ) {
-            $Choices = [List[String]]::new()
-            Get-ApprovedVerbs | 
-                Where-Object {$_ -like "$WordToComplete*"} | 
-                ForEach-Object { $Choices.Add("$_-") }
-            return $Choices
-    }
+function Get-ApprovedVerbsArgumentCompleter {
+    param ($WordToComplete)
+    $Choices = [List[String]]::new()
+    Get-ApprovedVerbs | 
+        Where-Object {$_ -like "$WordToComplete*"} | 
+        ForEach-Object { $Choices.Add("$_-") }
+    return $Choices
+}
 
+class ApprovedVerbsArgument : IArgumentCompleter {
     [IEnumerable[CompletionResult]] CompleteArgument(
         [string]      $CommandName ,
         [string]      $ParameterName,
@@ -65,39 +54,38 @@ class ApprovedVerbsArgument : IArgumentCompleter {
     )
     { 
         $CompletionResults = [List[CompletionResult]]::new()
-        [ApprovedVerbsArgument]::GetArguments($WordToComplete) | ForEach-Object {$CompletionResults.Add([CompletionResult]::new($_))}
+        Get-ApprovedVerbsArgumentCompleter $WordToComplete | ForEach-Object {$CompletionResults.Add([CompletionResult]::new($_))}
         
         return $CompletionResults
     }
 }
 
-class CommandFromModuleArgument : IArgumentCompleter {
-    <# REMEMBER IF TESTING LOCALLY: Dotsource Get-ApprovedVerbs Function#>
-    static [IEnumerable[String]] GetArguments(
+function Get-CommandFromModuleArgumentCompleter {
+    param (
         [string] $ModuleProject,
         [string] $WordToComplete
-        ) {
-            $Choices = [List[String]]::new()
-            $ModuleProjects = Get-ValidModuleProjectNames 
-            if ($ModuleProjects | Where-Object {$_ -eq $ModuleProject}) {
-                Get-ModuleProjectFunctionNames -ModuleProject $ModuleProject | 
-                    Where-Object {$_ -like "$WordToComplete*"} | 
-                    ForEach-Object { $Choices.Add("$_") }
+        )
 
-                Get-ModuleProjectAliasNames -ModuleProject $ModuleProject | 
-                    Where-Object {$_ -like "$WordToComplete*"} | 
-                    ForEach-Object { $Choices.Add("$_") }
-            } else {
-                $Choices.Add("[Invalid]")
-            }
+        $Choices = @()
+        $ModuleProjects = Get-ValidModuleProjectNames 
+        if ($ModuleProject -in $ModuleProjects) {
+            [Array]$Functions = Get-ModuleProjectFunctionNames -ModuleProject $ModuleProject | Where-Object {$_ -like "$WordToComplete*"}
+            if ($Functions) { $Choices += $Functions }
 
-            if (!$Choices) {
-                $Choices.Add('[None]')
-            }
+            [Array]$Aliases = Get-ModuleProjectAliasNames -ModuleProject $ModuleProject | Where-Object {$_ -like "$WordToComplete*"}
+            if ($Aliases) { $Choices += $Aliases }
+        } else {
+            $Choices = @("[Invalid]")
+        }
 
-            return $Choices
-    }
+        if (!$Choices) {
+            $Choices = @('[None]')
+        }
 
+        return @($Choices)
+}
+
+class CommandFromModuleArgument : IArgumentCompleter {
     [IEnumerable[CompletionResult]] CompleteArgument(
         [string]      $CommandName ,
         [string]      $ParameterName,
@@ -108,7 +96,7 @@ class CommandFromModuleArgument : IArgumentCompleter {
     { 
         $CompletionResults = [List[CompletionResult]]::new()
         if($FakeBoundParameters.Contains('ModuleProject')) {
-            [CommandFromModuleArgument]::GetArguments($FakeBoundParameters['ModuleProject'], $WordToComplete) | ForEach-Object {$CompletionResults.Add([CompletionResult]::new($_))}
+            Get-CommandFromModuleArgumentCompleter $FakeBoundParameters['ModuleProject'] $WordToComplete | ForEach-Object {$CompletionResults.Add([CompletionResult]::new($_))}
         }
 
         return $CompletionResults

@@ -34,7 +34,9 @@ https://github.com/EdLichtman/QuickModuleCLI
 
 #>
 function Add-ModuleAlias {
-    [CmdletBinding()]
+    [CmdletBinding(
+        SupportsShouldProcess=$True
+    )]
     param(
         [Parameter(Mandatory=$true)][string]
         [ValidateNotNullOrEmpty()]
@@ -58,12 +60,8 @@ function Add-ModuleAlias {
         $AliasMappedFunction
     )    
     
-    $newCode = @"
-Set-Alias $AliasName $AliasMappedFunction
-"@
+    New-ModuleProjectAlias -ModuleProject $ModuleProject -Alias $AliasName -CommandName $AliasMappedFunction
 
-    New-FileWithContent -filePath "$NestedModulesFolder\$NestedModule\Aliases\$AliasName.ps1" -fileText $newCode
-
-    Update-ModuleProject -NestedModule $NestedModule
-    Import-Module $BaseModuleName -Force
+    # Update-ModuleProject -NestedModule $NestedModule
+    # Import-Module $BaseModuleName -Force
 }

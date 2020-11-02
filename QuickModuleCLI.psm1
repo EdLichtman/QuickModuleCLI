@@ -1,7 +1,7 @@
 . "$PSScriptRoot\Private\Variables.ps1"
 . "$PSScriptRoot\Private\Environment.ps1"
 . "$PSScriptRoot\Private\ArgumentCompleters.ps1"
-. "$PSScriptRoot\Private\ArgumentTranformations.ps1"
+. "$PSScriptRoot\Private\ArgumentTransformations.ps1"
 . "$PSScriptRoot\Private\Validators.ps1"
 
 $helperFunctions = Get-ChildItem "$PSScriptRoot\Public" -Filter "*.ps1"

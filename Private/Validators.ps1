@@ -1,5 +1,7 @@
 using namespace System.Management.Automation;
 
+. "$PSScriptRoot\Validators.Exceptions.ps1"
+
 class ValidateModuleProjectExistsAttribute : ValidateArgumentsAttribute 
 {
     [void]  Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics)
@@ -8,11 +10,11 @@ class ValidateModuleProjectExistsAttribute : ValidateArgumentsAttribute
 
         $Choices = Get-ValidModuleProjectNames
         if (!$Choices) {
-            throw [ItemNotFoundException]'No viable Modules. Please create one with New-ModuleProject!'
+            throw (New-Object ModuleProjectDoesNotExistException 'No viable Modules. Please create one with New-ModuleProject!')
         }
     
         if (!($moduleProject -in ($Choices))) {
-            throw [ArgumentException] "Parameter must be one of the following choices: $Choices"
+            throw (New-Object ModuleProjectDoesNotExistException "Parameter must be one of the following choices: $Choices")
         }
     }
 }
@@ -25,7 +27,7 @@ class ValidateModuleProjectDoesNotExistAttribute : ValidateArgumentsAttribute
 
         $Choices = Get-ValidModuleProjectNames
         if ($Choices -and ($moduleProject -in ($Choices))) {
-            throw [ArgumentException] "Parameter must not be one of the following choices: $Choices"
+            throw (New-Object ModuleProjectExistsException "Parameter must not be one of the following choices: $Choices")
         }
     }
 }
@@ -37,7 +39,7 @@ class ValidateModuleDoesNotExistAttribute : ValidateArgumentsAttribute
         $moduleProject = $arguments
 
         if (Get-Module $moduleProject) {
-            throw [ArgumentException] "Module already exists by the name '$moduleProject'"
+            throw (New-Object ModuleExistsException "Module already exists by the name '$moduleProject'")
         }
     }
 }
@@ -70,7 +72,7 @@ function Assert-CommandExistsInModule {
     )
 
     if (!(Test-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName)) {
-        throw [ItemNotFoundException]"'$CommandName' does not exist as a command in $ModuleProject!"
+        throw (New-Object ModuleCommandDoesNotExistException "'$CommandName' does not exist as a command in $ModuleProject!")
     }
 }
 
@@ -96,7 +98,7 @@ class ValidateModuleCommandExistsAttribute : ValidateArgumentsAttribute
            }
         }
 
-        throw [ItemNotFoundException]"'$CommandName' does not exist as a command in any ModuleProject!"
+        throw (New-Object ModuleCommandDoesNotExistException "'$CommandName' does not exist as a command in any ModuleProject!")
     }
 }
 
@@ -108,6 +110,7 @@ function Test-CommandExists {
     Catch {return $false;}
     Finally {$ErrorActionPreference=$oldPreference}
 }
+
 class ValidateCommandExistsAttribute : ValidateArgumentsAttribute 
 {
     [void] Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics) 
@@ -122,7 +125,7 @@ class ValidateCommandExistsAttribute : ValidateArgumentsAttribute
         }
 
         if (!(Test-CommandExists -CommandName $CommandName)) {
-            throw [ArgumentException]"'$CommandName' does not exist"
+            throw (New-Object CommandDoesNotExistException "'$CommandName' does not exist")
         }
     }
 }
@@ -142,7 +145,7 @@ class ValidateModuleCommandDoesNotExistAttribute : ValidateArgumentsAttribute
             $AliasExists = ($Aliases | Where-Object { $_.BaseName -eq $CommandName})
             
             if ($FunctionExists -or $AliasExists) {
-                throw [ItemNotFoundException]"'$CommandName' already exists as a command in '$ModuleProject'!"
+                throw (New-Object ModuleCommandExistsException "'$CommandName' already exists as a command in '$ModuleProject'!")
             }
         }
     }
@@ -159,7 +162,7 @@ class ValidateParameterStartsWithApprovedVerbAttribute : ValidateArgumentsAttrib
             $chosenVerb = $commandName.Split('-')[0]
             $ApprovedVerbs = Get-ApprovedVerbs;
             if (!$ApprovedVerbs.Contains($chosenVerb)) {
-                throw [System.ArgumentException] "$chosenVerb is not a common accepted verb. Please find an appropriate verb by using the command 'Get-Verb'." 
+                throw (New-Object ParameterStartsWithUnapprovedVerbException "$chosenVerb is not a common accepted verb. Please find an appropriate verb by using the command 'Get-Verb'.")
             }
         }
     }

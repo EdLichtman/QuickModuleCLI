@@ -1,31 +1,36 @@
 # .ExternalHelp ..\AutoDocs\ExternalHelp\QuickModuleCLI-Help.xml
 function Add-ModuleFunction {
-    [CmdletBinding()]
+    [CmdletBinding(
+        SupportsShouldProcess=$True
+    )]
     param(
         [Parameter(Mandatory=$true)]
         [ValidateModuleProjectExists()]
-        [ArgumentCompleter([ModuleProjectArgument])]
         [string] $ModuleProject,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
+        [ValidateModuleCommandDoesNotExist()]
         [ValidateParameterStartsWithApprovedVerb()]
         [string] $FunctionName,
 
+        [Parameter(Mandatory=$false)]
         [SemicolonCreatesLineBreakTransformation()]
         [string] 
         $FunctionText
     )
 
     New-ModuleProjectFunction -ModuleProject $ModuleProject -CommandName $FunctionName -Text $FunctionText
+
     $FunctionLocation = Get-ModuleProjectFunctionPath -ModuleProject $ModuleProject -CommandName $FunctionName
-    if ([String]::IsNullOrWhiteSpace($newFunctionText)) {
-        powershell_ise.exe $FunctionLocation
-        Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
-        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+    if ([String]::IsNullOrWhiteSpace($FunctionText)) {
+        Open-PowershellEditor -Path $FunctionLocation
+        Wait-ForKeyPress
     }
 
     #Update-ModuleProject -NestedModule $NestedModule
     #Update-ModuleProjectCLI
     #Import-Module $BaseModuleName -Force
 }
+Register-ArgumentCompleter -CommandName Add-ModuleFunction -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Add-ModuleFunction -ParameterName FunctionName -ScriptBlock (Get-Command Get-ApprovedVerbsArgumentCompleter).ScriptBlock

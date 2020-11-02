@@ -37,7 +37,7 @@ function Get-ValidModuleProjectNames {
     ForEach-Object {
         $ProjectNames += "$($_.Name)"
     };
-    return , $ProjectNames
+    return $ProjectNames
 }
 
 <#FULLY TESTED#>
@@ -63,7 +63,7 @@ function Get-ModuleProjectFunctions {
     if (!(Test-Path $FunctionsFolder)) {
         throw [ItemNotFoundException] "Module does not exist by the name '$ModuleProject'"
     }
-    return , @(Get-ChildItem ($FunctionsFolder))
+    return @(Get-ChildItem ($FunctionsFolder))
 }
 
 <#FULLY TESTED#>
@@ -74,7 +74,7 @@ function Get-ModuleProjectFunctionNames {
         [String]$ModuleProject
         )
     $Functions = Get-ModuleProjectFunctions -ModuleProject $ModuleProject
-    return , @($Functions | ForEach-Object { "$($_.BaseName)" })
+    return $Functions.BaseName
 }
 
 <#FULLY TESTED#>
@@ -87,6 +87,7 @@ function Get-ModuleProjectFunctionPath {
     return "$FunctionsLocation\$CommandName.ps1"
 }
 
+<#FULLY TESTED#>
 function New-ModuleProjectFunction {
     param(
         [Parameter(Mandatory=$true)][String]$ModuleProject,
@@ -97,7 +98,7 @@ function New-ModuleProjectFunction {
         
     $ModuleProjectPath = Get-ModuleProjectLocation -ModuleProject $ModuleProject
     if (!(Test-Path ($ModuleProjectPath))) {
-        throw [System.ArgumentException] "Module already exists by the name '$moduleProject'"
+        throw [System.ArgumentException] "Module does not exist by the name '$moduleProject'"
     }
 
     $ModuleFunctionPath = Get-ModuleProjectFunctionPath -ModuleProject $ModuleProject -CommandName $CommandName
@@ -140,7 +141,7 @@ function Get-ModuleProjectAliases {
     if (!(Test-Path $AliasesFolder)) {
         throw [ItemNotFoundException] "Module does not exist by the name '$ModuleProject'"
     }
-    return , @(Get-ChildItem ($AliasesFolder))
+    return @(Get-ChildItem ($AliasesFolder))
 }
 
 <#FULLY TESTED#>
@@ -150,7 +151,7 @@ function Get-ModuleProjectAliasNames {
         [String]$ModuleProject
         )
     $Aliases = Get-ModuleProjectAliases -ModuleProject $ModuleProject
-    return , @($Aliases | ForEach-Object { "$($_.BaseName)" })
+    return $Aliases.BaseName
 }
 
 <#FULLY TESTED#>
@@ -164,10 +165,47 @@ function Get-ModuleProjectAliasPath {
 }
 
 <#FULLY TESTED#>
+function New-ModuleProjectAlias {
+    [CmdletBinding(SupportsShouldProcess=$True)]
+    param(
+        [Parameter(Mandatory=$true)][String]$ModuleProject,
+        [Parameter(Mandatory=$true)][String]$Alias,
+        [Parameter(Mandatory=$true)][String]$CommandName
+        )
+        
+    $ModuleProjectPath = Get-ModuleProjectLocation -ModuleProject $ModuleProject
+    if (!(Test-Path ($ModuleProjectPath))) {
+        throw [System.ArgumentException] "Module does not exist by the name '$ModuleProject'"
+    }
+
+    $ModuleAliasPath = Get-ModuleProjectAliasPath -ModuleProject $ModuleProject -CommandName $Alias
+    if (Test-Path ($ModuleAliasPath)) {
+        throw [System.ArgumentException] "Alias $Alias already exists in $ModuleProject"
+    }
+
+    New-Item -Path $ModuleAliasPath -ItemType File
+    $aliasContent = "Set-Alias $Alias $CommandName"
+    
+    Add-Content -Path $ModuleAliasPath -Value $aliasContent
+}
+
+<#FULLY TESTED#>
 function Get-ApprovedVerbs {
     $ApprovedVerbs = [HashSet[String]]::new();
     (Get-Verb | Select-Object -Property Verb) `
     | ForEach-Object {$ApprovedVerbs.Add($_.Verb)} | Out-Null;
 
     return $ApprovedVerbs;
+}
+
+<#TODO: MOVE THIS TO NEW PRIVATE FUNCTIONS FILE#>
+function Wait-ForKeyPress {
+    Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
+    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+}
+
+<#TODO: MOVE THIS TO NEW PRIVATE FUNCTIONS FILE#>
+function Open-PowershellEditor{ 
+    param([String]$Path)
+    powershell.exe $Path
 }

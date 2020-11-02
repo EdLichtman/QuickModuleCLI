@@ -4,22 +4,24 @@ function Copy-ModuleCommand {
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [ValidateModuleProjectExists()]
-        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        [ArgumentCompleter([ModuleProjectArgument])]
         [String]$SourceNestedModule,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [ValidateModuleCommandExists()]
+        [ArgumentCompleter([CommandFromModuleArgument])]
         [String]$SourceCommandName,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleProjectDoesNotExist()]
+        [ValidateModuleProjectExists()]
+        [ArgumentCompleter([ModuleProjectArgument])]
         [String]$DestinationNestedModule,
 
         [Parameter(Mandatory=$true)][String]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleCommandDoesNotExist()]
+        [ArgumentCompleter([ApprovedVerbsArgument])]
         $DestinationCommandName
     )
     Assert-CommandExistsInModule -ModuleProject $SourceNestedModule -CommandName $SourceCommandName

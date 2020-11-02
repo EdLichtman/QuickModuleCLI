@@ -11,9 +11,8 @@ describe 'Argument Transformations' {
 
         . "$PSScriptRoot\Environment.ps1"
         . "$PSScriptRoot\ArgumentCompleters.ps1"
-        . "$PSScriptRoot\ArgumentTranformations.ps1"
+        . "$PSScriptRoot\ArgumentTransformations.ps1"
         . "$PSScriptRoot\Validators.ps1"
-        . "$PSScriptRoot\PrivateFunctions.ps1"
 
         $ViableModule = "Viable"
         $NonviableModule = "Nonviable"
