@@ -243,6 +243,70 @@ Describe 'Environment' {
         }
     }
 
+    describe 'Get-ModuleProjectCommand' {
+        it 'should return function' {
+            $FunctionName = 'Get-Test'
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName
+
+            $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ViableModule -CommandName $FunctionName
+
+            $ExpectedCommandType = "Function"
+            $ExpectedCommandPath = (Get-Item (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $FunctionName)).FullName
+
+            $CommandType | Should -Be $ExpectedCommandType
+            $Command.FullName | Should -Be $ExpectedCommandPath
+        }
+
+        it 'should return alias' {
+            $AliasName = 'Test'
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestAlias -ModuleName $ViableModule -AliasName $AliasName
+
+            $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ViableModule -CommandName $AliasName
+
+            $ExpectedCommandType = "Alias"
+            $ExpectedCommandPath = (Get-Item (Get-ModuleProjectAliasPath -ModuleProject $ViableModule -CommandName $AliasName)).FullName
+
+            $CommandType | Should -Be $ExpectedCommandType
+            $Command.FullName | Should -Be $ExpectedCommandPath
+        }
+    }
+
+    
+    describe 'Get-ModuleProjectCommandDefinition' {
+        it 'should return function definition' {
+            $FunctionName = 'Get-Test'
+            $FunctionText = @"
+`$Foo = 'Hello World'
+Write-Output `$Foo
+"@
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText $FunctionText
+
+            $CommandType, $CommandDefinition = Get-ModuleProjectCommandDefinition -ModuleProject $ViableModule -CommandName $FunctionName
+
+            $ExpectedCommandType = "Function"
+
+            $CommandType | Should -Be $ExpectedCommandType
+            $CommandDefinition | Should -Be $FunctionText
+        }
+
+        it 'should return alias definition' {
+            $AliasName = 'GetAliasDefinitionTest'
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestAlias -ModuleName $ViableModule -AliasName $AliasName
+
+            $CommandType, $CommandDefinition = Get-ModuleProjectCommandDefinition -ModuleProject $ViableModule -CommandName $AliasName
+
+            $ExpectedCommandType = "Alias"
+            $ExpectedCommandDefinition = "Test-$AliasName"
+
+            $CommandType | Should -Be $ExpectedCommandType
+            $CommandDefinition | Should -Be $ExpectedCommandDefinition
+        }
+    }
+
     describe 'New-ModuleProjectFunction' {
         It 'Throws error if module does not exist' {
             {New-ModuleProjectFunction -ModuleProject $ViableModule -CommandName 'Write-Foo'} | Should -Throw -ExceptionType $ArgumentException

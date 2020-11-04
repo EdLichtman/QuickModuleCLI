@@ -41,7 +41,6 @@ function Add-ModuleAlias {
         [Parameter(Mandatory=$true)][string]
         [ValidateNotNullOrEmpty()]
         [ValidateModuleProjectExists()]
-        [ArgumentCompleter([ModuleProjectArgument])]
         #Specifies the name of the NestedModule in which this function belongs.
         $ModuleProject,
 
@@ -65,3 +64,4 @@ function Add-ModuleAlias {
     # Update-ModuleProject -NestedModule $NestedModule
     # Import-Module $BaseModuleName -Force
 }
+Register-ArgumentCompleter -CommandName Add-ModuleAlias -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

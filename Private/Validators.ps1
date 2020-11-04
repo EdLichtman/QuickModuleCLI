@@ -151,19 +151,30 @@ class ValidateModuleCommandDoesNotExistAttribute : ValidateArgumentsAttribute
     }
 }
 
+function Test-CommandStartsWithApprovedVerb {
+    param([String]$CommandName)
+    $chosenVerb = $commandName.Split('-')[0]
+    $ApprovedVerbs = Get-ApprovedVerbs;
+    return ($ApprovedVerbs.Contains($chosenVerb));
+}
+
+function Assert-CommandStartsWithApprovedVerb {
+    param([String]$Command) 
+    $chosenVerb = $Command.Split('-')[0]
+    $ApprovedVerbs = Get-ApprovedVerbs;
+    if (!$ApprovedVerbs.Contains($chosenVerb)) {
+        throw (New-Object ParameterStartsWithUnapprovedVerbException "$chosenVerb is not a common accepted verb. Please find an appropriate verb by using the command 'Get-Verb'.")
+    }
+}
 # https://powershellexplained.com/2017-02-20-Powershell-creating-parameter-validators-and-transforms/
 class ValidateParameterStartsWithApprovedVerbAttribute : ValidateArgumentsAttribute 
 {
     [void]  Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics)
     {
-        $commandName = $arguments
-        if(![string]::IsNullOrWhiteSpace($commandName))
+        $Command = $arguments
+        if(![string]::IsNullOrWhiteSpace($Command))
         {
-            $chosenVerb = $commandName.Split('-')[0]
-            $ApprovedVerbs = Get-ApprovedVerbs;
-            if (!$ApprovedVerbs.Contains($chosenVerb)) {
-                throw (New-Object ParameterStartsWithUnapprovedVerbException "$chosenVerb is not a common accepted verb. Please find an appropriate verb by using the command 'Get-Verb'.")
-            }
+            Assert-CommandStartsWithApprovedVerb -Command $Command
         }
     }
 }

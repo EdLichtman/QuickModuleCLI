@@ -189,6 +189,47 @@ function New-ModuleProjectAlias {
     Add-Content -Path $ModuleAliasPath -Value $aliasContent
 }
 
+<#SOME TESTING DONE#>
+function Get-ModuleProjectCommand {
+    param(
+        [Parameter(Mandatory=$true)][String]$ModuleProject,
+        [Parameter(Mandatory=$true)][String]$CommandName
+        )
+    $FunctionPath = Get-ModuleProjectFunctionPath -ModuleProject $ModuleProject -CommandName $CommandName
+    $AliasPath = Get-ModuleProjectAliasPath -ModuleProject $ModuleProject -CommandName $CommandName
+
+    if (Test-Path $FunctionPath) {
+        return ('Function', (Get-Item $FunctionPath))
+    }
+    if (Test-Path $AliasPath) {
+        return ('Alias', (Get-Item $AliasPath))
+    }
+    throw [System.InvalidOperationException] "No command exists named $CommandName in $ModuleProject!"
+}
+
+<#SOME TESTING DONE#>
+function Get-ModuleProjectCommandDefinition {
+    param(
+        [Parameter(Mandatory=$true)][String]$ModuleProject,
+        [Parameter(Mandatory=$true)][String]$CommandName
+    )
+    $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
+
+    . "$($Command.FullName)"
+    $CommandName = $Command.BaseName
+    $CommandDefinition = ""
+    if ($CommandType -EQ 'Function') {
+        # Using AST because -ExpandProperty Definition adds a /r/n to the beginning and end of the line 
+        # and instead of hoping all powershell versions work the same way, this is safer than manipulating 
+        # any text.
+        $CommandDefinition = (Get-ChildItem function:\$CommandName).ScriptBlock.Ast.Body.EndBlock.ToString()
+    } elseif($CommandType -EQ 'Alias') {
+        $CommandDefinition = (Get-ChildItem alias:\$CommandName).Definition
+    }
+    
+    return ($CommandType, $CommandDefinition)
+}
+
 <#FULLY TESTED#>
 function Get-ApprovedVerbs {
     $ApprovedVerbs = [HashSet[String]]::new();

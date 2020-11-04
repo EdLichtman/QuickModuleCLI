@@ -15,12 +15,15 @@ describe 'Add-ModuleAlias' {
         . "$PSScriptRoot\..\Private\Validators.ps1"
 
         . "$PSScriptRoot\Add-ModuleFunction.ps1"
+        . "$PSScriptRoot\Edit-ModuleCommand.ps1"
 
         $ViableModule = "Viable"
         Remove-Sandbox
     }
     BeforeEach {
         New-Sandbox
+
+        Mock Edit-ModuleCommand
     }
     AfterEach {
         Remove-Sandbox

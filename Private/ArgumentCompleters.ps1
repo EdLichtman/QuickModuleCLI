@@ -3,21 +3,26 @@ using namespace System.Collections.Generic
 using namespace System.Management.Automation 
 using namespace System.Management.Automation.Language
 
-
 function Get-ModuleProjectArgumentCompleter {
-    param(
-        [String]$WordToComplete
+    param (
+        [string]      $CommandName ,
+        [string]      $ParameterName,
+        [string]      $WordToComplete,
+        [CommandAst]  $CommandAst,
+        [IDictionary] $FakeBoundParameters
     )
     $Choices = [List[String]]::new()
     Get-ValidModuleProjectNames | 
         Where-Object {$_ -like "$WordToComplete*"} | 
         ForEach-Object { $Choices.Add("$_") }
     if (!$Choices) {
-        $Choices.Add('[None]')
+        throw [InvalidOperationException] 'No Modules Exist!'
+    } else {
+        return @($Choices)
     }
-
-    return @($Choices)
 }
+
+#REMOVE THIS -- INSTEAD USE GET-ARGUMENTCOMPLETER FOR TESTABILITY
 #https://jamesone111.wordpress.com/2019/09/23/the-classy-way-to-complete-and-validate-powershell-parameters/
 class ModuleProjectArgument : IArgumentCompleter {
     [IEnumerable[CompletionResult]] CompleteArgument(
@@ -36,7 +41,13 @@ class ModuleProjectArgument : IArgumentCompleter {
 }
 
 function Get-ApprovedVerbsArgumentCompleter {
-    param ($WordToComplete)
+    param (
+        [string]      $CommandName ,
+        [string]      $ParameterName,
+        [string]      $WordToComplete,
+        [CommandAst]  $CommandAst,
+        [IDictionary] $FakeBoundParameters
+    )
     $Choices = [List[String]]::new()
     Get-ApprovedVerbs | 
         Where-Object {$_ -like "$WordToComplete*"} | 
@@ -44,6 +55,7 @@ function Get-ApprovedVerbsArgumentCompleter {
     return $Choices
 }
 
+#REMOVE THIS -- INSTEAD USE GET-ARGUMENTCOMPLETER FOR TESTABILITY
 class ApprovedVerbsArgument : IArgumentCompleter {
     [IEnumerable[CompletionResult]] CompleteArgument(
         [string]      $CommandName ,
@@ -62,10 +74,15 @@ class ApprovedVerbsArgument : IArgumentCompleter {
 
 function Get-CommandFromModuleArgumentCompleter {
     param (
-        [string] $ModuleProject,
-        [string] $WordToComplete
-        )
+        [string]      $CommandName ,
+        [string]      $ParameterName,
+        [string]      $WordToComplete,
+        [CommandAst]  $CommandAst,
+        [IDictionary] $FakeBoundParameters
+    )
 
+    if($FakeBoundParameters.Contains('ModuleProject')) {
+        $ModuleProject = $FakeBoundParameters['ModuleProject']
         $Choices = @()
         $ModuleProjects = Get-ValidModuleProjectNames 
         if ($ModuleProject -in $ModuleProjects) {
@@ -74,17 +91,19 @@ function Get-CommandFromModuleArgumentCompleter {
 
             [Array]$Aliases = Get-ModuleProjectAliasNames -ModuleProject $ModuleProject | Where-Object {$_ -like "$WordToComplete*"}
             if ($Aliases) { $Choices += $Aliases }
+
+            if (!$Choices) {
+                throw [InvalidOperationException] 'No Matching Commands Exist in Module!'
+            } else {
+                return @($Choices)
+            }
         } else {
-            $Choices = @("[Invalid]")
+            throw [InvalidOperationException] 'No Modules Exist!'
         }
-
-        if (!$Choices) {
-            $Choices = @('[None]')
-        }
-
-        return @($Choices)
+    }  
 }
 
+#REMOVE THIS -- INSTEAD USE GET-ARGUMENTCOMPLETER FOR TESTABILITY
 class CommandFromModuleArgument : IArgumentCompleter {
     [IEnumerable[CompletionResult]] CompleteArgument(
         [string]      $CommandName ,

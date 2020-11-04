@@ -14,6 +14,7 @@ describe 'Add-ModuleFunction' {
         . "$PSScriptRoot\..\Private\ArgumentTransformations.ps1"
         . "$PSScriptRoot\..\Private\Validators.ps1"
         
+        . "$PSScriptRoot\Edit-ModuleCommand.ps1"
         . "$PSScriptRoot\Add-ModuleFunction.ps1"
 
         $ViableModule = "Viable"
@@ -62,10 +63,9 @@ describe 'Add-ModuleFunction' {
         Assert-MockCalled New-ModuleProjectFunction -Times 1
     }
 
-    it 'Attempts to open the powershell editor if no text is entered' {
+    it 'attempts to edit-modulecommand if functionText is not provided' {
         Mock New-ModuleProjectFunction
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
+        Mock Edit-ModuleCommand
 
         Mock Get-ValidModuleProjectNames { return @($ViableModule) }
         Mock Get-ModuleProjectFunctions { return @() }
@@ -73,13 +73,12 @@ describe 'Add-ModuleFunction' {
 
         Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -WhatIf
         
-        Assert-MockCalled Open-PowershellEditor -Times 1
+        Assert-MockCalled Edit-ModuleCommand -Times 1
     }
 
-    it 'does not attempts to open the powershell editor if text is entered' {
+    it 'does not edit-modulecommand if functionText is provided' {
         Mock New-ModuleProjectFunction
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
+        Mock Edit-ModuleCommand
 
         Mock Get-ValidModuleProjectNames { return @($ViableModule) }
         Mock Get-ModuleProjectFunctions { return @() }
@@ -87,36 +86,7 @@ describe 'Add-ModuleFunction' {
 
         Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -FunctionText 'Write-Output "Hello World"' -WhatIf
 
-        Assert-MockCalled Open-PowershellEditor -Times 0
-    }
-
-    it 'waits for keypress input if no text is entered' {
-        Mock New-ModuleProjectFunction
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
-
-        Mock Get-ValidModuleProjectNames { return @($ViableModule) }
-        Mock Get-ModuleProjectFunctions { return @() }
-        Mock Get-ModuleProjectAliases { return @() }
-
-        Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -WhatIf
-        
-        Assert-MockCalled Wait-ForKeyPress -Times 1
-    }
-
-    it 'does not wait for keypress input if text is entered' {
-        Mock New-ModuleProjectFunction
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
-
-        Mock Get-ValidModuleProjectNames { return @($ViableModule) }
-        Mock Get-ModuleProjectFunctions { return @() }
-        Mock Get-ModuleProjectAliases { return @() }
-
-        Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -FunctionText 'Write-Output "Hello World"' -WhatIf
-    
-
-        Assert-MockCalled Wait-ForKeyPress -Times 0
+        Assert-MockCalled Edit-ModuleCommand -Times 0
     }
 
     it 'splits strings into new lines on semicolon' {
@@ -136,15 +106,20 @@ describe 'Add-ModuleFunction' {
         Assert-MockCalled Get-SemicolonCreatesLineBreakTransformation -Times 1
     }
 
-    it 'auto-suggests valid verb arguments for FunctionName' {
-        $Arguments = (Get-ArgumentCompleter -CommandName Add-ModuleFunction -ParameterName FunctionName)
-        
-        $Arguments.Definition.Ast.Name | Should -Be Get-ApprovedVerbsArgumentCompleter
-    }
+    describe 'auto-completion for input' {
+        it 'auto-suggests valid Module Arguments for Module' {
+            Mock Get-ValidModuleProjectNames
+            $Arguments = (Get-ArgumentCompleter -CommandName Add-ModuleFunction -ParameterName ModuleProject)
+            
+            try {$Arguments.Definition.Invoke()} catch {}
+    
+            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
+        }
 
-    it 'auto-suggests valid Module Arguments for Module' {
-        $Arguments = (Get-ArgumentCompleter -CommandName Add-ModuleFunction -ParameterName ModuleProject)
-        
-        $Arguments.Definition.Ast.Name | Should -Be Get-ModuleProjectArgumentCompleter
+        it 'auto-suggests valid verb arguments for FunctionName' {
+            $Arguments = (Get-ArgumentCompleter -CommandName Add-ModuleFunction -ParameterName FunctionName)
+            
+            'Get-' -in ($Arguments.Definition.Invoke()) | Should -BeTrue
+        }
     }
 }

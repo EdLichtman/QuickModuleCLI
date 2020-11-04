@@ -22,10 +22,8 @@ function Add-ModuleFunction {
 
     New-ModuleProjectFunction -ModuleProject $ModuleProject -CommandName $FunctionName -Text $FunctionText
 
-    $FunctionLocation = Get-ModuleProjectFunctionPath -ModuleProject $ModuleProject -CommandName $FunctionName
     if ([String]::IsNullOrWhiteSpace($FunctionText)) {
-        Open-PowershellEditor -Path $FunctionLocation
-        Wait-ForKeyPress
+        Edit-ModuleCommand -ModuleProject $ModuleProject -CommandName $FunctionName
     }
 
     #Update-ModuleProject -NestedModule $NestedModule

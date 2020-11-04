@@ -118,7 +118,8 @@ function Add-TestModule {
 function Add-TestFunction {
     param(
         [String] $ModuleName,
-        [String] $FunctionName
+        [String] $FunctionName,
+        [String] $FunctionText
     )
 
     $TestModuleDirectory = "$(Get-SandboxNestedModulesFolder)\$ModuleName"
@@ -133,7 +134,11 @@ function Add-TestFunction {
 
     $FunctionPath = "$TestFunctionsDirectory\$FunctionName.ps1"
     New-Item $FunctionPath -ItemType File -Force;
-    Add-Content $FunctionPath "function $functionName {}"
+    Add-Content $FunctionPath @"
+function $functionName {
+    $FunctionText
+}
+"@
 }
 
 function Add-TestAlias {

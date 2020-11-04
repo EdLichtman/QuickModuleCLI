@@ -56,4 +56,15 @@ describe 'Add-ModuleAlias' {
 
         Assert-MockCalled New-ModuleProjectAlias -Times 1
     }
+
+    describe 'auto-completion for input' {
+        it 'auto-suggests valid Module Arguments for Module' {
+            Mock Get-ValidModuleProjectNames
+            $Arguments = (Get-ArgumentCompleter -CommandName Add-ModuleAlias -ParameterName ModuleProject)
+            
+            try {$Arguments.Definition.Invoke()} catch {}
+    
+            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
+        }
+    }
 }

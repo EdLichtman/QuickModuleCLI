@@ -15,19 +15,29 @@ describe 'Add-ModuleFunction' {
         . "$PSScriptRoot\..\Private\Validators.ps1"
         
         . "$PSScriptRoot\Add-ModuleFunction.ps1"
+        . "$PSScriptRoot\Add-ModuleAlias.ps1"
+        . "$PSScriptRoot\Edit-ModuleCommand.ps1"
+        . "$PSScriptRoot\Copy-ModuleCommand.ps1"
 
         $ViableModule = "Viable"
+        $ParameterBindingException = 'System.Management.Automation.ParameterBindingException'
+    }
+
+    BeforeEach {    
+        Mock New-ModuleProjectFunction
+        Mock New-ModuleProjectAlias
+        Mock Edit-ModuleCommand
     }
 
     it 'throws error if module does not exist' {
-        throw [System.NotImplementedException]
         Mock Get-ValidModuleProjectNames { return @() }
-        $err = { Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Test' -FunctionText 'Write-Output "Hello"' -WhatIf } | Should -Throw -PassThru
+        $err = {  Copy-ModuleCommand -SourceModuleProject $ViableModule -SourceCommandName 'Write-Test' -DestinationModuleProject $ViableModule -DestinationCommandName 'Write-Test2' } | Should -Throw -PassThru
+
+        $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
         $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ModuleProjectDoesNotExistException'
     }
 
     it 'throws error if function already exists' {
-        throw [System.NotImplementedException]
         $Function = 'Write-Foo'
         $MockFunctionFile = Get-MockFileInfo -BaseName $Function
 
@@ -35,113 +45,108 @@ describe 'Add-ModuleFunction' {
         Mock Get-ModuleProjectFunctions { return @($MockFunctionFile) }
         Mock Get-ModuleProjectAliases { return @()}
 
-        $err = { Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $Function -FunctionText 'Write-Output "Hello"' -WhatIf } | Should -Throw -PassThru
+        $err = {  Copy-ModuleCommand -SourceModuleProject $ViableModule -SourceCommandName $Function -DestinationModuleProject $ViableModule -DestinationCommandName $Function } | Should -Throw -PassThru
+
+        $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
         $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ModuleCommandExistsException'
     }
 
-    it 'throws error if function does not use an approved verb' {
-        throw [System.NotImplementedException]
-        $Function = 'Foo-Bar'
+    it 'throws error if SourceModule does not contain the SourceCommand that exists' {
+        $Function = 'Write-Foo'
+        $MockFunctionFile = Get-MockFileInfo -BaseName $Function
+        Mock Get-ValidModuleProjectNames { return @($ViableModule, 'Test') }
+        Mock Get-ModuleProjectFunctions { return @($MockFunctionFile) } -ParameterFilter {$ModuleProject -eq 'Test' }
+        Mock Get-ModuleProjectFunctions { return @()}
+        Mock Get-ModuleProjectAliases { return @()}
 
-        Mock Get-ValidModuleProjectNames { return ($ViableModule) }
-        Mock Get-ModuleProjectFunctions { return @() }
-        Mock Get-ModuleProjectAliases { return @() }
+        $err = { Copy-ModuleCommand -SourceModuleProject $ViableModule -SourceCommandName $Function -DestinationModuleProject $ViableModule -DestinationCommandName 'Write-Test2' } | Should -Throw -PassThru
 
-        $err = { Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $Function -FunctionText 'Write-Output "Hello"' -WhatIf } | Should -Throw -PassThru
-        $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ParameterStartsWithUnapprovedVerbException'
+        $err.Exception.GetType().BaseType | Should -Not -Be $ParameterBindingException
+        $err.Exception.GetType().Name | Should -Be 'ModuleCommandDoesNotExistException'
     }
 
-    it 'Attempts to create a new ModuleProjectFunction' {
-        throw [System.NotImplementedException]
-        Mock New-ModuleProjectFunction
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
+    it 'throws error if attempting to copy a function using a new name without the approved verb' {
+        $Function = 'Write-Foo'
+        $MockFunctionFile = Get-MockFileInfo -BaseName $Function
+        Mock Get-ValidModuleProjectNames { return @($ViableModule, 'Test') }
 
-        Mock Get-ValidModuleProjectNames { return ($ViableModule) }
-        Mock Get-ModuleProjectFunctions { return @() }
-        Mock Get-ModuleProjectAliases { return @() }
+        Mock Get-ModuleProjectFunctions { return @($MockFunctionFile) } -ParameterFilter {$ModuleProject -eq $ViableModule }.GetNewClosure()
+        Mock Get-ModuleProjectFunctions { return @()}
+        Mock Get-ModuleProjectAliases { return @()}
 
-        Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -FunctionText 'Write-Output "Hello"' -WhatIf
+        Mock Get-ModuleProjectCommandDefinition {return ('Function', $MockFunctionFile)}
 
-        Assert-MockCalled New-ModuleProjectFunction -Times 1
+        $err = { Copy-ModuleCommand -SourceModuleProject $ViableModule -SourceCommandName $Function -DestinationModuleProject $ViableModule -DestinationCommandName 'Foo-Test2' } | Should -Throw -PassThru
+
+        $err.Exception.GetType().BaseType | Should -Not -Be $ParameterBindingException
+        $err.Exception.GetType().Name | Should -Be 'ParameterStartsWithUnapprovedVerbException'
     }
 
-    it 'Attempts to open the powershell editor if no text is entered' {
-        throw [System.NotImplementedException]
-        Mock New-ModuleProjectFunction
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
 
-        Mock Get-ValidModuleProjectNames { return @($ViableModule) }
-        Mock Get-ModuleProjectFunctions { return @() }
-        Mock Get-ModuleProjectAliases { return @() }
-
-        Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -WhatIf
+    it 'Attempts to Edit-ModuleCommand if a function is cloned' {
+        $Function = 'Write-Foo'
+        $MockFunctionFile = Get-MockFileInfo -BaseName $Function
+        Mock Get-ValidModuleProjectNames { return @($ViableModule, 'Test') }
         
-        Assert-MockCalled Open-PowershellEditor -Times 1
-    }
+        Mock Get-ModuleProjectFunctions { return @($MockFunctionFile) } -ParameterFilter {$ModuleProject -eq $ViableModule}.GetNewClosure()
+        Mock Get-ModuleProjectFunctions { return @()}
+        Mock Get-ModuleProjectAliases { return @()}
+        Mock Get-ModuleProjectCommandDefinition {return ('Function', $MockFunctionFile)}
 
-    it 'does not attempts to open the powershell editor if text is entered' {
-        throw [System.NotImplementedException]
-        Mock New-ModuleProjectFunction
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
-
-        Mock Get-ValidModuleProjectNames { return @($ViableModule) }
-        Mock Get-ModuleProjectFunctions { return @() }
-        Mock Get-ModuleProjectAliases { return @() }
-
-        Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -FunctionText 'Write-Output "Hello World"' -WhatIf
-
-        Assert-MockCalled Open-PowershellEditor -Times 0
-    }
-
-    it 'waits for keypress input if no text is entered' {
-        throw [System.NotImplementedException]
-        Mock New-ModuleProjectFunction
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
-
-        Mock Get-ValidModuleProjectNames { return @($ViableModule) }
-        Mock Get-ModuleProjectFunctions { return @() }
-        Mock Get-ModuleProjectAliases { return @() }
-
-        Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -WhatIf
+        Copy-ModuleCommand -SourceModuleProject $ViableModule -SourceCommandName $Function -DestinationModuleProject $ViableModule -DestinationCommandName 'Write-Test2'
         
-        Assert-MockCalled Wait-ForKeyPress -Times 1
+        Assert-MockCalled Edit-ModuleCommand -Times 1
     }
 
-    it 'does not wait for keypress input if text is entered' {
-        throw [System.NotImplementedException]
-        Mock New-ModuleProjectFunction
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
+    it 'does not attempt to Edit-ModuleCommand if alias is cloned' {
+        $Alias = 'Foo'
+        $MockAliasFile = Get-MockFileInfo -BaseName $Alias
+        Mock Get-ValidModuleProjectNames { return @($ViableModule, 'Test') }
+        
+        Mock Get-ModuleProjectFunctions { return @()}
 
-        Mock Get-ValidModuleProjectNames { return @($ViableModule) }
-        Mock Get-ModuleProjectFunctions { return @() }
-        Mock Get-ModuleProjectAliases { return @() }
+        Mock Get-ModuleProjectAliases { return @($MockAliasFile) } -ParameterFilter {$ModuleProject -eq $ViableModule}.GetNewClosure()
+        Mock Get-ModuleProjectAliases { return @()}
+        
+        Mock Get-ModuleProjectCommandDefinition {return ('Alias', $MockAliasFile)}
 
-        Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -FunctionText 'Write-Output "Hello World"' -WhatIf
+        Copy-ModuleCommand -SourceModuleProject $ViableModule -SourceCommandName $Alias -DestinationModuleProject $ViableModule -DestinationCommandName 'Test2'
+        
+        Assert-MockCalled New-ModuleProjectAlias -Times 1
+        Assert-MockCalled Edit-ModuleCommand -Times 0
+    }
+
+    describe 'auto-completion for input' {
+        it 'auto-suggests valid Module Arguments for Source Module' {
+            Mock Get-ValidModuleProjectNames
+            $Arguments = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName SourceModuleProject)
+            
+            try {$Arguments.Definition.Invoke()} catch {}
     
+            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
+        }
 
-        Assert-MockCalled Wait-ForKeyPress -Times 0
-    }
+        it 'auto-suggests valid Module Command for SourceCommandName' {
+            $FakeBoundParameters = @{'ModuleProject'=$ViableModule}
+            Mock Get-ValidModuleProjectNames {return $ViableModule}
+            Mock Get-ModuleProjectFunctionNames
+            Mock Get-ModuleProjectAliasNames
 
-    it 'splits strings into new lines on semicolon' {
-        throw [System.NotImplementedException]
-        Mock New-ModuleProjectFunction
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
-        
-        #Mock for the sake of assertion, but you need to still return a value to work.
-        Mock Get-SemicolonCreatesLineBreakTransformation {param($inputData) return $inputData} 
+            $Arguments = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName SourceCommandName)
+            
+            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+    
+            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 1
+            Assert-MockCalled Get-ModuleProjectAliasNames -Times 1
+        }
 
-        Mock Get-ValidModuleProjectNames { return @($ViableModule) }
-        Mock Get-ModuleProjectFunctions { return @() }
-        Mock Get-ModuleProjectAliases { return @() }
-
-        Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -FunctionText 'Write-Output "Hello World"' -WhatIf
-
-        Assert-MockCalled Get-SemicolonCreatesLineBreakTransformation -Times 1
+        it 'auto-suggests valid Module Arguments for Destination Module' {
+            Mock Get-ValidModuleProjectNames
+            $Arguments = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName DestinationModuleProject)
+            
+            try {$Arguments.Definition.Invoke()} catch {}
+    
+            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
+        }
     }
 }

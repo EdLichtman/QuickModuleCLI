@@ -2,8 +2,8 @@ function Edit-ModuleCommand {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
-        [ValidateModuleProjectExists()]
-        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        #[ValidateModuleProjectExists()]
+        #[ArgumentCompleter({(Get-ModuleProjectChoices)})]
         [string]$ModuleProject,
         
         [Parameter(Mandatory=$true)]
@@ -12,18 +12,9 @@ function Edit-ModuleCommand {
     )
     Assert-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
 
-    $Function = Get-ModuleProjectFunctionPath -ModuleProject $ModuleProject -CommandName $CommandName
-    $Alias = Get-ModuleProjectAliasPath -ModuleProject $ModuleProject -CommandName $CommandName
-
-    if(Test-Path "$Function") {
-        . powershell_ise.exe "$Function" 
-    }
-    elseif(Test-Path "$Alias") {
-        . powershell_ise.exe "$Alias"
-    } 
-
-    Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
-    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+    $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
+    Open-PowershellEditor -Path $Command.FullName
+    Wait-ForKeyPress
 
     Import-Module $BaseModuleName -Force
 }

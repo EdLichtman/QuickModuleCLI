@@ -17,6 +17,8 @@ Describe 'ArgumentCompleters' {
 
         $ViableModule = "Viable"
         $NonviableModule = "Nonviable"
+
+        $InvalidOperationException = 'System.InvalidOperationException'
         Remove-Sandbox
     }
     BeforeEach {
@@ -51,17 +53,15 @@ Describe 'ArgumentCompleters' {
             $ExpectedArgument = @('Foo')
             Mock Get-ValidModuleProjectNames { return @($expectedArgument, 'Bar') }
             
-            $Arguments = Get-ModuleProjectArgumentCompleter 'F'
+            $Arguments = Get-ModuleProjectArgumentCompleter -WordToComplete 'F'
 
             $Arguments | Should -Be @($ExpectedArgument)
         }
 
-        It 'Should return [None] if no modules exist' {
+        It 'Should throw error if no modules exist' {
             Mock Get-ValidModuleProjectNames { return @() }
             
-            $Arguments = Get-ModuleProjectArgumentCompleter ''
-
-            $Arguments | Should -Be @('[None]')
+            {Get-ModuleProjectArgumentCompleter } | Should -Throw -ExceptionType $InvalidOperationException
         }
     }
 
@@ -70,7 +70,7 @@ Describe 'ArgumentCompleters' {
             $ApprovedVerbs = [HashSet[String]]::new()
             (Get-Verb) | Select-Object -Property Verb | ForEach-Object {$ApprovedVerbs.Add("$($_.Verb)")}
 
-            $Arguments = Get-ApprovedVerbsArgumentCompleter '' | ForEach-Object { 
+            $Arguments = Get-ApprovedVerbsArgumentCompleter | ForEach-Object { 
                 ($_ -replace '-', '')
             }
 
@@ -80,27 +80,34 @@ Describe 'ArgumentCompleters' {
         }
 
         It 'Ends each verb with dash' {
-            Get-ApprovedVerbsArgumentCompleter '' | ForEach-Object { 
+            Get-ApprovedVerbsArgumentCompleter | ForEach-Object { 
                 $_.EndsWith('-') | Should -Be $True
             }
         }
 
         It 'shows all words that match a pattern' {
-            Get-ApprovedVerbsArgumentCompleter 'g' | ForEach-Object {
+            Get-ApprovedVerbsArgumentCompleter -WordToComplete 'g' | ForEach-Object {
                 $_.StartsWith('G') | Should -Be $True
             }
         }
     }
 
     describe 'CommandFromModuleArgument' {
-        It 'Should return [None] if no commands exist' {
+        BeforeAll {
+            function Get-FakeBoundParameters{
+                param([String]$ModuleProject)
+                return @{
+                    'ModuleProject' = $ModuleProject
+                }
+            }
+
+        }
+        It 'Should throw error if no commands exist' {
             Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
             Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
             Add-TestFunction 'Foo' 'Write-HelloWorld'
 
-            $Arguments = Get-CommandFromModuleArgumentCompleter $ViableModule ''
-
-            $Arguments | Should -Be @('[None]')
+            { Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule)} | Should -Throw -ExceptionType $InvalidOperationException
         }
 
         It 'Should show all commands that exist in module from given parameters' {
@@ -111,7 +118,7 @@ Describe 'ArgumentCompleters' {
                 Add-TestFunction $ViableModule $function
             }
 
-            $Arguments = Get-CommandFromModuleArgumentCompleter $ViableModule ''
+            $Arguments = Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule)
 
             $Arguments | Should -Be $ExpectedFunctions
         }
@@ -124,18 +131,16 @@ Describe 'ArgumentCompleters' {
             Add-TestFunction $ViableModule 'Assert-HowdyWorld'
             
 
-            $Arguments = Get-CommandFromModuleArgumentCompleter $ViableModule 'T'
+            $Arguments = Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule) -WordToComplete 'T'
 
             $Arguments | Should -Be @($ExpectedFunction)
         }
 
-        It 'Should return [Invalid] if module does not exist' {
+        It 'Should throw error if module does not exist' {
             Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
             Add-TestFunction 'Foo' 'Write-HelloWorld'
 
-            $Arguments = Get-CommandFromModuleArgumentCompleter $ViableModule ''
-
-            $Arguments | Should -Be @('[invalid]')
+            { Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule) } | Should -Throw -ExceptionType $InvalidOperationException
         }
 
         It 'Should return Aliases if any exist' {
@@ -147,7 +152,7 @@ Describe 'ArgumentCompleters' {
                 Add-TestAlias $ViableModule $Alias
             }
 
-            $Arguments = Get-CommandFromModuleArgumentCompleter $ViableModule ''
+            $Arguments = Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule)
 
             $Arguments | Should -Be $ExpectedAliases
         }
@@ -165,7 +170,7 @@ Describe 'ArgumentCompleters' {
                 Add-TestAlias $ViableModule $Alias
             }
 
-            $Arguments = Get-CommandFromModuleArgumentCompleter $ViableModule ''
+            $Arguments = Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule) 
 
             $Arguments | Should -Be ($ExpectedFunctions += $ExpectedAliases)
         }

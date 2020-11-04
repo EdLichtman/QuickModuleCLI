@@ -1,46 +1,43 @@
 function Copy-ModuleCommand {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$True)]
     param(
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [ValidateModuleProjectExists()]
-        [ArgumentCompleter([ModuleProjectArgument])]
-        [String]$SourceNestedModule,
+        [String]$SourceModuleProject,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [ValidateModuleCommandExists()]
-        [ArgumentCompleter([CommandFromModuleArgument])]
         [String]$SourceCommandName,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [ValidateModuleProjectExists()]
-        [ArgumentCompleter([ModuleProjectArgument])]
-        [String]$DestinationNestedModule,
+        [String]$DestinationModuleProject,
 
         [Parameter(Mandatory=$true)][String]
         [ValidateNotNullOrEmpty()]
-        [ArgumentCompleter([ApprovedVerbsArgument])]
+        [ValidateModuleCommandDoesNotExist()]
         $DestinationCommandName
     )
-    Assert-CommandExistsInModule -ModuleProject $SourceNestedModule -CommandName $SourceCommandName
+    Assert-CommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $SourceCommandName
 
-    $Function = "$NestedModulesFolder\$SourceNestedModule\Functions\$SourceCommandName.ps1"
-    $Alias = "$NestedModulesFolder\$SourceNestedModule\Aliases\$SourceCommandName.ps1"
+    $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $SourceCommandName
 
-    if(Test-Path $Function) {
-        $FunctionBlock = Get-Content $Function -Raw
-        $NewFunctionBlock = $FunctionBlock -Replace "$SourceCommandName", "$DestinationCommandName" 
-        New-FileWithContent -filePath "$NestedModulesFolder\$DestinationNestedModule\Functions\$DestinationCommandName.ps1" -fileText $NewFunctionBlock
-    } elseif (Test-Path $Alias) {
-        $aliasBlock = Get-Content $Alias -Raw
-        $NewAliasBlock = $aliasBlock -Replace "Set-Alias $SourceCommandName", "Set-Alias $DestinationCommandName"
-        New-FileWithContent -filePath "$NestedModulesFolder\$DestinationNestedModule\Aliases\$DestinationCommandName.ps1" -fileText $NewAliasBlock
-    } 
+    if ($CommandType -EQ 'Function') {
+        Assert-CommandStartsWithApprovedVerb -Command $DestinationCommandName
+        New-ModuleProjectFunction -ModuleProject $DestinationModuleProject -CommandName $DestinationCommandName -Text $CommandBlock
+        Edit-ModuleCommand -ModuleProject $DestinationModuleProject -CommandName $DestinationCommandName
+    } elseif ($CommandType -EQ 'Alias') {
+       New-ModuleProjectAlias -ModuleProject $DestinationModuleProject -Alias $DestinationCommandName -CommandName $CommandBlock
+    }
 
-    Update-ModuleProject -NestedModule $DestinationNestedModule
-    Update-ModuleProjectCLI
+    # Update-ModuleProject -NestedModule $DestinationNestedModule
+    # Update-ModuleProjectCLI
 
-    Edit-ModuleCommand -NestedModule $DestinationNestedModule -commandName $DestinationCommandName
+    # Edit-ModuleCommand -NestedModule $DestinationNestedModule -commandName $DestinationCommandName
 }
+Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName SourceModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName SourceCommandName -ScriptBlock (Get-Command Get-CommandFromModuleArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName DestinationModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
