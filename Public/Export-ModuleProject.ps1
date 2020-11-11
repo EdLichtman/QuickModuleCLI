@@ -3,8 +3,7 @@ function Export-ModuleProject {
     param (
         [Parameter(Mandatory=$true)]
         [ValidateModuleProjectExists()]
-        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
-        [string] $NestedModule,
+        [string] $ModuleProject,
 
         [Parameter(Mandatory=$true)][string] $Destination,
         [String] $Author,
@@ -47,3 +46,5 @@ function Export-ModuleProject {
 
     Copy-Item -Path $NestedModuleLocation -Destination $Destination -Recurse;
 }
+
+Register-ArgumentCompleter -CommandName Export-ModuleProject -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

@@ -2,8 +2,7 @@ function Edit-ModuleCommand {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
-        #[ValidateModuleProjectExists()]
-        #[ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        [ValidateModuleProjectExists()]
         [string]$ModuleProject,
         
         [Parameter(Mandatory=$true)]
@@ -16,5 +15,7 @@ function Edit-ModuleCommand {
     Open-PowershellEditor -Path $Command.FullName
     Wait-ForKeyPress
 
-    Import-Module $BaseModuleName -Force
+    #Import-Module $BaseModuleName -Force
 }
+
+Register-ArgumentCompleter -CommandName Edit-ModuleCommand -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

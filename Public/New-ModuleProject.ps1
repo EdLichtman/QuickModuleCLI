@@ -1,5 +1,5 @@
 function New-ModuleProject {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
@@ -45,5 +45,5 @@ foreach($alias in $aliases) {
         -CmdletsToExport @() `
 
 
-    Update-ModuleProjectCLI
+    #Update-ModuleProjectCLI
 }
