@@ -22,6 +22,8 @@ describe 'Add-ModuleAlias' {
     }
     BeforeEach {
         New-Sandbox
+
+        Mock Import-Module
     }
     AfterEach {
         Remove-Sandbox
@@ -51,5 +53,14 @@ describe 'Add-ModuleAlias' {
 
         $Alias = Get-Item "alias:\$AliasName"
         $Alias.Definition | Should -Be $AliasMappedFunction
+    }
+
+    it 'Should try to import the module again' {
+        $AliasName = 'foo'
+        Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+
+        Add-ModuleAlias -ModuleProject $ViableModule -AliasName $AliasName -AliasMappedFunction 'Write-Output'
+
+        Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Force -eq $True -and $Name -eq $BaseModuleName}
     }
 }

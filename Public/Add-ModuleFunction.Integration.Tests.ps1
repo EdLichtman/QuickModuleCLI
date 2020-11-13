@@ -1,4 +1,4 @@
-describe 'Add-ModuleAlias' {
+describe 'Add-ModuleFunction' {
     BeforeAll {
         . "$PSScriptRoot\..\Private\_TestEnvironment.ps1"
         
@@ -15,8 +15,8 @@ describe 'Add-ModuleAlias' {
         . "$PSScriptRoot\..\Private\Validators.Exceptions.ps1"
         . "$PSScriptRoot\..\Private\Validators.ps1"
 
-        . "$PSScriptRoot\Add-ModuleFunction.ps1"
         . "$PSScriptRoot\Edit-ModuleCommand.ps1"
+        . "$PSScriptRoot\Add-ModuleFunction.ps1"
 
         $ViableModule = "Viable"
         Remove-Sandbox
@@ -25,6 +25,7 @@ describe 'Add-ModuleAlias' {
         New-Sandbox
 
         Mock Edit-ModuleCommand
+        Mock Import-Module
     }
     AfterEach {
         Remove-Sandbox
@@ -34,9 +35,6 @@ describe 'Add-ModuleAlias' {
     }
 
     it 'Should create a function located in a module' {
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
-
         $FunctionName = 'Write-Foo'
         Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
 
@@ -46,9 +44,6 @@ describe 'Add-ModuleAlias' {
     }
 
     it 'Should create a function' {
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
-
         $FunctionName = 'Write-Foo'
         Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
 
@@ -62,9 +57,6 @@ describe 'Add-ModuleAlias' {
     }
 
     it 'Should create a function with a non-standard value text' {
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
-
         $expectedReturnValue = 'Foo'
         $FunctionName = 'Get-Foo'
         $FunctionText = "return '$expectedReturnValue'"
@@ -77,5 +69,13 @@ describe 'Add-ModuleAlias' {
 
         $actualReturnValue = Invoke-Expression "$FunctionName"
         $actualReturnValue | Should -Be $expectedReturnValue
+    }
+
+    it 'Should try to import the module again' {
+        Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+
+        Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Get-Foo'
+
+        Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Force -eq $True -and $Name -eq $BaseModuleName}
     }
 }

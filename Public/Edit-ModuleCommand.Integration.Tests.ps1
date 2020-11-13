@@ -23,6 +23,7 @@ describe 'Edit-ModuleCommand' {
     }
     BeforeEach {
         New-Sandbox
+        Mock Import-Module
     }
     AfterEach {
         Remove-Sandbox

@@ -19,6 +19,10 @@ describe 'Add-ModuleAlias' {
         $ViableModule = "Viable"
     }
 
+    BeforeEach {
+        Mock Import-Module
+    }
+
     it 'throws error if module does not exist' {
         Mock Get-ValidModuleProjectNames { return @() }
         $err = { Add-ModuleAlias -ModuleProject $ViableModule -AliasName 'foo' -AliasMappedFunction 'Write-Output' -WhatIf } | Should -Throw -PassThru
