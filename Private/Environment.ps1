@@ -222,6 +222,7 @@ function Get-ModuleProjectCommandDefinition {
         # Using AST because -ExpandProperty Definition adds a /r/n to the beginning and end of the line 
         # and instead of hoping all powershell versions work the same way, this is safer than manipulating 
         # any text.
+        #TODO: EndBlock isn't always foolproof, figure out a better way of combining body
         $CommandDefinition = (Get-ChildItem function:\$CommandName).ScriptBlock.Ast.Body.EndBlock.ToString()
     } elseif($CommandType -EQ 'Alias') {
         $CommandDefinition = (Get-ChildItem alias:\$CommandName).Definition
@@ -249,4 +250,89 @@ function Wait-ForKeyPress {
 function Open-PowershellEditor{ 
     param([String]$Path)
     powershell.exe $Path
+}
+
+<#TODO: Find a new place for this and Make Tests#>
+function Edit-ModuleManifest {
+    [CmdletBinding(PositionalBinding=$false)]
+    param(
+        [String]$psd1Location,
+        [String]$Author,
+        [String]$CompanyName,
+        [String]$Copyright,
+        [Version]$ModuleVersion,
+        [String]$Description,
+        $Tags,
+        [Uri]$ProjectUri,
+        [Uri]$LicenseUri,
+        [Uri]$IconUri,
+        [String]$ReleaseNotes,
+        [String]$HelpInfoUri,
+        [String]$RootModule,
+        $FunctionsToExport,
+        $AliasesToExport,
+        $NestedModules
+    ) 
+    $psd1Content = (Get-Content $psd1Location | Out-String)
+    $psd1 = (Invoke-Expression $psd1Content)
+    
+    function Add-ManifestProperties {
+        param(
+            [Hashtable] $BoundParameters,
+            [Hashtable] $ExistingManifestProperties,
+            [Object] $ManifestProperties,
+            [String[]] $Keys
+        )
+        foreach($Key in $Keys) {
+            if ($BoundParameters.ContainsKey($Key)) { $ManifestProperties[$Key] = $BoundParameters[$Key] }
+            elseif($ExistingManifestProperties.ContainsKey($Key)) { $ManifestProperties[$Key] = $ExistingManifestProperties[$Key] }
+        }
+    }
+    $ManifestProperties = @{
+        Path = $psd1Location
+    }
+    Add-ManifestProperties -BoundParameters $PSBoundParameters -ExistingManifestProperties $psd1 -ManifestProperties $ManifestProperties `
+        @(
+            #Actually Passed in
+            "Author",
+            "Description",
+            "CompanyName",
+            "Copyright",
+            "ModuleVersion",
+            "HelpInfoUri",
+            "RootModule",
+            "FunctionsToExport",
+            "AliasesToExport",
+            "NestedModules",
+
+            #Should exist only on psd1
+            "PowerShellVersion",
+            "CompatiblePSEditions",
+            "CmdletsToExport",
+            "VariablesToExport",
+            "Guid",
+            "ClrVersion",
+            "DotNetFrameworkVersion",
+            "PowerShellHostName",
+            "PowerShellHostVersion",
+            "RequiredModules",
+            "TypesToProcess",
+            "FormatsToProcess",
+            "ScriptsToProcess",
+            "RequiredAssemblies",
+            "FileList",
+            "ModuleList",
+            "DscResourcesToExport"
+        )
+
+        Add-ManifestProperties -BoundParameters $PSBoundParameters -ExistingManifestProperties $psd1.PrivateData.PSData -ManifestProperties $ManifestProperties `
+        @(
+            "Tags",
+            "ProjectUri",
+            "LicenseUri",
+            "IconUri",
+            "ReleaseNotes"
+        )
+        
+    New-ModuleManifest @ManifestProperties
 }

@@ -3,22 +3,22 @@ function Copy-ModuleCommand {
     param(
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleProjectExists()]
+        [ValidateScript({ValidateModuleProjectExists $_})]
         [String]$SourceModuleProject,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleCommandExists()]
+        [ValidateScript({ValidateModuleCommandExists $_})]
         [String]$SourceCommandName,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleProjectExists()]
+        [ValidateScript({ValidateModuleProjectExists $_})]
         [String]$DestinationModuleProject,
 
         [Parameter(Mandatory=$true)][String]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleCommandDoesNotExist()]
+        [ValidateScript({ValidateModuleCommandDoesNotExist $_})]
         $DestinationCommandName
     )
     Assert-CommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $SourceCommandName
@@ -26,7 +26,7 @@ function Copy-ModuleCommand {
     $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $SourceCommandName
 
     if ($CommandType -EQ 'Function') {
-        Assert-CommandStartsWithApprovedVerb -Command $DestinationCommandName
+        ValidateCommandStartsWithApprovedVerb -Command $DestinationCommandName
         New-ModuleProjectFunction -ModuleProject $DestinationModuleProject -CommandName $DestinationCommandName -Text $CommandBlock
         Edit-ModuleCommand -ModuleProject $DestinationModuleProject -CommandName $DestinationCommandName
     } elseif ($CommandType -EQ 'Alias') {

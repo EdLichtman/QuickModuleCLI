@@ -3,7 +3,7 @@ function New-ModuleProject {
     param(
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleProjectDoesNotExist()]
+        [ValidateScript({ValidateModuleProjectDoesNotExist $_})]
         [string] $ModuleProject
     )
 
@@ -40,7 +40,7 @@ foreach($alias in $aliases) {
         -ModuleVersion '0.0.1' `
         -PowerShellVersion "$currentPowershellVersion" `
         -CompatiblePSEditions "Desktop" `
-        -FunctionsToExport @('*-*') `
-        -AliasesToExport @('*') `
+        -FunctionsToExport @() `
+        -AliasesToExport @() `
         -CmdletsToExport @() `
 }

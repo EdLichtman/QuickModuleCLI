@@ -3,8 +3,8 @@ function Update-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param (
         [Parameter(Mandatory=$true)]
-        [ValidateModuleProjectExists()]
-        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ValidateModuleProjectExists $_})]
         [string] $ModuleProject,
         
         [String]  $Author,

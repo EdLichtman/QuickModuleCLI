@@ -32,16 +32,16 @@ Describe 'Validators' {
         BeforeEach {
             function Test-ModuleProjectExistsFunction{
                 param(
-                    [ValidateModuleProjectExistsAttribute()]
+                    [ValidateScript({ValidateModuleProjectExists $_})]
                     [String]
                     $ModuleProject
                 )
             }
         }
 
-        it 'Errors if module is empty string (because be default empty module does not exist)' {
+        it 'Does not error if module is empty string (because we want to separate concerns into separate attributes)' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            { Test-ModuleProjectExistsFunction -ModuleProject "" } | Should -Throw -ExceptionType $ParameterBindingException
+            { Test-ModuleProjectExistsFunction -ModuleProject "" } | Should -Not -Throw
         }
 
         it 'Errors if no modules exist' {
@@ -52,7 +52,6 @@ Describe 'Validators' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             { Test-ModuleProjectExistsFunction -ModuleProject $NonViableModule } | Should -Throw -ExceptionType $ParameterBindingException
         }
-
         it 'Does not error if Module is valid' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             { Test-ModuleProjectExistsFunction -ModuleProject $ViableModule } | Should -Not -Throw -ExceptionType $ParameterBindingException
@@ -63,7 +62,7 @@ Describe 'Validators' {
         BeforeEach {
             function Test-ModuleProjectDoesNotExistFunction{
                 param(
-                    [ValidateModuleProjectDoesNotExist()]
+                    [ValidateScript({ValidateModuleProjectDoesNotExist $_})]
                     [String]
                     $ModuleProject
                 )
@@ -94,7 +93,7 @@ Describe 'Validators' {
         BeforeEach {
             function Test-ModuleDoesNotExistFunction{
                 param(
-                    [ValidateModuleDoesNotExist()]
+                    [ValidateScript({ValidateModuleDoesNotExist $_})]
                     [String]
                     $ModuleProject
                 )
@@ -116,7 +115,7 @@ Describe 'Validators' {
         BeforeEach {
             function Test-ModuleCommandExistsFunction {
                 param( 
-                    [ValidateModuleCommandExists()]
+                    [ValidateScript({ValidateModuleCommandExists $_})]
                     [String]
                     $CommandName
                     )
@@ -143,42 +142,11 @@ Describe 'Validators' {
         }
     }
 
-    describe 'ValidateCommandExistsAttribute' {
-        BeforeEach {
-            function Test-CommandExistsFunction {
-                param( 
-                    [ValidateCommandExists()]
-                    [String]
-                    $CommandName
-                    )
-            }
-        }
-
-        it 'Does not error if command exists' {
-            Add-TestModule -Name '_First' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestFunction -ModuleName $ViableModule -FunctionName 'Get-Foo'
-            { Test-CommandExistsFunction -CommandName 'Get-Foo' } | Should -Not -Throw
-        }
-
-        it 'Errors if command does not exist' {
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-
-            { Test-CommandExistsFunction -CommandName 'Get-Foo' } | Should -Throw
-        }
-
-        it 'Does not error if known command is not a module command' {
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-
-            { Test-CommandExistsFunction -CommandName 'Write-Output' } | Should -not -Throw
-        }
-    }
-
     describe 'ValidateModuleCommandDoesNotExistAttribute' {
         BeforeEach {
             function Test-ModuleCommandDoesNotExistFunction {
                 param( 
-                    [ValidateModuleCommandDoesNotExist()]
+                    [ValidateScript({ValidateModuleCommandDoesNotExist $_})]
                     [String]
                     $CommandName
                     )
@@ -214,7 +182,7 @@ Describe 'Validators' {
                 param( 
                     [String]
                     $ModuleProject,
-                    [ValidateModuleCommandExists()]
+                    [ValidateScript({ValidateModuleCommandExists $_})]
                     [String]
                     $CommandName
                     )
@@ -254,7 +222,7 @@ Describe 'Validators' {
         BeforeEach {
             function Test-Attribute{
                 param(
-                    [ValidateParameterStartsWithApprovedVerb()]
+                    [ValidateScript({ValidateCommandStartsWithApprovedVerb $_})]
                     [String]
                     $Command
                 )

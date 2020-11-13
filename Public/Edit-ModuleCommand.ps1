@@ -2,10 +2,13 @@ function Edit-ModuleCommand {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
-        [ValidateModuleProjectExists()]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ValidateModuleProjectExists $_})]
         [string]$ModuleProject,
         
         [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ValidateModuleCommandExists $_})]
         [string]$CommandName
         
     )

@@ -5,27 +5,27 @@ function Add-ModuleFunction {
     )]
     param(
         [Parameter(Mandatory=$true)]
-        [ValidateModuleProjectExists()]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ValidateModuleProjectExists $_})]
         [string] $ModuleProject,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleCommandDoesNotExist()]
-        [ValidateParameterStartsWithApprovedVerb()]
+        [ValidateScript({ValidateModuleCommandDoesNotExist $_})]
+        [ValidateScript({ValidateCommandStartsWithApprovedVerb $_})]
         [string] $FunctionName,
 
         [Parameter(Mandatory=$false)]
-        [SemicolonCreatesLineBreakTransformation()]
         [string] 
         $FunctionText
     )
-
-    New-ModuleProjectFunction -ModuleProject $ModuleProject -CommandName $FunctionName -Text $FunctionText
+    New-ModuleProjectFunction -ModuleProject $ModuleProject -CommandName $FunctionName -Text (SemicolonCreatesLineBreakTransformation $FunctionText)
 
     if ([String]::IsNullOrWhiteSpace($FunctionText)) {
         Edit-ModuleCommand -ModuleProject $ModuleProject -CommandName $FunctionName
     }
 
+    Update-ModuleProject -ModuleProject $ModuleProject
     Import-Module $BaseModuleName -Force
 }
 Register-ArgumentCompleter -CommandName Add-ModuleFunction -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

@@ -16,25 +16,17 @@ describe 'Argument Transformations' {
 
         $ViableModule = "Viable"
         $NonviableModule = "Nonviable"
-        $ArgumentException = 'System.ArgumentException'
-        $ParameterBindingException = 'System.Management.Automation.ParameterBindingException'
     }
     
     describe 'SemicolonCreatesLineBreakTranformAttribute' {
         BeforeAll {
             function Test-SemicolonCreatesLineBreakTransform {
                 param(
-                    [SemicolonCreatesLineBreakTransformation()]
                     [String]
                     $Test
                 )
-                return $Test;
+                return SemicolonCreatesLineBreakTransformation $Test;
             }
-        }
-
-        It "throws error if non-string value is sent in" {
-            $DateTime = [DateTime]'2020-01-01'
-            { Test-SemicolonCreatesLineBreakTransform -Test $DateTime } | Should -Throw -ExceptionType $ParameterBindingException
         }
 
         It "does nothing if string has no semicolon" {

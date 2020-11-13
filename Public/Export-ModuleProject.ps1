@@ -2,7 +2,8 @@ function Export-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param (
         [Parameter(Mandatory=$true)]
-        [ValidateModuleProjectExists()]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ValidateModuleProjectExists $_})]
         [string] $ModuleProject,
 
         [Parameter(Mandatory=$true)][string] $Destination,

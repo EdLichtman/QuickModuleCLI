@@ -1,17 +1,17 @@
 function Get-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param(
-        [ValidateModuleProjectExists()]
-        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
-        [String] $NestedModule,
+        [ValidateScript({ValidateModuleProjectExists $_})]
+        [String] $ModuleProject,
         
+        [ValidateScript({ValidateModuleCommandExists $_})]
         [String] $CommandName,
         [Switch] $Summary
     )
-
+    throw 'Needs to be tested and rewritten!'
     $Modules = New-Object System.Collections.ArrayList;
 
-    $LimitToNestedModule = $PSBoundParameters.ContainsKey('NestedModule');
+    $LimitToModuleProject = $PSBoundParameters.ContainsKey('ModuleProject');
     $LimitToCommandName = $PSBoundParameters.ContainsKey('CommandName');
 
     if ($LimitToCommandName -and $Summary) {
@@ -65,3 +65,6 @@ function Get-ModuleProject {
     
     Write-Output $Modules
 }
+
+Register-ArgumentCompleter -CommandName Get-ModuleProject -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Get-ModuleProject -ParameterName CommandName -ScriptBlock (Get-Command Get-CommandFromModuleArgumentCompleter).ScriptBlock

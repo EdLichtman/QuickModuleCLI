@@ -38,29 +38,30 @@ function Add-ModuleAlias {
         SupportsShouldProcess=$True
     )]
     param(
-        [Parameter(Mandatory=$true)][string]
+        [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleProjectExists()]
+        [ValidateScript({ValidateModuleProjectExists $_})]
+        [string]
         #Specifies the name of the NestedModule in which this function belongs.
         $ModuleProject,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleCommandDoesNotExist()]
+        [ValidateScript({ValidateModuleCommandDoesNotExist $_})]
         [string]
         #Specifies the name of the new alias.
         $AliasName,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateCommandExists()]
+        [ValidateScript({ValidateCommandExists $_})]
         [string]
         #Specifies the name of the function to which this alias maps.
         $AliasMappedFunction
     )    
     
     New-ModuleProjectAlias -ModuleProject $ModuleProject -Alias $AliasName -CommandName $AliasMappedFunction
-
+    Update-ModuleProject -ModuleProject $ModuleProject
     Import-Module $BaseModuleName -Force
 }
 Register-ArgumentCompleter -CommandName Add-ModuleAlias -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

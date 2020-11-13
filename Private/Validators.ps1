@@ -2,12 +2,9 @@ using namespace System.Management.Automation;
 
 . "$PSScriptRoot\Validators.Exceptions.ps1"
 
-class ValidateModuleProjectExistsAttribute : ValidateArgumentsAttribute 
-{
-    [void]  Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics)
-    {
-        $moduleProject = $arguments
-
+function ValidateModuleProjectExists {
+    param($ModuleProject) 
+    if ($ModuleProject) {
         $Choices = Get-ValidModuleProjectNames
         if (!$Choices) {
             throw (New-Object ModuleProjectDoesNotExistException 'No viable Modules. Please create one with New-ModuleProject!')
@@ -17,30 +14,53 @@ class ValidateModuleProjectExistsAttribute : ValidateArgumentsAttribute
             throw (New-Object ModuleProjectDoesNotExistException "Parameter must be one of the following choices: $Choices")
         }
     }
+
+    return $true
+
 }
 
-class ValidateModuleProjectDoesNotExistAttribute : ValidateArgumentsAttribute 
+class ValidateModuleProjectExistsAttribute : ValidateArgumentsAttribute 
 {
     [void]  Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics)
     {
         $moduleProject = $arguments
-
+        ValidateModuleProjectExists -ModuleProject $ModuleProject
+    }
+}
+function ValidateModuleProjectDoesNotExist {
+    param($ModuleProject) 
+    if ($ModuleProject) {
         $Choices = Get-ValidModuleProjectNames
         if ($Choices -and ($moduleProject -in ($Choices))) {
             throw (New-Object ModuleProjectExistsException "Parameter must not be one of the following choices: $Choices")
         }
     }
+    return $True
+}
+class ValidateModuleProjectDoesNotExistAttribute : ValidateArgumentsAttribute 
+{
+    [void]  Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics)
+    {
+        $moduleProject = $arguments
+       ValidateModuleProjectExists $ModuleProject
+    }
 }
 
+function ValidateModuleDoesNotExist {
+    param ($ModuleProject) 
+    if ($ModuleProject) {
+        if (Get-Module $moduleProject) {
+            throw (New-Object ModuleExistsException "Module already exists by the name '$moduleProject'")
+        }
+    }
+    return $True
+}
 class ValidateModuleDoesNotExistAttribute : ValidateArgumentsAttribute 
 {
     [void]  Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics)
     {
         $moduleProject = $arguments
-
-        if (Get-Module $moduleProject) {
-            throw (New-Object ModuleExistsException "Module already exists by the name '$moduleProject'")
-        }
+        ValidateModuleDoesNotExist $ModuleProject
     }
 }
 
@@ -86,29 +106,42 @@ function Test-ModuleCommandExists {
 
     return $false;
 }
-class ValidateModuleCommandExistsAttribute : ValidateArgumentsAttribute 
-{
-    [void] Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics) 
-    {
-        $CommandName = $arguments;
+function ValidateModuleCommandExists {
+    param($CommandName)
+    if ($CommandName) {
         $ModuleProjects = Get-ValidModuleProjectNames;
         foreach($ModuleProject in $ModuleProjects) {
            if (Test-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName) {
-               return;
+               return $True;
            }
         }
 
         throw (New-Object ModuleCommandDoesNotExistException "'$CommandName' does not exist as a command in any ModuleProject!")
     }
+    return $True
+}
+class ValidateModuleCommandExistsAttribute : ValidateArgumentsAttribute 
+{
+    [void] Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics) 
+    {
+        $CommandName = $arguments;
+        ValidateModuleCommandExists $CommandName
+    }
 }
 
-function Test-CommandExists {
-    param([String]$CommandName)
-    $oldPreference = $ErrorActionPreference;
-    $ErrorActionPreference = 'stop'
-    try {if(Get-Command $CommandName){return $true;}}
-    Catch {return $false;}
-    Finally {$ErrorActionPreference=$oldPreference}
+function ValidateCommandExists {
+    param($CommandName)
+    $ModuleProjects = Get-ValidModuleProjectNames;
+    foreach($ModuleProject in $ModuleProjects) {
+       if (Test-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName) {
+           return;
+       }
+    }
+
+    if (!(Get-Command -Name $CommandName -ErrorAction 'SilentlyContinue')) {
+        throw (New-Object CommandDoesNotExistException "'$CommandName' does not exist")
+    }
+    return $True
 }
 
 class ValidateCommandExistsAttribute : ValidateArgumentsAttribute 
@@ -116,31 +149,18 @@ class ValidateCommandExistsAttribute : ValidateArgumentsAttribute
     [void] Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics) 
     {
         $CommandName = $arguments;   
-
-        $ModuleProjects = Get-ValidModuleProjectNames;
-        foreach($ModuleProject in $ModuleProjects) {
-           if (Test-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName) {
-               return;
-           }
-        }
-
-        if (!(Test-CommandExists -CommandName $CommandName)) {
-            throw (New-Object CommandDoesNotExistException "'$CommandName' does not exist")
-        }
+        ValidateCommandExists -CommandName $CommandName
     }
 }
 
-
-class ValidateModuleCommandDoesNotExistAttribute : ValidateArgumentsAttribute 
-{
-    [void] Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics) 
-    {
-        $CommandName = $arguments;
+function ValidateModuleCommandDoesNotExist {
+    param($CommandName) 
+    if ($CommandName) {
         $ModuleProjects = Get-ValidModuleProjectNames;
         foreach($ModuleProject in $ModuleProjects) {
             $Functions = Get-ModuleProjectFunctions -ModuleProject $ModuleProject
             $FunctionExists = ($Functions | Where-Object { $_.BaseName -eq $CommandName});
-
+    
             $Aliases = Get-ModuleProjectAliases -ModuleProject $ModuleProject
             $AliasExists = ($Aliases | Where-Object { $_.BaseName -eq $CommandName})
             
@@ -148,6 +168,16 @@ class ValidateModuleCommandDoesNotExistAttribute : ValidateArgumentsAttribute
                 throw (New-Object ModuleCommandExistsException "'$CommandName' already exists as a command in '$ModuleProject'!")
             }
         }
+    }
+    
+    return $True
+}
+class ValidateModuleCommandDoesNotExistAttribute : ValidateArgumentsAttribute 
+{
+    [void] Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics) 
+    {
+        $CommandName = $arguments;
+        ValidateModuleCommandDoesNotExist -CommandName $CommandName
     }
 }
 
@@ -158,23 +188,25 @@ function Test-CommandStartsWithApprovedVerb {
     return ($ApprovedVerbs.Contains($chosenVerb));
 }
 
-function Assert-CommandStartsWithApprovedVerb {
+function ValidateCommandStartsWithApprovedVerb {
     param([String]$Command) 
-    $chosenVerb = $Command.Split('-')[0]
-    $ApprovedVerbs = Get-ApprovedVerbs;
-    if (!$ApprovedVerbs.Contains($chosenVerb)) {
-        throw (New-Object ParameterStartsWithUnapprovedVerbException "$chosenVerb is not a common accepted verb. Please find an appropriate verb by using the command 'Get-Verb'.")
+    if ($Command) {
+        $chosenVerb = $Command.Split('-')[0]
+        $ApprovedVerbs = Get-ApprovedVerbs;
+        if (!$ApprovedVerbs.Contains($chosenVerb)) {
+            throw (New-Object ParameterStartsWithUnapprovedVerbException "$chosenVerb is not a common accepted verb. Please find an appropriate verb by using the command 'Get-Verb'.")
+        }
     }
+    
+    return $True
 }
+
 # https://powershellexplained.com/2017-02-20-Powershell-creating-parameter-validators-and-transforms/
 class ValidateParameterStartsWithApprovedVerbAttribute : ValidateArgumentsAttribute 
 {
     [void]  Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics)
     {
         $Command = $arguments
-        if(![string]::IsNullOrWhiteSpace($Command))
-        {
-            Assert-CommandStartsWithApprovedVerb -Command $Command
-        }
+        ValidateCommandStartsWithApprovedVerb -Command $Command
     }
 }
