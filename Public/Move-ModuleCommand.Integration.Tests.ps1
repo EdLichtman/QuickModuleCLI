@@ -12,6 +12,7 @@ describe 'Move-ModuleCommand' {
         . "$PSScriptRoot\..\Private\Environment.ps1"
         . "$PSScriptRoot\..\Private\ArgumentCompleters.ps1"
         . "$PSScriptRoot\..\Private\ArgumentTransformations.ps1"
+        . "$PSScriptRoot\..\Private\Validators.Exceptions.ps1"
         . "$PSScriptRoot\..\Private\Validators.ps1"
 
         . "$PSScriptRoot\Remove-ModuleCommand.ps1"
