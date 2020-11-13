@@ -14,5 +14,9 @@ if (!(Test-Path "$PSScriptRoot\Modules")) {
         New-Item "$PSScriptRoot\Modules" -ItemType Directory
 }
 
+foreach($Module in (Get-ValidModuleProjects)) {
+        Import-Module "$($Module.FullName)\$($Module.Name).psd1"
+}
+
 #In theory this will not change the Global Error Action Preference, but will scope this action preference to all of the Module Functions.
 $ErrorActionPreference = "Stop"

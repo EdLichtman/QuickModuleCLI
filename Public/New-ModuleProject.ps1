@@ -43,7 +43,4 @@ foreach($alias in $aliases) {
         -FunctionsToExport @() `
         -AliasesToExport @() `
         -CmdletsToExport @() `
-
-
-    #Update-ModuleProjectCLI
 }

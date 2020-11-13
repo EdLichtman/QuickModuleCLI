@@ -1,26 +1,23 @@
 function Remove-ModuleCommand {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
         [ValidateModuleProjectExists()]
-        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
         [string]$ModuleProject,
         
-        [Parameter(Mandatory=$true)][string]$CommandName
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateModuleCommandExists()]
+        [string]$CommandName
     )
     Assert-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
     
-    $Function = Get-ModuleProjectFunctionPath -ModuleProject $ModuleProject -CommandName $CommandName
-    $Alias = Get-ModuleProjectAliasPath -ModuleProject $ModuleProject -CommandName $CommandName
-    
-    if(Test-Path $Function) {
-        Remove-Item -Path $Function    
-    }
-    elseif(Test-Path $Alias) {
-        Remove-Item -Path $Alias
-    } 
+    $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
+    Remove-Item $Command
 
-    Update-ModuleProject -ModuleProject $ModuleProject
-    Update-ModuleProjectCLI
-    Import-Module $BaseModuleName -Force
+    #Update-ModuleProject -ModuleProject $ModuleProject
+    #Import-Module $BaseModuleName -Force
 }
+Register-ArgumentCompleter -CommandName Remove-ModuleCommand -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Remove-ModuleCommand -ParameterName CommandName -ScriptBlock (Get-Command Get-CommandFromModuleArgumentCompleter).ScriptBlock

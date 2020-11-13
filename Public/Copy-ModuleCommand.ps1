@@ -34,7 +34,6 @@ function Copy-ModuleCommand {
     }
 
     # Update-ModuleProject -NestedModule $DestinationNestedModule
-    # Update-ModuleProjectCLI
 
     # Edit-ModuleCommand -NestedModule $DestinationNestedModule -commandName $DestinationCommandName
 }

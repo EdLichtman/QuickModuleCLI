@@ -21,6 +21,5 @@ function Rename-ModuleProject {
     Rename-Item -Path "$DestinationModuleDirectory\$NestedModule.psm1" -NewName "$DestinationModuleDirectory\$DestinationNestedModule.psm1"
 
     Edit-ModuleManifest -psd1Location "$DestinationModuleDirectory\$DestinationNestedModule.psd1" -RootModule "$DestinationNestedModule.psm1"
-    Update-ModuleProjectCLI
-    Import-Module $BaseModuleName -Force
+    #Import-Module $BaseModuleName -Force
 }

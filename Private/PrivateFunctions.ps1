@@ -128,37 +128,3 @@ function Edit-ModuleManifest {
         
     New-ModuleManifest @ManifestProperties
 }
-function Update-ModuleProjectCLI {
-    [CmdletBinding()]param()
-    $psd1Location = "$BaseFolder\$BaseModuleName.psd1"
-
-    $FunctionsToExport = New-Object System.Collections.ArrayList($null)
-    $Functions = Get-ChildItem "$FunctionsFolder" -File
-    if ($Functions) {
-        $Functions | ForEach-Object {$FunctionsToExport.Add("$($_.BaseName)")} | Out-Null
-    }
-
-    $AliasesToExport = New-Object System.Collections.ArrayList($null)
-
-    $NestedModules = New-Object System.Collections.ArrayList($null)
-    foreach($Module in Get-ChildItem $NestedModulesFolder) {
-        $ModuleName = $Module.BaseName;
-        $NestedModules.Add("Modules\$ModuleName\$ModuleName") | Out-Null
-        $QuickModuleLocation = "$NestedModulesFolder\$ModuleName"
-        if (Test-Path "$QuickModuleLocation\Functions") {
-            $Functions = Get-ChildItem "$QuickModuleLocation\Functions" -File;
-            if ($Functions) {
-                $Functions | ForEach-Object {$FunctionsToExport.Add("$($_.BaseName)")} | Out-Null
-            }
-        }
-
-        if (Test-Path "$QuickModuleLocation\Aliases") {
-            $Aliases = Get-ChildItem "$QuickModuleLocation\Aliases" -File;
-            if ($Aliases) {
-                $Aliases | ForEach-Object {$AliasesToExport.Add("$($_.BaseName)")} | Out-Null
-            }
-        }
-    }
-
-    Edit-ModuleManifest -psd1Location $psd1Location -NestedModules $NestedModules -FunctionsToExport $FunctionsToExport -AliasesToExport $AliasesToExport
-}

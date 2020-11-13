@@ -1,41 +1,36 @@
 function Move-ModuleCommand {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
         [ValidateModuleProjectExists()]
-        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
         [string] $ModuleProject,
 
         [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateModuleCommandExists()]
         [string] $CommandName,
 
         [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
         [ValidateModuleProjectExists()]
-        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
         [string] $DestinationModuleProject
     )
     Assert-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
     
-    $Function = Get-ModuleProjectFunctionPath -ModuleProject $ModuleProject -CommandName $CommandName
-    $Alias = Get-ModuleProjectAliasPath -ModuleProject $ModuleProject -CommandName $CommandName
-    $DestinationFunctionPath = Get-ModuleProjectFunctionPath -ModuleProject $DestinationModuleProject -CommandName $CommandName
-    $DestinationAliasPath = Get-ModuleProjectAliasPath -ModuleProject $DestinationModuleProject -CommandName $CommandName
+    $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $SourceCommandName
 
+    Remove-ModuleCommand -ModuleProject $ModuleProject -CommandName $CommandName
+    if ($CommandType -EQ 'Function') {
+        New-ModuleProjectFunction -ModuleProject $DestinationModuleProject -CommandName $CommandName -Text $CommandBlock
+    } elseif ($CommandType -EQ 'Alias') {
+       New-ModuleProjectAlias -ModuleProject $DestinationModuleProject -Alias $CommandName -CommandName $CommandBlock
+    }
 
-    if(Test-Path $Function) {
-        $FunctionBlock = Get-Content $Function -Raw
-        
-        Remove-Item $Function
-        New-FileWithContent -filePath $DestinationFunctionPath -fileText $FunctionBlock
-    } elseif (Test-Path $Alias) {
-        $aliasBlock = Get-Content $Alias -Raw
-        
-        Remove-Item $Alias
-        New-FileWithContent -filePath $DestinationAliasPath -fileText $aliasBlock
-    } 
-
-    Update-ModuleProject -ModuleProject $ModuleProject
-    Update-ModuleProject -ModuleProject $DestinationModuleProject
-    Update-ModuleProjectCLI
-    Import-Module $BaseModuleName -Force
+    #Update-ModuleProject -ModuleProject $ModuleProject
+    #Update-ModuleProject -ModuleProject $DestinationModuleProject
+    #Import-Module $BaseModuleName -Force
 }
+
+Register-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName DestinationModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

@@ -50,7 +50,5 @@ function Split-ModuleProject {
         New-Item -Path "$ModulesDirectory\$NestedModule" -ItemType Directory
     }
     Move-Item -Path $NestedModuleDirectory -Destination $ModulesDirectory;
-
-    Update-ModuleProjectCLI
-    Import-Module $BaseModuleName -force
+    #Import-Module $BaseModuleName -force
 }

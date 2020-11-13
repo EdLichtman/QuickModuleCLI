@@ -40,8 +40,7 @@ function Rename-ModuleCommand {
         New-FileWithContent -filePath $ReplacementAliasPath -fileText $NewAliasBlock
     } 
 
-    Update-ModuleProject -NestedModule $NestedModule
-    Update-ModuleProjectCLI
-    Import-Module $BaseModuleName -Force
+    #Update-ModuleProject -NestedModule $NestedModule
+    #Import-Module $BaseModuleName -Force
 
 }

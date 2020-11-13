@@ -27,7 +27,6 @@ function Add-ModuleFunction {
     }
 
     #Update-ModuleProject -NestedModule $NestedModule
-    #Update-ModuleProjectCLI
     #Import-Module $BaseModuleName -Force
 }
 Register-ArgumentCompleter -CommandName Add-ModuleFunction -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

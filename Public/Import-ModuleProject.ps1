@@ -19,6 +19,5 @@ function Import-ModuleProject {
 
     Copy-Item -Path $Path -Destination $NestedModulesFolder -Recurse;
 
-    Update-ModuleProjectCLI
-    Import-Module $BaseModuleName -Force
+    #Import-Module $BaseModuleName -Force
 }
