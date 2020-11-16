@@ -3,24 +3,24 @@ function Move-ModuleCommand {
     param(
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleProjectExists()]
-        [string] $ModuleProject,
+        [ValidateScript({ValidateModuleProjectExists $_})]
+        [string] $SourceModuleProject,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleCommandExists()]
+        [ValidateScript({ValidateModuleCommandExists $_})]
         [string] $CommandName,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleProjectExists()]
+        [ValidateScript({ValidateModuleProjectExists $_})]
         [string] $DestinationModuleProject
     )
-    Assert-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
+    Assert-CommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $CommandName
     
-    $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $SourceCommandName
+    $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $CommandName
 
-    Remove-ModuleCommand -ModuleProject $ModuleProject -CommandName $CommandName
+    Remove-ModuleCommand -ModuleProject $SourceModuleProject -CommandName $CommandName
     if ($CommandType -EQ 'Function') {
         New-ModuleProjectFunction -ModuleProject $DestinationModuleProject -CommandName $CommandName -Text $CommandBlock
     } elseif ($CommandType -EQ 'Alias') {
@@ -32,5 +32,6 @@ function Move-ModuleCommand {
     #Import-Module $BaseModuleName -Force
 }
 
-Register-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName SourceModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName CommandName -ScriptBlock (Get-Command Get-CommandFromModuleArgumentCompleter).ScriptBlock
 Register-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName DestinationModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
