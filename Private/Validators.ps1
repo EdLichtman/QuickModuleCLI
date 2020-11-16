@@ -210,3 +210,19 @@ class ValidateParameterStartsWithApprovedVerbAttribute : ValidateArgumentsAttrib
         ValidateCommandStartsWithApprovedVerb -Command $Command
     }
 }
+
+#TODO: Test
+function ValidateModuleProjectExportDestinationIsValid {
+    param([String]$Destination) 
+
+    $LimitationsText = 'Export-ModuleProject should be used to export your ModuleProject without clobber. If you wish to package the module for import as a separate module, use the command Split-ModuleProject instead.'
+    if ($Destination -eq $ModuleProjectsFolder) {
+        throw (New-Object ValidateModuleProjectExportDestinationIsInvalidException "Cannot export module to ModuleProjects directory. $LimitationsText")
+    }
+    $ModuleDirectories = $env:PSModulePath.Split(';')
+    if ($ModuleDirectories -contains $Destination) {
+        throw (New-Object ValidateModuleProjectExportDestinationIsInvalidException "Cannot export module to a PSModule directory. $LimitationsText")
+    }
+
+    return $True
+}

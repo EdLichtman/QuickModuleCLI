@@ -85,34 +85,37 @@ describe 'Edit-ModuleCommand' {
         }
     
     }
-    it 'Attempts to Open Powershell Editor' {
-        $FunctionName = 'Write-Foo'
-        $FunctionText = "return 'Foo'"
 
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
-
-        Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-        Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
-
-        Edit-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName
-        
-        Assert-MockCalled Open-PowershellEditor -Times 1
-    }
-
-    it 'Attempts to Open Powershell Editor' {
-        $FunctionName = 'Write-Foo'
-        $FunctionText = "return 'Foo'"
-
-        Mock Open-PowershellEditor
-        Mock Wait-ForKeyPress
-
-        Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-        Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
-
-        Edit-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName
-        
-        Assert-MockCalled Wait-ForKeyPress -Times 1
+    describe 'functionality' {
+        it 'Attempts to Open Powershell Editor' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "return 'Foo'"
+    
+            Mock Open-PowershellEditor
+            Mock Wait-ForKeyPress
+    
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+    
+            Edit-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName
+            
+            Assert-MockCalled Open-PowershellEditor -Times 1
+        }
+    
+        it 'Attempts to Open Powershell Editor' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "return 'Foo'"
+    
+            Mock Open-PowershellEditor
+            Mock Wait-ForKeyPress
+    
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+    
+            Edit-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName
+            
+            Assert-MockCalled Wait-ForKeyPress -Times 1
+        }
     }
 
     describe 'auto-completion for input' {
@@ -124,5 +127,20 @@ describe 'Edit-ModuleCommand' {
     
             Assert-MockCalled Get-ValidModuleProjectNames -Times 1
         }
+
+        it 'auto-suggests valid Module Command for CommandName' {
+            $FakeBoundParameters = @{'ModuleProject'=$ViableModule}
+            Mock Get-ValidModuleProjectNames {return $ViableModule}
+            Mock Get-ModuleProjectFunctionNames
+            Mock Get-ModuleProjectAliasNames
+
+            $Arguments = (Get-ArgumentCompleter -CommandName Edit-ModuleCommand -ParameterName CommandName)
+            
+            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+    
+            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 1
+            Assert-MockCalled Get-ModuleProjectAliasNames -Times 1
+        }
+
     }
 }

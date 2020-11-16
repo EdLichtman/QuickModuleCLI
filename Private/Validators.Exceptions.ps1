@@ -24,3 +24,7 @@ class ModuleCommandDoesNotExistException : Exception {
 class ParameterStartsWithUnapprovedVerbException : Exception {
     ParameterStartsWithUnapprovedVerbException([String] $Message) : base($Message) {}
 }
+
+class ValidateModuleProjectExportDestinationIsInvalidException : Exception {
+    ValidateModuleProjectExportDestinationIsInvalidException([String] $Message) : base($Message) {}
+}

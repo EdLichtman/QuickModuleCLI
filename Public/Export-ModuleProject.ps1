@@ -1,12 +1,17 @@
 function Export-ModuleProject {
-    [CmdletBinding(PositionalBinding=$false)]
+    [CmdletBinding(
+        PositionalBinding=$false,
+        SupportsShouldProcess)]
     param (
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [ValidateScript({ValidateModuleProjectExists $_})]
         [string] $ModuleProject,
 
-        [Parameter(Mandatory=$true)][string] $Destination,
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({ValidateModuleProjectExportDestinationIsValid $_})]
+        [string] $Destination,
+        
         [String] $Author,
         [String] $CompanyName,
         [String] $Copyright,
@@ -19,7 +24,7 @@ function Export-ModuleProject {
         [String] $ReleaseNotes,
         [String] $HelpInfoUri
     )  
-    $NestedModuleLocation = Get-ModuleProjectLocation -ModuleProject $NestedModule
+    $ModuleProjectLocation = Get-ModuleProjectLocation -ModuleProject $ModuleProject
 
     $ModuleManifestParameters = @{}
     Add-InputParametersToObject -BoundParameters $PSBoundParameters `
@@ -38,14 +43,9 @@ function Export-ModuleProject {
             'HelpInfoUri'
         )
 
-    Update-ModuleProject -NestedModule $NestedModule @ModuleManifestParameters 
+    Update-ModuleProject -ModuleProject $ModuleProject @ModuleManifestParameters 
 
-    $ModuleDirectories = $env:PSModulePath.Split(';')
-    if ($ModuleDirectories -contains $Destination) {
-        throw 'Cannot export module to a PSModule directory. Export-ModuleProject should be used to export your Nested Module to be imported into the QuickModuleCLI package. If you wish to package the module for import as a separate module, use the command Split-ModuleProject instead.'
-    }
-
-    Copy-Item -Path $NestedModuleLocation -Destination $Destination -Recurse;
+    Copy-Item -Path $ModuleProjectLocation -Destination $Destination -Recurse;
 }
 
 Register-ArgumentCompleter -CommandName Export-ModuleProject -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
