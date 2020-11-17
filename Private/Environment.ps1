@@ -241,7 +241,33 @@ function Remove-ModuleProjectCommand {
     $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
     Remove-Item $Command
 }
+<#TODO: MOVE THIS TO NEW PRIVATE FUNCTIONS FILE#>
+<#TODO: Test#> 
+function Confirm-Choice {
+    param(
+        [Parameter(Mandatory=$True)][String]$Title,
+        [Parameter(Mandatory=$True)][String]$Prompt,
+        [Parameter(Mandatory=$False)][Switch]$DefaultsToYes
+    )
+    $Default = if ($DefaultsToYes) {
+        0
+    } else {
+        1
+    }
+    return ($Host.UI.PromptForChoice($Title,$Prompt,@('&Yes','&No'), $Default) -eq 0)
+}
+<#TODO: Test#> 
+function Remove-ModuleProjectFolder {
+    param(
+        [Parameter(Mandatory=$true)][String]$ModuleProject
+    )
 
+    $ModuleProjectLocation = Get-ModuleProjectLocation -ModuleProject $ModuleProject
+    $Continue = Confirm-Choice -Title 'Removing Module...' -Prompt "Removing '$ModuleProject' located at '$ModuleProjectLocation'. Are you sure you wish to proceed?"
+    if ($Continue) {
+        Remove-Item $ModuleProjectLocation -Recurse
+    }
+}
 <#FULLY TESTED#>
 function Get-ApprovedVerbs {
     $ApprovedVerbs = [HashSet[String]]::new();
@@ -254,7 +280,7 @@ function Get-ApprovedVerbs {
 <#TODO: MOVE THIS TO NEW PRIVATE FUNCTIONS FILE#>
 function Wait-ForKeyPress {
     Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
-    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+    $null = (Get-HostUI).RawUI.ReadKey('NoEcho,IncludeKeyDown')
 }
 
 <#TODO: MOVE THIS TO NEW PRIVATE FUNCTIONS FILE#>

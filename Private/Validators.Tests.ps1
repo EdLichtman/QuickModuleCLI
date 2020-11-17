@@ -13,8 +13,10 @@ Describe 'Validators' {
         $NonviableModule = "Nonviable"
         $ParameterBindingException = 'System.Management.Automation.ParameterBindingException'
 
+        . "$PSScriptRoot\UI.ps1"
         . "$PSScriptRoot\Environment.ps1"
         . "$PSScriptRoot\ArgumentCompleters.ps1"
+        . "$PSScriptRoot\ArgumentTransformations.ps1"
         . "$PSScriptRoot\Validators.ps1"
 
         Remove-Sandbox

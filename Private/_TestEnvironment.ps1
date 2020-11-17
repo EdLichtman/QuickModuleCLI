@@ -1,4 +1,4 @@
-function Get-SandboxBaseFolder { return "$PSScriptRoot\..\Tests\Sandbox"; }
+function Get-SandboxBaseFolder { return "$PSScriptRoot\..\TestSandbox"; }
 function Get-SandboxNestedModulesFolder { return "$(Get-SandboxBaseFolder)\Modules"; }
 function Get-SandboxFunctionsFolder { return "$(Get-SandboxBaseFolder)\Public"; }
 function Get-SandboxPrivateFunctionsFolder { return "$(Get-SandboxBaseFolder)\Private" }

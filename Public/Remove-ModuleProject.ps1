@@ -1,15 +1,13 @@
 function Remove-ModuleProject {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory=$true)]
-        [ValidateModuleProjectExists()]
-        [ArgumentCompleter({(Get-ModuleProjectChoices)})]
-        [string] $NestedModule
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ValidateModuleProjectExists $_})]
+        [string] $ModuleProject
     )
-    $ModuleDirectory = Get-ModuleProjectLocation -ModuleProject $NestedModule
     
-    $Continue = $Host.UI.PromptForChoice("Module found at: '$ModuleDirectory'", "Are you sure you would like to delete?", @('&Yes','&No'), 1);
-    if ($Continue -eq 0) {
-        Remove-Item $ModuleDirectory -Recurse
-    }
+    Remove-ModuleProjectFolder -ModuleProject $ModuleProject
+
 }
+Register-ArgumentCompleter -CommandName Remove-ModuleProject -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

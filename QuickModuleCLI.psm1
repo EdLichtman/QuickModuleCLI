@@ -1,4 +1,5 @@
 . "$PSScriptRoot\Private\Variables.ps1"
+. "$PSScriptRoot\Private\UI.ps1"
 . "$PSScriptRoot\Private\Environment.ps1"
 . "$PSScriptRoot\Private\ArgumentCompleters.ps1"
 . "$PSScriptRoot\Private\ArgumentTransformations.ps1"

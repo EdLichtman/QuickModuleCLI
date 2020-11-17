@@ -9,6 +9,7 @@ describe 'Argument Transformations' {
         $FunctionsFolder = Get-SandboxFunctionsFolder
         $PrivateFunctionsFolder = Get-SandboxPrivateFunctionsFolder
 
+        . "$PSScriptRoot\UI.ps1"
         . "$PSScriptRoot\Environment.ps1"
         . "$PSScriptRoot\ArgumentCompleters.ps1"
         . "$PSScriptRoot\ArgumentTransformations.ps1"
