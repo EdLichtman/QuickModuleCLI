@@ -31,12 +31,19 @@ function ValidateModuleProjectDoesNotExist {
     return $True
 }
 
-<#Fully Tested#>
+<#Fully Tested -- todo: Test with new addition of Get-EnvironmentalModuleDirectories#>
 function ValidateModuleDoesNotExist {
     param ($ModuleProject) 
     if ($ModuleProject) {
         if (Get-Module $moduleProject) {
             throw (New-Object ModuleExistsException "Module already exists by the name '$moduleProject'")
+        }
+
+        $ModuleDirectories = Get-EnvironmentModuleDirectories
+        foreach($Directory in $ModuleDirectories) {
+            if ($ModuleProject -in (Get-ChildItem $Directory -Directory).Name) {
+                throw (New-Object ModuleExistsException "Module already exists by the name '$moduleProject'")
+            }
         }
     }
     return $True
@@ -150,8 +157,8 @@ function ValidateModuleProjectExportDestinationIsValid {
     if ($Destination -eq $ModuleProjectsFolder) {
         throw (New-Object ModuleProjectExportDestinationIsInvalidException "Cannot export module to ModuleProjects directory. $LimitationsText")
     }
-    $ModuleDirectories = $env:PSModulePath.Split(';')
-    if ($ModuleDirectories -contains $Destination) {
+
+    if ((Get-EnvironmentModuleDirectories) -contains $Destination) {
         throw (New-Object ModuleProjectExportDestinationIsInvalidException "Cannot export module to a PSModule directory. $LimitationsText")
     }
 
@@ -169,5 +176,31 @@ function ValidateModuleCommandMoveDestinationIsValid {
         throw (New-Object ModuleCommandMoveDestinationIsInvalidException 'SourceModuleProject must not be the same as DestinationModuleProject')
     }
 
+    return $True
+}
+
+<#Todo: Test#>
+function ValidateModuleProjectForImportIsValid {
+    param( 
+        [String] $Path
+    )
+
+    if (!(Test-Path $Path)) {
+        throw (New-Object 'ItemNotFoundException' 'Please enter a valid Module path for import')
+    }
+    $ModuleProjectItem = Get-Item $Path
+    $ModuleName = $ModuleProjectItem.Name
+
+    ValidateModuleProjectDoesNotExist -ModuleProject $ModuleName | Out-Null
+    ValidateModuleDoesNotExist -ModuleProject $ModuleName | Out-Null
+
+    if (!(Test-Path "$Path\$ModuleName.psd1") `
+        -or !(Test-Path "$Path\$ModuleName.psm1") `
+        -or !(Test-Path "$Path\Functions") `
+        -or !(Test-Path "$Path\Aliases")) {
+            #todo -- add more validation, like do all the functions and Aliases only hold 1 base function or alias? Does psd1 have DefaultPrefix?
+            throw ModuleProjectUnsupportedForImportException "This module is not supported for import by QuickModuleCLI"
+        }
+    
     return $True
 }

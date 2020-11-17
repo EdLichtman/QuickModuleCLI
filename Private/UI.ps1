@@ -13,14 +13,16 @@ function Confirm-Choice {
     return ($Host.UI.PromptForChoice($Title,$Prompt,@('&Yes','&No'), $Default) -eq 0)
 }
 
-<#TODO: MOVE THIS TO NEW PRIVATE FUNCTIONS FILE#>
 function Wait-ForKeyPress {
     Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
-    $null = (Get-HostUI).RawUI.ReadKey('NoEcho,IncludeKeyDown')
+    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
 }
 
-<#TODO: MOVE THIS TO NEW PRIVATE FUNCTIONS FILE#>
-function Open-PowershellEditor{ 
+function Open-PowershellEditor { 
     param([String]$Path)
     powershell.exe $Path
+}
+
+function Get-EnvironmentModuleDirectories {
+    return ($env:PSModulePath.Split(';') | ForEach-Object { Get-Item $_ }).FullName
 }

@@ -8,6 +8,7 @@ describe 'Export-ModuleProject' {
         $ModuleProjectsFolder = Get-SandboxNestedModulesFolder
         $FunctionsFolder = Get-SandboxFunctionsFolder
         $PrivateFunctionsFolder = Get-SandboxPrivateFunctionsFolder
+        $PSProfileFolder = "$BaseFolder\PSProfileModules"
 
         . "$PSScriptRoot\..\Private\UI.ps1"
         . "$PSScriptRoot\..\Private\Environment.ps1"
@@ -62,11 +63,11 @@ describe 'Export-ModuleProject' {
         }
 
         it 'throws error if attempting to copy module project to designated PowershellModule location' {
+            Mock Get-EnvironmentModuleDirectories {return @($PSProfileFolder)}
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestFunction -ModuleName $ViableModule -FunctionName 'Get-Foo' -FunctionText "Write-Output 'Foo'"
 
-            $PSProfile = $env:PSModulePath.Split(';')[0]
-            $err = { Export-ModuleProject -ModuleProject $ViableModule -Destination $PSProfile -WhatIf } | Should -Throw -PassThru
+            $err = { Export-ModuleProject -ModuleProject $ViableModule -Destination $PSProfileFolder -WhatIf } | Should -Throw -PassThru
             $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
             $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ModuleProjectExportDestinationIsInvalidException'
         }

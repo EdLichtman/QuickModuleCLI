@@ -32,3 +32,7 @@ class ModuleProjectExportDestinationIsInvalidException : Exception {
 class ModuleCommandMoveDestinationIsInvalidException : Exception {
     ModuleCommandMoveDestinationIsInvalidException([String] $Message) : base($Message) {}
 }
+
+class ModuleProjectUnsupportedForImportException : ArgumentException {
+    ModuleProjectUnsupportedForImportException([String] $Message) : base($Message) {}
+}

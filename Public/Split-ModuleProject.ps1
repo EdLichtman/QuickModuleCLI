@@ -43,7 +43,7 @@ function Split-ModuleProject {
 
     Edit-ModuleManifest -psd1Location $psd1Location @ModuleManifestParameters 
 
-    $ModuleDirectories = $env:PSModulePath.Split(';')
+    $ModuleDirectories = Get-EnvironmentModuleDirectories
     $ModulesDirectory = $ModuleDirectories | Where-Object {$_.StartsWith((Split-Path $Profile))}
 
     if (!(Test-Path "$ModulesDirectory\$NestedModule")) {

@@ -241,21 +241,6 @@ function Remove-ModuleProjectCommand {
     $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
     Remove-Item $Command
 }
-<#TODO: MOVE THIS TO NEW PRIVATE FUNCTIONS FILE#>
-<#TODO: Test#> 
-function Confirm-Choice {
-    param(
-        [Parameter(Mandatory=$True)][String]$Title,
-        [Parameter(Mandatory=$True)][String]$Prompt,
-        [Parameter(Mandatory=$False)][Switch]$DefaultsToYes
-    )
-    $Default = if ($DefaultsToYes) {
-        0
-    } else {
-        1
-    }
-    return ($Host.UI.PromptForChoice($Title,$Prompt,@('&Yes','&No'), $Default) -eq 0)
-}
 <#TODO: Test#> 
 function Remove-ModuleProjectFolder {
     param(
@@ -268,6 +253,7 @@ function Remove-ModuleProjectFolder {
         Remove-Item $ModuleProjectLocation -Recurse
     }
 }
+
 <#FULLY TESTED#>
 function Get-ApprovedVerbs {
     $ApprovedVerbs = [HashSet[String]]::new();
@@ -275,18 +261,6 @@ function Get-ApprovedVerbs {
     | ForEach-Object {$ApprovedVerbs.Add($_.Verb)} | Out-Null;
 
     return $ApprovedVerbs;
-}
-
-<#TODO: MOVE THIS TO NEW PRIVATE FUNCTIONS FILE#>
-function Wait-ForKeyPress {
-    Write-Host -NoNewline -Object 'Press any key when you are finished editing...' -ForegroundColor Yellow
-    $null = (Get-HostUI).RawUI.ReadKey('NoEcho,IncludeKeyDown')
-}
-
-<#TODO: MOVE THIS TO NEW PRIVATE FUNCTIONS FILE#>
-function Open-PowershellEditor{ 
-    param([String]$Path)
-    powershell.exe $Path
 }
 
 <#TODO: Find a new place for this and Make Tests#>
