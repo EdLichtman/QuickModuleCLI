@@ -21,7 +21,7 @@ function Copy-ModuleCommand {
         [ValidateScript({ValidateModuleCommandDoesNotExist $_})]
         $DestinationCommandName
     )
-    Assert-CommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $SourceCommandName
+    ValidateCommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $SourceCommandName
 
     $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $SourceCommandName
 

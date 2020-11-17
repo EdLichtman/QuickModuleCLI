@@ -231,6 +231,17 @@ function Get-ModuleProjectCommandDefinition {
     return ($CommandType, $CommandDefinition)
 }
 
+<#TODO: Test#>
+function Remove-ModuleProjectCommand {
+    param(
+        [Parameter(Mandatory=$true)][String]$ModuleProject,
+        [Parameter(Mandatory=$true)][String]$CommandName
+    )
+
+    $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
+    Remove-Item $Command
+}
+
 <#FULLY TESTED#>
 function Get-ApprovedVerbs {
     $ApprovedVerbs = [HashSet[String]]::new();

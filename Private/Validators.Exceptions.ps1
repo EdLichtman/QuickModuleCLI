@@ -25,6 +25,10 @@ class ParameterStartsWithUnapprovedVerbException : Exception {
     ParameterStartsWithUnapprovedVerbException([String] $Message) : base($Message) {}
 }
 
-class ValidateModuleProjectExportDestinationIsInvalidException : Exception {
-    ValidateModuleProjectExportDestinationIsInvalidException([String] $Message) : base($Message) {}
+class ModuleProjectExportDestinationIsInvalidException : Exception {
+    ModuleProjectExportDestinationIsInvalidException([String] $Message) : base($Message) {}
+}
+
+class ModuleCommandMoveDestinationIsInvalidException : Exception {
+    ModuleCommandMoveDestinationIsInvalidException([String] $Message) : base($Message) {}
 }

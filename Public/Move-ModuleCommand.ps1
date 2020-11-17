@@ -16,20 +16,21 @@ function Move-ModuleCommand {
         [ValidateScript({ValidateModuleProjectExists $_})]
         [string] $DestinationModuleProject
     )
-    Assert-CommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $CommandName
-    
-    $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $CommandName
+    ValidateCommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $CommandName
+    ValidateModuleCommandMoveDestinationIsValid -SourceModuleProject $SourceModuleProject -DestinationModuleProject $DestinationModuleProject
 
-    Remove-ModuleCommand -ModuleProject $SourceModuleProject -CommandName $CommandName
+    $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $CommandName
+    Remove-ModuleProjectCommand -ModuleProject $SourceModuleProject -CommandName $CommandName
+
     if ($CommandType -EQ 'Function') {
         New-ModuleProjectFunction -ModuleProject $DestinationModuleProject -CommandName $CommandName -Text $CommandBlock
     } elseif ($CommandType -EQ 'Alias') {
        New-ModuleProjectAlias -ModuleProject $DestinationModuleProject -Alias $CommandName -CommandName $CommandBlock
     }
 
-    #Update-ModuleProject -ModuleProject $ModuleProject
-    #Update-ModuleProject -ModuleProject $DestinationModuleProject
-    #Import-Module $BaseModuleName -Force
+    Update-ModuleProject -ModuleProject $SourceModuleProject
+    Update-ModuleProject -ModuleProject $DestinationModuleProject
+    Import-Module $BaseModuleName -Force
 }
 
 Register-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName SourceModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

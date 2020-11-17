@@ -28,7 +28,7 @@ Describe 'Validators' {
     AfterAll {
         Remove-Sandbox
     }
-    Describe 'ValidateModuleProjectExistsAttribute' {
+    Describe 'ValidateModuleProjectExists' {
         BeforeEach {
             function Test-ModuleProjectExistsFunction{
                 param(
@@ -58,7 +58,7 @@ Describe 'Validators' {
         }
     }
 
-    describe 'ValidateModuleProjectDoesNotExistAttribute' {
+    describe 'ValidateModuleProjectDoesNotExist' {
         BeforeEach {
             function Test-ModuleProjectDoesNotExistFunction{
                 param(
@@ -89,7 +89,7 @@ Describe 'Validators' {
         }
     }
 
-    describe 'ValidateModuleDoesNotExistAttribute' {
+    describe 'ValidateModuleDoesNotExist' {
         BeforeEach {
             function Test-ModuleDoesNotExistFunction{
                 param(
@@ -111,38 +111,7 @@ Describe 'Validators' {
         }
     }
 
-    describe 'ValidateModuleCommandExistsAttribute' {
-        BeforeEach {
-            function Test-ModuleCommandExistsFunction {
-                param( 
-                    [ValidateScript({ValidateModuleCommandExists $_})]
-                    [String]
-                    $CommandName
-                    )
-            }
-        }
-
-        it 'Does not error if command exists' {
-            Add-TestModule -Name '_First' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestFunction -ModuleName $ViableModule -FunctionName 'Get-Foo'
-            { Test-ModuleCommandExistsFunction -CommandName 'Get-Foo' } | Should -Not -Throw
-        }
-
-        it 'Errors if command does not exist' {
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-
-            { Test-ModuleCommandExistsFunction -CommandName 'Get-Foo' } | Should -Throw -ExceptionType $ParameterBindingException
-        }
-
-        it 'Errors if known command is not a module command' {
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-
-            { Test-ModuleCommandExistsFunction -CommandName 'Write-Output' } | Should -Throw -ExceptionType $ParameterBindingException
-        }
-    }
-
-    describe 'ValidateModuleCommandDoesNotExistAttribute' {
+    describe 'ValidateModuleCommandDoesNotExist' {
         BeforeEach {
             function Test-ModuleCommandDoesNotExistFunction {
                 param( 
@@ -176,7 +145,7 @@ Describe 'Validators' {
         }
     }
 
-    describe 'Assert-CommandExistsInModule' {
+    describe 'ValidateCommandExistsInModule' {
         BeforeEach {
             function Test-CommandExistsInModuleFunction {
                 param( 
@@ -186,7 +155,7 @@ Describe 'Validators' {
                     [String]
                     $CommandName
                     )
-                    Assert-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
+                    ValidateCommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
             }
         }
 
@@ -218,7 +187,7 @@ Describe 'Validators' {
 
     }
 
-    describe 'ValidateParameterStartsWithApprovedVerbAttribute' {
+    describe 'ValidateParameterStartsWithApprovedVerb' {
         BeforeEach {
             function Test-Attribute{
                 param(

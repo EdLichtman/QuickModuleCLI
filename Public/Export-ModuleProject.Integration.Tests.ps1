@@ -58,7 +58,7 @@ describe 'Export-ModuleProject' {
 
             $err = { Export-ModuleProject -ModuleProject $ViableModule -Destination $ModuleProjectsFolder -WhatIf } | Should -Throw -PassThru
             $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
-            $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ValidateModuleProjectExportDestinationIsInvalidException'
+            $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ModuleProjectExportDestinationIsInvalidException'
         }
 
         it 'throws error if attempting to copy module project to designated PowershellModule location' {
@@ -68,7 +68,7 @@ describe 'Export-ModuleProject' {
             $PSProfile = $env:PSModulePath.Split(';')[0]
             $err = { Export-ModuleProject -ModuleProject $ViableModule -Destination $PSProfile -WhatIf } | Should -Throw -PassThru
             $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
-            $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ValidateModuleProjectExportDestinationIsInvalidException'
+            $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ModuleProjectExportDestinationIsInvalidException'
         }
     }
 

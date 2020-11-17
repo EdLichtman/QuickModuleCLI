@@ -2,6 +2,7 @@ using namespace System.Management.Automation;
 
 . "$PSScriptRoot\Validators.Exceptions.ps1"
 
+<#Fully Tested#>
 function ValidateModuleProjectExists {
     param($ModuleProject) 
     if ($ModuleProject) {
@@ -18,15 +19,7 @@ function ValidateModuleProjectExists {
     return $true
 
 }
-
-class ValidateModuleProjectExistsAttribute : ValidateArgumentsAttribute 
-{
-    [void]  Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics)
-    {
-        $moduleProject = $arguments
-        ValidateModuleProjectExists -ModuleProject $ModuleProject
-    }
-}
+<#Fully Tested#>
 function ValidateModuleProjectDoesNotExist {
     param($ModuleProject) 
     if ($ModuleProject) {
@@ -37,15 +30,8 @@ function ValidateModuleProjectDoesNotExist {
     }
     return $True
 }
-class ValidateModuleProjectDoesNotExistAttribute : ValidateArgumentsAttribute 
-{
-    [void]  Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics)
-    {
-        $moduleProject = $arguments
-       ValidateModuleProjectExists $ModuleProject
-    }
-}
 
+<#Fully Tested#>
 function ValidateModuleDoesNotExist {
     param ($ModuleProject) 
     if ($ModuleProject) {
@@ -55,16 +41,9 @@ function ValidateModuleDoesNotExist {
     }
     return $True
 }
-class ValidateModuleDoesNotExistAttribute : ValidateArgumentsAttribute 
-{
-    [void]  Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics)
-    {
-        $moduleProject = $arguments
-        ValidateModuleDoesNotExist $ModuleProject
-    }
-}
 
 <#Internal#>
+<#Fully Tested#>
 function Test-CommandExistsInModule {
     param(
         [String] $ModuleProject,
@@ -85,7 +64,8 @@ function Test-CommandExistsInModule {
 }
 <#/Internal#>
 
-function Assert-CommandExistsInModule {
+<#Fully Tested#>
+function ValidateCommandExistsInModule {
     param(
         [String] $ModuleProject,
         [String] $CommandName
@@ -96,16 +76,7 @@ function Assert-CommandExistsInModule {
     }
 }
 
-function Test-ModuleCommandExists {
-    $ModuleProjects = Get-ValidModuleProjectNames;
-    foreach($ModuleProject in $ModuleProjects) {
-        if (Test-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName) {
-            return $true;
-        }
-    }
-
-    return $false;
-}
+<#TODO: Test #>
 function ValidateModuleCommandExists {
     param($CommandName)
     if ($CommandName) {
@@ -120,15 +91,8 @@ function ValidateModuleCommandExists {
     }
     return $True
 }
-class ValidateModuleCommandExistsAttribute : ValidateArgumentsAttribute 
-{
-    [void] Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics) 
-    {
-        $CommandName = $arguments;
-        ValidateModuleCommandExists $CommandName
-    }
-}
 
+<#TODO: Test#>
 function ValidateCommandExists {
     param($CommandName)
     $ModuleProjects = Get-ValidModuleProjectNames;
@@ -144,15 +108,7 @@ function ValidateCommandExists {
     return $True
 }
 
-class ValidateCommandExistsAttribute : ValidateArgumentsAttribute 
-{
-    [void] Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics) 
-    {
-        $CommandName = $arguments;   
-        ValidateCommandExists -CommandName $CommandName
-    }
-}
-
+<#Fully Tested#>
 function ValidateModuleCommandDoesNotExist {
     param($CommandName) 
     if ($CommandName) {
@@ -172,22 +128,7 @@ function ValidateModuleCommandDoesNotExist {
     
     return $True
 }
-class ValidateModuleCommandDoesNotExistAttribute : ValidateArgumentsAttribute 
-{
-    [void] Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics) 
-    {
-        $CommandName = $arguments;
-        ValidateModuleCommandDoesNotExist -CommandName $CommandName
-    }
-}
-
-function Test-CommandStartsWithApprovedVerb {
-    param([String]$CommandName)
-    $chosenVerb = $commandName.Split('-')[0]
-    $ApprovedVerbs = Get-ApprovedVerbs;
-    return ($ApprovedVerbs.Contains($chosenVerb));
-}
-
+<#Fully Tested#>
 function ValidateCommandStartsWithApprovedVerb {
     param([String]$Command) 
     if ($Command) {
@@ -201,27 +142,31 @@ function ValidateCommandStartsWithApprovedVerb {
     return $True
 }
 
-# https://powershellexplained.com/2017-02-20-Powershell-creating-parameter-validators-and-transforms/
-class ValidateParameterStartsWithApprovedVerbAttribute : ValidateArgumentsAttribute 
-{
-    [void]  Validate([object]$arguments, [EngineIntrinsics]$engineIntrinsics)
-    {
-        $Command = $arguments
-        ValidateCommandStartsWithApprovedVerb -Command $Command
-    }
-}
-
 #TODO: Test
 function ValidateModuleProjectExportDestinationIsValid {
     param([String]$Destination) 
 
     $LimitationsText = 'Export-ModuleProject should be used to export your ModuleProject without clobber. If you wish to package the module for import as a separate module, use the command Split-ModuleProject instead.'
     if ($Destination -eq $ModuleProjectsFolder) {
-        throw (New-Object ValidateModuleProjectExportDestinationIsInvalidException "Cannot export module to ModuleProjects directory. $LimitationsText")
+        throw (New-Object ModuleProjectExportDestinationIsInvalidException "Cannot export module to ModuleProjects directory. $LimitationsText")
     }
     $ModuleDirectories = $env:PSModulePath.Split(';')
     if ($ModuleDirectories -contains $Destination) {
-        throw (New-Object ValidateModuleProjectExportDestinationIsInvalidException "Cannot export module to a PSModule directory. $LimitationsText")
+        throw (New-Object ModuleProjectExportDestinationIsInvalidException "Cannot export module to a PSModule directory. $LimitationsText")
+    }
+
+    return $True
+}
+
+#TODO: Test
+function ValidateModuleCommandMoveDestinationIsValid {
+    param(
+        [String]$SourceModuleProject,
+        [String]$DestinationModuleProject
+    )
+
+    if ($SourceModuleProject -eq $DestinationModuleProject) {
+        throw (New-Object ModuleCommandMoveDestinationIsInvalidException 'SourceModuleProject must not be the same as DestinationModuleProject')
     }
 
     return $True

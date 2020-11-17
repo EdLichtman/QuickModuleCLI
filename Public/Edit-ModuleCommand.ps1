@@ -12,7 +12,7 @@ function Edit-ModuleCommand {
         [string]$CommandName
         
     )
-    Assert-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
+    ValidateCommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
 
     $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
     Open-PowershellEditor -Path $Command.FullName

@@ -11,11 +11,9 @@ function Remove-ModuleCommand {
         [ValidateScript({ValidateModuleCommandExists $_})]
         [string]$CommandName
     )
-    Assert-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
-    
-    $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
-    Remove-Item $Command
+    ValidateCommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
 
+    Remove-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
     Update-ModuleProject -ModuleProject $ModuleProject
     Import-Module $BaseModuleName -Force
 }
