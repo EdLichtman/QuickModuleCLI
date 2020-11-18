@@ -9,5 +9,6 @@ function Remove-ModuleProject {
     
     Remove-ModuleProjectFolder -ModuleProject $ModuleProject
 
+    Import-Module $BaseModuleName -Force
 }
 Register-ArgumentCompleter -CommandName Remove-ModuleProject -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

@@ -59,7 +59,6 @@ describe 'Remove-ModuleProject' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestFunction -ModuleName $ViableModule -FunctionName 'Write-Foo' -FunctionText  "return 'Foo'"
     
-            $ExpectedPath = Get-ModuleProjectLocation -ModuleProject $ViableModule
             Remove-ModuleProject -ModuleProject $ViableModule 
             
             Assert-MockCalled Remove-ModuleProjectFolder -Times 1 -ParameterFilter { $ModuleProject -eq $ViableModule}
@@ -83,6 +82,17 @@ describe 'Remove-ModuleProject' {
             Remove-ModuleProject -ModuleProject $ViableModule
 
             (Get-ValidModuleProjects).Name | Should -Be $ViableModule
+        }
+
+        it 'Should try to re-import the ModuleProject' {
+            Mock Confirm-Choice -MockWith {return $True}
+
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestFunction -ModuleName $ViableModule -FunctionName 'Write-Foo' -FunctionText 'Write-Output "Hello World"' -WhatIf
+    
+            Remove-ModuleProject -ModuleProject $ViableModule
+
+            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True}
         }
     }
 

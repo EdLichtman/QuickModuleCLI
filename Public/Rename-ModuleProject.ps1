@@ -2,24 +2,25 @@ function Rename-ModuleProject {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
-        [ValidateModuleProjectExists()]
-        [ArgumentCompleter([ModuleProjectArgument])]
-        [string] $NestedModule,
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ValidateModuleProjectExists $_})]
+        [string] $SourceModuleProject,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleProjectDoesNotExist()]
-        [string] $DestinationNestedModule
+        [ValidateScript({ValidateModuleProjectDoesNotExist $_})]
+        [string] $DestinationModuleProject
     )
 
-    $NestedModuleDirectory = Get-ModuleProjectLocation -ModuleProject $NestedModule
-    $DestinationModuleDirectory = Get-ModuleProjectLocation -ModuleProject $DestinationNestedModule
-    Copy-Item -Path $NestedModuleDirectory -Destination $DestinationModuleDirectory -Recurse
+    $SourceModuleProjectLocation = Get-ModuleProjectLocation -ModuleProject $SourceModuleProject
+    $DestinationModuleProjectLocation = Get-ModuleProjectLocation -ModuleProject $DestinationModuleProject
 
-    $DestinationPsd1Location = "$DestinationModuleDirectory\$DestinationNestedModule.psd1"
-    Rename-Item -Path "$DestinationModuleDirectory\$NestedModule.psd1" -NewName $DestinationPsd1Location
-    Rename-Item -Path "$DestinationModuleDirectory\$NestedModule.psm1" -NewName "$DestinationModuleDirectory\$DestinationNestedModule.psm1"
+    Rename-Item -Path $SourceModuleProjectLocation -NewName $DestinationModuleProject
+    Rename-Item -Path "$DestinationModuleProjectLocation\$SourceModuleProject.psd1" -NewName "$DestinationModuleProject.psd1"
+    Rename-Item -Path "$DestinationModuleProjectLocation\$SourceModuleProject.psm1" -NewName "$DestinationModuleProject.psm1"
 
-    Edit-ModuleManifest -psd1Location "$DestinationModuleDirectory\$DestinationNestedModule.psd1" -RootModule "$DestinationNestedModule.psm1"
-    #Import-Module $BaseModuleName -Force
+    Edit-ModuleManifest -psd1Location "$DestinationModuleProjectLocation\$DestinationModuleProject.psd1" -RootModule "$DestinationModuleProject.psm1"
+    Import-Module $BaseModuleName -Force
 }
+
+Register-ArgumentCompleter -CommandName Rename-ModuleProject -ParameterName SourceModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
