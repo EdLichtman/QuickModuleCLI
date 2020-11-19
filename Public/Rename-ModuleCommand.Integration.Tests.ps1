@@ -37,13 +37,6 @@ describe 'Rename-ModuleCommand' {
     }
 
     describe 'validations' {
-        it 'throws error if source ModuleProject is null' {
-            $err = { Rename-ModuleCommand -ModuleProject '' -CommandName 'Get-Foo' -NewCommandName 'Test' -WhatIf } | Should -Throw -PassThru
-
-            $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
-            $err.Exception.Message -like '*Null or Empty*' | Should -BeTrue
-        }
-
         it 'throws error if source ModuleProject does not exist' {   
             $err = { Rename-ModuleCommand -ModuleProject $ViableModule -CommandName 'Get-Foo' -NewCommandName 'Test' -WhatIf } | Should -Throw -PassThru
             $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
@@ -136,6 +129,20 @@ describe 'Rename-ModuleCommand' {
     
             Assert-MockCalled Get-ModuleProjectFunctionNames -Times 1
             Assert-MockCalled Get-ModuleProjectAliasNames -Times 1
+        }
+
+        it 'auto-suggests valid Module Command for CommandName with no ModuleProject' {
+            $FakeBoundParameters = @{}
+            Mock Get-ValidModuleProjectNames {return $ViableModule, 'Test'}
+            Mock Get-ModuleProjectFunctionNames
+            Mock Get-ModuleProjectAliasNames
+
+            $Arguments = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName CommandName)
+            
+            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+    
+            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 2
+            Assert-MockCalled Get-ModuleProjectAliasNames -Times 2
         }
 
         it 'auto-suggests valid verb arguments for NewCommandName if CommandName is a function' {
@@ -238,7 +245,7 @@ describe 'Rename-ModuleCommand' {
     
             Rename-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName -NewCommandName $NewFunctionName
     
-            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True}
+            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True -and $Global -eq $True}
         }        
     }
 

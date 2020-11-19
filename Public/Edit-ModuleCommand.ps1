@@ -1,8 +1,7 @@
 function Edit-ModuleCommand {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
+        [Parameter()]
         [ValidateScript({ValidateModuleProjectExists $_})]
         [string]$ModuleProject,
         
@@ -21,5 +20,5 @@ function Edit-ModuleCommand {
     Import-Module $BaseModuleName -Force -Global
 }
 
-Register-ArgumentCompleter -CommandName Edit-ModuleCommand -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
-Register-ArgumentCompleter -CommandName Edit-ModuleCommand -ParameterName CommandName -ScriptBlock (Get-Command Get-CommandFromModuleArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Edit-ModuleCommand -ParameterName ModuleProject -ScriptBlock (Get-Command ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Edit-ModuleCommand -ParameterName CommandName -ScriptBlock (Get-Command CommandFromOptionalModuleArgumentCompleter).ScriptBlock

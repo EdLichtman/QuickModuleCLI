@@ -92,7 +92,7 @@ describe 'Remove-ModuleProject' {
     
             Remove-ModuleProject -ModuleProject $ViableModule
 
-            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True}
+            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True -and $Global -eq $True}
         }
     }
 

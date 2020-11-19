@@ -1,8 +1,7 @@
 function Copy-ModuleCommand {
     [CmdletBinding(SupportsShouldProcess=$True)]
     param(
-        [Parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
+        [Parameter()]
         [ValidateScript({ValidateModuleProjectExists $_})]
         [String]$SourceModuleProject,
 
@@ -21,7 +20,9 @@ function Copy-ModuleCommand {
         [ValidateScript({ValidateModuleCommandDoesNotExist $_})]
         $NewCommandName
     )
-    ValidateCommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $CommandName
+    if ($SourceModuleProject) {
+        ValidateCommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $CommandName
+    }
 
     $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $CommandName
 
@@ -37,7 +38,7 @@ function Copy-ModuleCommand {
 
     # Edit-ModuleCommand -NestedModule $DestinationNestedModule -commandName $NewCommandName
 }
-Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName SourceModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
-Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName CommandName -ScriptBlock (Get-Command Get-CommandFromModuleArgumentCompleter).ScriptBlock
-Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName DestinationModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
-Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName NewCommandName -ScriptBlock (Get-Command Get-NewCommandFromModuleArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName SourceModuleProject -ScriptBlock (Get-Command ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName CommandName -ScriptBlock (Get-Command CommandFromOptionalModuleArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName DestinationModuleProject -ScriptBlock (Get-Command ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName NewCommandName -ScriptBlock (Get-Command NewCommandFromModuleArgumentCompleter).ScriptBlock

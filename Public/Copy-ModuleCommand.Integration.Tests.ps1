@@ -41,14 +41,6 @@ describe 'Copy-ModuleCommand' {
     }
 
     describe 'validations' {
-        it 'throws error if ModuleProject is empty' {
-            
-            $err = {  Copy-ModuleCommand -SourceModuleProject '' -CommandName 'Write-Test' -DestinationModuleProject $ViableModule -NewCommandName 'Write-Test2' } | Should -Throw -PassThru
-    
-            $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
-            $err.Exception.Message -like '*Null or Empty*' | Should -BeTrue
-        }
-
         it 'throws error if module does not exist' {
             $err = {  Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName 'Write-Test' -DestinationModuleProject $ViableModule -NewCommandName 'Write-Test2' } | Should -Throw -PassThru
     
@@ -167,6 +159,20 @@ describe 'Copy-ModuleCommand' {
     
             Assert-MockCalled Get-ModuleProjectFunctionNames -Times 1
             Assert-MockCalled Get-ModuleProjectAliasNames -Times 1
+        }
+
+        it 'auto-suggests valid Module Command for CommandName With no SourceModuleProject' {
+            $FakeBoundParameters = @{}
+            Mock Get-ValidModuleProjectNames {return $ViableModule,'Test'}
+            Mock Get-ModuleProjectFunctionNames
+            Mock Get-ModuleProjectAliasNames
+
+            $Arguments = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName CommandName)
+            
+            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+    
+            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 2
+            Assert-MockCalled Get-ModuleProjectAliasNames -Times 2
         }
 
         it 'auto-suggests valid Module Arguments for Destination Module' {

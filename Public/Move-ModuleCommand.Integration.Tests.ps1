@@ -37,13 +37,6 @@ describe 'Move-ModuleCommand' {
     }
 
     describe 'validations' {
-        it 'throws error if source ModuleProject is null' {
-            $err = { Move-ModuleCommand -SourceModuleProject '' -CommandName 'Get-Foo' -DestinationModuleProject 'Test' -WhatIf } | Should -Throw -PassThru
-
-            $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
-            $err.Exception.Message -like '*Null or Empty*' | Should -BeTrue
-        }
-
         it 'throws error if source ModuleProject does not exist' {   
             $err = { Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName 'Get-Foo' -DestinationModuleProject 'Test' -WhatIf } | Should -Throw -PassThru
             $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
@@ -119,6 +112,20 @@ describe 'Move-ModuleCommand' {
     
             Assert-MockCalled Get-ModuleProjectFunctionNames -Times 1
             Assert-MockCalled Get-ModuleProjectAliasNames -Times 1
+        }
+
+        it 'auto-suggests valid Module Command for CommandName with no SourceModuleProject' {
+            $FakeBoundParameters = @{}
+            Mock Get-ValidModuleProjectNames {return $ViableModule, 'Test'}
+            Mock Get-ModuleProjectFunctionNames
+            Mock Get-ModuleProjectAliasNames
+
+            $Arguments = (Get-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName CommandName)
+            
+            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+    
+            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 2
+            Assert-MockCalled Get-ModuleProjectAliasNames -Times 2
         }
 
         it 'auto-suggests valid Module Arguments for Destination Module' {

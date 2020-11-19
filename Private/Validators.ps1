@@ -105,7 +105,7 @@ function ValidateCommandExists {
     $ModuleProjects = Get-ValidModuleProjectNames;
     foreach($ModuleProject in $ModuleProjects) {
        if (Test-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName) {
-           return;
+           return $True; #todo: Test
        }
     }
 

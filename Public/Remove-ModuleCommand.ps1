@@ -1,8 +1,7 @@
 function Remove-ModuleCommand {
     [CmdletBinding(SupportsShouldProcess)]
     param(
-        [Parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
+        [Parameter()]
         [ValidateScript({ValidateModuleProjectExists $_})]
         [string]$ModuleProject,
         
@@ -15,7 +14,7 @@ function Remove-ModuleCommand {
 
     Remove-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
     Update-ModuleProject -ModuleProject $ModuleProject
-    Import-Module $BaseModuleName -Force -Global #todo test
+    Import-Module $BaseModuleName -Force -Global
 }
-Register-ArgumentCompleter -CommandName Remove-ModuleCommand -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
-Register-ArgumentCompleter -CommandName Remove-ModuleCommand -ParameterName CommandName -ScriptBlock (Get-Command Get-CommandFromModuleArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Remove-ModuleCommand -ParameterName ModuleProject -ScriptBlock (Get-Command ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Remove-ModuleCommand -ParameterName CommandName -ScriptBlock (Get-Command CommandFromOptionalModuleArgumentCompleter).ScriptBlock

@@ -58,5 +58,5 @@ function Get-ModuleProject {
     }
 }
 
-Register-ArgumentCompleter -CommandName Get-ModuleProject -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
-Register-ArgumentCompleter -CommandName Get-ModuleProject -ParameterName CommandName -ScriptBlock (Get-Command Get-CommandFromOptionalModuleArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Get-ModuleProject -ParameterName ModuleProject -ScriptBlock (Get-Command ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Get-ModuleProject -ParameterName CommandName -ScriptBlock (Get-Command CommandFromOptionalModuleArgumentCompleter).ScriptBlock

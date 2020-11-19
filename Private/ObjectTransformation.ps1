@@ -17,8 +17,7 @@ function Get-ReducedPopulatedHashtable {
     [OutputType([Hashtable])]
     <#
 .Synopsis
-Given the $PSBoundParameters, an object to populate and a set of keys, 
-this creates an object from the input parameters.
+Given a Hashtable and a set of keys, this reduces the Hashtable into only those values that are contained within those keys.
     #>
     param (
         [Hashtable] $InputTable,

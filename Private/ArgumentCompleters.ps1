@@ -3,7 +3,7 @@ using namespace System.Collections.Generic
 using namespace System.Management.Automation 
 using namespace System.Management.Automation.Language
 
-function Get-ModuleProjectArgumentCompleter {
+function ModuleProjectArgumentCompleter {
     param (
         [string]      $CommandName ,
         [string]      $ParameterName,
@@ -20,7 +20,7 @@ function Get-ModuleProjectArgumentCompleter {
     }
 }
 
-function Get-ApprovedVerbsArgumentCompleter {
+function ApprovedVerbsArgumentCompleter {
     param (
         [string]      $CommandName ,
         [string]      $ParameterName,
@@ -35,7 +35,7 @@ function Get-ApprovedVerbsArgumentCompleter {
     return $Choices
 }
 
-function Get-CommandFromModuleArgumentCompleter {
+function CommandFromModuleArgumentCompleter {
     param (
         [string]      $CommandName ,
         [string]      $ParameterName,
@@ -65,7 +65,7 @@ function Get-CommandFromModuleArgumentCompleter {
     }  
 }
 
-function Get-CommandFromOptionalModuleArgumentCompleter {
+function CommandFromOptionalModuleArgumentCompleter {
     param (
         [string]      $CommandName ,
         [string]      $ParameterName,
@@ -95,7 +95,7 @@ function Get-CommandFromOptionalModuleArgumentCompleter {
 }
 
 <#TODO: Test#>
-function Get-NewCommandFromModuleArgumentCompleter {
+function NewCommandFromModuleArgumentCompleter {
     param (
         [string]      $CommandName ,
         [string]      $ParameterName,

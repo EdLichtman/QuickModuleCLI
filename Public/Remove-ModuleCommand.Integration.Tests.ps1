@@ -39,14 +39,7 @@ describe 'Remove-ModuleCommand' {
         Remove-Sandbox
     }
 
-    describe 'validations' {
-        it 'throws error if ModuleProject is null' {
-            $err = { Remove-ModuleCommand -ModuleProject '' -CommandName 'Get-Foo' -WhatIf } | Should -Throw -PassThru
-    
-            $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
-            $err.Exception.Message -like '*Null or Empty*' | Should -BeTrue
-        }
-    
+    describe 'validations' {   
         it 'throws error if ModuleProject does not exist' {
             Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
     
@@ -111,6 +104,20 @@ describe 'Remove-ModuleCommand' {
             Assert-MockCalled Get-ModuleProjectFunctionNames -Times 1
             Assert-MockCalled Get-ModuleProjectAliasNames -Times 1
         }
+
+        it 'auto-suggests valid Module Command for CommandName with no ModuleProject' {
+            $FakeBoundParameters = @{}
+            Mock Get-ValidModuleProjectNames {return $ViableModule,'Test'}
+            Mock Get-ModuleProjectFunctionNames
+            Mock Get-ModuleProjectAliasNames
+
+            $Arguments = (Get-ArgumentCompleter -CommandName Remove-ModuleCommand -ParameterName CommandName)
+            
+            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+    
+            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 2
+            Assert-MockCalled Get-ModuleProjectAliasNames -Times 2
+        }
     }
 
     describe 'functionality' {
@@ -157,10 +164,10 @@ describe 'Remove-ModuleCommand' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName
 
-            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True}
+            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True -and $Global -eq $True}
             Remove-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName
 
-            Assert-MockCalled Import-Module -Times 2 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True}
+            Assert-MockCalled Import-Module -Times 2 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True -and $Global -eq $True}
         }
     }
 }

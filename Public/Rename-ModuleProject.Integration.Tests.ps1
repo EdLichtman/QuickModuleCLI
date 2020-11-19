@@ -125,7 +125,7 @@ describe 'Rename-ModuleProject' {
     
             Rename-ModuleProject -SourceModuleProject $ViableModule -DestinationModuleProject 'Test'
 
-            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True}
+            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True -and $Global -eq $True}
         }
     }
 }

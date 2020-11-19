@@ -38,13 +38,6 @@ describe 'Edit-ModuleCommand' {
     }
 
     describe 'validations' {
-        it 'throws error if ModuleProject is null' {
-            $err = {  Edit-ModuleCommand -ModuleProject '' -CommandName 'Write-Test2' } | Should -Throw -PassThru
-    
-            $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
-            $err.Exception.Message -like '*Null or Empty*' | Should -BeTrue
-        }
-
         it 'throws error if module does not exist' {
             $err = {  Edit-ModuleCommand -ModuleProject $ViableModule -CommandName 'Write-Test2' } | Should -Throw -PassThru
     
@@ -142,5 +135,18 @@ describe 'Edit-ModuleCommand' {
             Assert-MockCalled Get-ModuleProjectAliasNames -Times 1
         }
 
+        it 'auto-suggests valid Module Command for CommandName without ModuleProject' {
+            $FakeBoundParameters = @{}
+            Mock Get-ValidModuleProjectNames {return $ViableModule,'Test'}
+            Mock Get-ModuleProjectFunctionNames
+            Mock Get-ModuleProjectAliasNames
+
+            $Arguments = (Get-ArgumentCompleter -CommandName Edit-ModuleCommand -ParameterName CommandName)
+            
+            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+    
+            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 2
+            Assert-MockCalled Get-ModuleProjectAliasNames -Times 2
+        }
     }
 }

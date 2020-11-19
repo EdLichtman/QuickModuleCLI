@@ -42,4 +42,4 @@ function Update-ModuleProject {
 
     Edit-ModuleManifest -psd1Location $psd1Location @ModuleManifestParameters
 }
-Register-ArgumentCompleter -CommandName Update-ModuleProject -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Update-ModuleProject -ParameterName ModuleProject -ScriptBlock (Get-Command ModuleProjectArgumentCompleter).ScriptBlock
