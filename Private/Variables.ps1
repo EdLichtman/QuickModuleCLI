@@ -1,4 +1,4 @@
-$BaseFolder =  "$PSScriptRoot\..\.."
+$BaseFolder =  "$PSScriptRoot\.."
 $BaseModuleName = "QuickModuleCLI"
 $ModuleProjectsFolder = "$BaseFolder\Modules"
 $FunctionsFolder = "$BaseFolder\Public"

@@ -106,7 +106,7 @@ function New-ModuleProjectFunction {
         throw [System.ArgumentException] "Function $CommandName already exists in $ModuleProject"
     }
 
-    New-Item -Path $ModuleFunctionPath -ItemType File
+    New-Item -Path $ModuleFunctionPath -ItemType File | Out-Null
     $functionContent = $Text;
     if (!$Raw) {
         $functionContent = @"
@@ -116,7 +116,7 @@ function $CommandName {
 "@
     }
     
-    Add-Content -Path $ModuleFunctionPath -Value $functionContent
+    Add-Content -Path $ModuleFunctionPath -Value $functionContent 
 }
 
 <#FULLY TESTED#>
@@ -183,7 +183,7 @@ function New-ModuleProjectAlias {
         throw [System.ArgumentException] "Alias $Alias already exists in $ModuleProject"
     }
 
-    New-Item -Path $ModuleAliasPath -ItemType File
+    New-Item -Path $ModuleAliasPath -ItemType File | Out-Null
     $aliasContent = "Set-Alias $Alias $CommandName"
     
     Add-Content -Path $ModuleAliasPath -Value $aliasContent
@@ -356,6 +356,6 @@ function Edit-ModuleManifest {
             $ManifestProperties[$Key] = $PrivateData[$Key]
         }
     }
-    
+
     New-ModuleManifest -Path $psd1Location @ManifestProperties
 }

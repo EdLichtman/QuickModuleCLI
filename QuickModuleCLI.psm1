@@ -3,6 +3,7 @@
 . "$PSScriptRoot\Private\Environment.ps1"
 . "$PSScriptRoot\Private\ArgumentCompleters.ps1"
 . "$PSScriptRoot\Private\ArgumentTransformations.ps1"
+. "$PSScriptRoot\Private\ObjectTransformation.ps1"
 . "$PSScriptRoot\..\Private\Validators.Exceptions.ps1"
 . "$PSScriptRoot\Private\Validators.ps1"
 
