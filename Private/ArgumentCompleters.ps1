@@ -82,11 +82,11 @@ function Get-CommandFromOptionalModuleArgumentCompleter {
 
     foreach($Module in $ModuleProjects) {
         if(!$ModuleProject -or ($ModuleProject -eq $Module)) {
-            $Functions = @(Get-ModuleProjectFunctionNames -ModuleProject $ModuleProject | Where-Object {$_ -like "$WordToComplete*"})
+            $Functions = @(Get-ModuleProjectFunctionNames -ModuleProject $Module | Where-Object {$_ -like "$WordToComplete*"})
             if ($Functions) {
                 $Functions
             }
-            $Aliases = @(Get-ModuleProjectAliasNames -ModuleProject $ModuleProject | Where-Object {$_ -like "$WordToComplete*"})
+            $Aliases = @(Get-ModuleProjectAliasNames -ModuleProject $Module | Where-Object {$_ -like "$WordToComplete*"})
             if ($Aliases) {
                 $Aliases
             }
