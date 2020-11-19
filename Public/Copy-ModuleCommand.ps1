@@ -9,7 +9,7 @@ function Copy-ModuleCommand {
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [ValidateScript({ValidateModuleCommandExists $_})]
-        [String]$SourceCommandName,
+        [String]$CommandName,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
@@ -19,24 +19,25 @@ function Copy-ModuleCommand {
         [Parameter(Mandatory=$true)][String]
         [ValidateNotNullOrEmpty()]
         [ValidateScript({ValidateModuleCommandDoesNotExist $_})]
-        $DestinationCommandName
+        $NewCommandName
     )
-    ValidateCommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $SourceCommandName
+    ValidateCommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $CommandName
 
-    $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $SourceCommandName
+    $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $CommandName
 
     if ($CommandType -EQ 'Function') {
-        ValidateCommandStartsWithApprovedVerb -Command $DestinationCommandName
-        New-ModuleProjectFunction -ModuleProject $DestinationModuleProject -CommandName $DestinationCommandName -Text $CommandBlock
-        Edit-ModuleCommand -ModuleProject $DestinationModuleProject -CommandName $DestinationCommandName
+        ValidateCommandStartsWithApprovedVerb -Command $NewCommandName
+        New-ModuleProjectFunction -ModuleProject $DestinationModuleProject -CommandName $NewCommandName -Text $CommandBlock
+        Edit-ModuleCommand -ModuleProject $DestinationModuleProject -CommandName $NewCommandName
     } elseif ($CommandType -EQ 'Alias') {
-       New-ModuleProjectAlias -ModuleProject $DestinationModuleProject -Alias $DestinationCommandName -CommandName $CommandBlock
+       New-ModuleProjectAlias -ModuleProject $DestinationModuleProject -Alias $NewCommandName -CommandName $CommandBlock
     }
 
     # Update-ModuleProject -NestedModule $DestinationNestedModule
 
-    # Edit-ModuleCommand -NestedModule $DestinationNestedModule -commandName $DestinationCommandName
+    # Edit-ModuleCommand -NestedModule $DestinationNestedModule -commandName $NewCommandName
 }
 Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName SourceModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
-Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName SourceCommandName -ScriptBlock (Get-Command Get-CommandFromModuleArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName CommandName -ScriptBlock (Get-Command Get-CommandFromModuleArgumentCompleter).ScriptBlock
 Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName DestinationModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName NewCommandName -ScriptBlock (Get-Command Get-NewCommandFromModuleArgumentCompleter).ScriptBlock

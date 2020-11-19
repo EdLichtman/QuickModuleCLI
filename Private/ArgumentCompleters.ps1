@@ -22,24 +22,6 @@ function Get-ModuleProjectArgumentCompleter {
     }
 }
 
-#REMOVE THIS -- INSTEAD USE GET-ARGUMENTCOMPLETER FOR TESTABILITY
-#https://jamesone111.wordpress.com/2019/09/23/the-classy-way-to-complete-and-validate-powershell-parameters/
-class ModuleProjectArgument : IArgumentCompleter {
-    [IEnumerable[CompletionResult]] CompleteArgument(
-        [string]      $CommandName ,
-        [string]      $ParameterName,
-        [string]      $WordToComplete,
-        [CommandAst]  $CommandAst,
-        [IDictionary] $FakeBoundParameters
-    )
-    { 
-        $CompletionResults = [List[CompletionResult]]::new()
-        @(Get-ModuleProjectArgumentCompleter $WordToComplete) | ForEach-Object {$CompletionResults.Add([CompletionResult]::new($_))}
-
-        return $CompletionResults
-    }
-}
-
 function Get-ApprovedVerbsArgumentCompleter {
     param (
         [string]      $CommandName ,
@@ -55,23 +37,6 @@ function Get-ApprovedVerbsArgumentCompleter {
     return $Choices
 }
 
-#REMOVE THIS -- INSTEAD USE GET-ARGUMENTCOMPLETER FOR TESTABILITY
-class ApprovedVerbsArgument : IArgumentCompleter {
-    [IEnumerable[CompletionResult]] CompleteArgument(
-        [string]      $CommandName ,
-        [string]      $ParameterName,
-        [string]      $WordToComplete,
-        [CommandAst]  $CommandAst,
-        [IDictionary] $FakeBoundParameters
-    )
-    { 
-        $CompletionResults = [List[CompletionResult]]::new()
-        Get-ApprovedVerbsArgumentCompleter $WordToComplete | ForEach-Object {$CompletionResults.Add([CompletionResult]::new($_))}
-        
-        return $CompletionResults
-    }
-}
-
 function Get-CommandFromModuleArgumentCompleter {
     param (
         [string]      $CommandName ,
@@ -81,8 +46,13 @@ function Get-CommandFromModuleArgumentCompleter {
         [IDictionary] $FakeBoundParameters
     )
 
-    if($FakeBoundParameters.Contains('ModuleProject')) {
-        $ModuleProject = $FakeBoundParameters['ModuleProject']
+    $ModuleProject = if ($FakeBoundParameters.Contains('ModuleProject')) {
+        $FakeBoundParameters['ModuleProject']
+    } elseif ($FakeBoundParameters.Contains('SourceModuleProject')) {
+        $FakeBoundParameters['SourceModuleProject']
+    }
+
+    if($ModuleProject) {
         $Choices = @()
         $ModuleProjects = Get-ValidModuleProjectNames 
         if ($ModuleProject -in $ModuleProjects) {
@@ -103,21 +73,40 @@ function Get-CommandFromModuleArgumentCompleter {
     }  
 }
 
-#REMOVE THIS -- INSTEAD USE GET-ARGUMENTCOMPLETER FOR TESTABILITY
-class CommandFromModuleArgument : IArgumentCompleter {
-    [IEnumerable[CompletionResult]] CompleteArgument(
+<#TODO: Test#>
+function Get-NewCommandFromModuleArgumentCompleter {
+    param (
         [string]      $CommandName ,
         [string]      $ParameterName,
         [string]      $WordToComplete,
         [CommandAst]  $CommandAst,
         [IDictionary] $FakeBoundParameters
     )
-    { 
-        $CompletionResults = [List[CompletionResult]]::new()
-        if($FakeBoundParameters.Contains('ModuleProject')) {
-            Get-CommandFromModuleArgumentCompleter $FakeBoundParameters['ModuleProject'] $WordToComplete | ForEach-Object {$CompletionResults.Add([CompletionResult]::new($_))}
-        }
 
-        return $CompletionResults
+    $ModuleProject = if ($FakeBoundParameters.Contains('ModuleProject')) {
+        $FakeBoundParameters['ModuleProject']
+    } elseif ($FakeBoundParameters.Contains('SourceModuleProject')) {
+        $FakeBoundParameters['SourceModuleProject']
     }
+
+    $CommandName = if ($FakeBoundParameters.Contains('CommandName')) {
+        $FakeBoundParameters['CommandName']
+    } else {''}
+
+    if($ModuleProject -and $CommandName) {
+        $Choices = @()
+        $ModuleProjects = Get-ValidModuleProjectNames 
+        if ($ModuleProject -in $ModuleProjects) {
+            $Functions = Get-ModuleProjectFunctionNames -ModuleProject $ModuleProject | Where-Object {$_ -EQ $CommandName}
+            if ($Functions) { 
+                Get-ApprovedVerbs | 
+                    Where-Object {$_ -like "$WordToComplete*"} | 
+                    ForEach-Object { $Choices += @("$_-") }
+             }
+
+            return @($Choices)
+        } else {
+            throw [InvalidOperationException] 'No Modules Exist!'
+        }
+    }  
 }

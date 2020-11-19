@@ -21,26 +21,25 @@ function Update-ModuleProject {
     )
     $ModuleProjectLocation = Get-ModuleProjectLocation -ModuleProject $ModuleProject
     $psd1Location = "$ModuleProjectLocation\$ModuleProject.psd1"
-
-    $FunctionsToExport = Get-ModuleProjectFunctionNames -ModuleProject $ModuleProject
-    $AliasesToExport = Get-ModuleProjectAliasNames -ModuleProject $ModuleProject
     
-    $ModuleManifestParameters = @{}
-    Add-InputParametersToObject -BoundParameters $PSBoundParameters `
-        -ObjectToPopulate $ModuleManifestParameters `
-        -Keys @(
-            'Author',
-            'CompanyName',
-            'Copyright',
-            'ModuleVersion',
-            'Description',
-            'Tags',
-            'ProjectUri',
-            'LicenseUri',
-            'IconUri',
-            'ReleaseNotes',
-            'HelpInfoUri'
-        )
+    $ModuleManifestParameters = Get-ReducedPopulatedHashtable -InputTable $PSBoundParameters `
+    -Keys @(
+        'Author',
+        'CompanyName',
+        'Copyright',
+        'ModuleVersion',
+        'Description',
+        'Tags',
+        'ProjectUri',
+        'LicenseUri',
+        'IconUri',
+        'ReleaseNotes',
+        'HelpInfoUri'
+    )
 
-    Edit-ModuleManifest -psd1Location $psd1Location @ModuleManifestParameters -FunctionsToExport $FunctionsToExport -AliasesToExport $AliasesToExport
+    $ModuleManifestParameters.FunctionsToExport = Get-ModuleProjectFunctionNames -ModuleProject $ModuleProject
+    $ModuleManifestParameters.AliasesToExport = Get-ModuleProjectAliasNames -ModuleProject $ModuleProject
+
+    Edit-ModuleManifest -psd1Location $psd1Location @ModuleManifestParameters
 }
+Register-ArgumentCompleter -CommandName Update-ModuleProject -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

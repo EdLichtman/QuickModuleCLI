@@ -33,7 +33,7 @@ Describe 'ArgumentCompleters' {
         Remove-Sandbox
     }
 
-    describe 'ModuleProjectArgument' {
+    describe 'Get-ModuleProjectArgument' {
         It 'Uses Tested Get-ValidModuleProjects logic to figure out Valid Choices' {
             Mock Get-ValidModuleProjectNames { return @('Test') }
             Get-ModuleProjectArgumentCompleter ''
@@ -67,7 +67,7 @@ Describe 'ArgumentCompleters' {
         }
     }
 
-    describe 'ApprovedVerbsArgument' {
+    describe 'Get-ApprovedVerbsArgument' {
         It 'Gets approved verbs' {
             $ApprovedVerbs = [HashSet[String]]::new()
             (Get-Verb) | Select-Object -Property Verb | ForEach-Object {$ApprovedVerbs.Add("$($_.Verb)")}
@@ -94,7 +94,7 @@ Describe 'ArgumentCompleters' {
         }
     }
 
-    describe 'CommandFromModuleArgument' {
+    describe 'Get-CommandFromModuleArgument' {
         BeforeAll {
             function Get-FakeBoundParameters{
                 param([String]$ModuleProject)

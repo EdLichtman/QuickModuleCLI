@@ -17,7 +17,6 @@ describe 'Export-ModuleProject' {
         . "$PSScriptRoot\..\Private\ArgumentTransformations.ps1"
         . "$PSScriptRoot\..\Private\Validators.ps1"
         
-        . "$PSScriptRoot\Update-ModuleProject.ps1"
         . "$PSScriptRoot\Export-ModuleProject.ps1"
 
         $ViableModule = "Viable"
@@ -26,7 +25,6 @@ describe 'Export-ModuleProject' {
     }
     BeforeEach {
         New-Sandbox
-        Mock Update-ModuleProject
     }
     AfterEach {
         Remove-Sandbox
@@ -74,50 +72,6 @@ describe 'Export-ModuleProject' {
     }
 
     describe 'functionality' {
-        it 'calls Update-ModuleProject with updated Parameters' {
-            $expectedAuthor = New-Guid
-            $expectedCompanyName = New-Guid
-            $expectedCopyright = New-Guid
-            $expectedModuleVersion = "$(Get-Random -Maximum 10 -Minimum 0).$(Get-Random -Maximum 10 -Minimum 0).$(Get-Random -Maximum 10 -Minimum 0)"
-            $expectedDescription = New-Guid
-            $expectedTags = New-Guid
-            $expectedProjectUri = "http://$(New-Guid)/"
-            $expectedLicenseUri = "http://$(New-Guid)/"
-            $expectedIconUri = "http://$(New-Guid)/"
-            $expectedReleaseNotes = New-Guid
-            $expectedHelpInfoUri = "http://$(New-Guid)/"
-
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestFunction -ModuleName $ViableModule -FunctionName 'Get-Foo' -FunctionText "Write-Output 'Foo'"
-
-            Export-ModuleProject -ModuleProject $ViableModule -Destination $BaseFolder `
-                -Author $expectedAuthor `
-                -CompanyName $expectedCompanyName `
-                -Copyright $expectedCopyright `
-                -ModuleVersion $expectedModuleVersion `
-                -Description $expectedDescription `
-                -Tags $expectedTags `
-                -ProjectUri $expectedProjectUri `
-                -LicenseUri $expectedLicenseUri `
-                -IconUri $expectedIconUri `
-                -ReleaseNotes $expectedReleaseNotes `
-                -HelpInfoUri $expectedHelpInfoUri 
-
-            Assert-MockCalled Update-ModuleProject -Times 1 -ParameterFilter {
-                $Author -eq $expectedAuthor -and
-                $CompanyName -eq $expectedCompanyName -and
-                $Copyright -eq $expectedCopyright -and
-                $ModuleVersion -eq $expectedModuleVersion -and
-                $Description -eq $expectedDescription -and
-                $Tags -eq $expectedTags -and
-                $ProjectUri -eq $expectedProjectUri -and
-                $LicenseUri -eq $expectedLicenseUri -and
-                $IconUri -eq $expectedIconUri -and
-                $ReleaseNotes -eq $expectedReleaseNotes -and
-                $HelpInfoUri -eq $expectedHelpInfoUri
-            }
-        }
-
         it 'copies module project to new location' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestFunction -ModuleName $ViableModule -FunctionName 'Get-Foo' -FunctionText "Write-Output 'Foo'"

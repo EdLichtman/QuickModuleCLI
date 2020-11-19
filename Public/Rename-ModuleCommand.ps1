@@ -1,46 +1,42 @@
 function Rename-ModuleCommand {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory=$true)]
-        [ValidateModuleProjectExists()]
         [ValidateNotNullOrEmpty()]
-        [ArgumentCompleter([ModuleProjectArgument])]
-        [string] $NestedModule,
+        [ValidateScript({ValidateModuleProjectExists $_})]
+        [string] $ModuleProject,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleCommandExists()]
-        [ArgumentCompleter([CommandFromModuleArgument])]
+        [ValidateScript({ValidateModuleCommandExists $_})]
         [string] $CommandName,
 
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleCommandDoesNotExist()]
-        [ValidateParameterStartsWithApprovedVerb()]
-        [ArgumentCompleter([ApprovedVerbsArgument])]
-        [string] $Replacement
+        [ValidateScript({ValidateModuleCommandDoesNotExist $_})]
+        [string] $NewCommandName
     )
+    
+    ValidateCommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
 
-    $Function = Get-ModuleProjectFunctionPath -ModuleProject $NestedModule -CommandName $CommandName
-    $Alias = Get-ModuleProjectAliasPath -ModuleProject $NestedModule -CommandName $CommandName
-    $ReplacementFunctionPath = Get-ModuleProjectFunctionPath -ModuleProject $NestedModule -CommandName $Replacement
-    $ReplacementAliasPath = Get-ModuleProjectAliasPath -ModuleProject $NestedModule -CommandName $Replacement
+    $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $ModuleProject -CommandName $CommandName
+    if ($CommandType -EQ 'Function') {
+        ValidateCommandStartsWithApprovedVerb -Command $NewCommandName
+    }
 
-    if(Test-Path $Function) {
-        $FunctionBlock = Get-Content $Function -Raw
-        $NewFunctionBlock = $FunctionBlock -Replace "$commandName", "$replacement" 
+    Remove-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
 
-        Remove-Item $Function
-        New-FileWithContent -filePath $ReplacementFunctionPath -fileText $NewFunctionBlock
-    } elseif (Test-Path $Alias) {
-        $aliasBlock = Get-Content $Alias -Raw
-        $NewAliasBlock = $aliasBlock -Replace "Set-Alias $commandName", "Set-Alias $replacement" 
+    if ($CommandType -EQ 'Function') {
+        New-ModuleProjectFunction -ModuleProject $ModuleProject -CommandName $NewCommandName -Text $CommandBlock
+    } elseif ($CommandType -EQ 'Alias') {
+       New-ModuleProjectAlias -ModuleProject $ModuleProject -Alias $NewCommandName -CommandName $CommandBlock
+    }
 
-        Remove-Item $Alias
-        New-FileWithContent -filePath $ReplacementAliasPath -fileText $NewAliasBlock
-    } 
-
-    #Update-ModuleProject -NestedModule $NestedModule
-    #Import-Module $BaseModuleName -Force
+    Update-ModuleProject -ModuleProject $ModuleProject
+    Import-Module $BaseModuleName -Force
 
 }
+
+Register-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName CommandName -ScriptBlock (Get-Command Get-CommandFromModuleArgumentCompleter).ScriptBlock
+Register-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName NewCommandName -ScriptBlock (Get-Command Get-NewCommandFromModuleArgumentCompleter).ScriptBlock

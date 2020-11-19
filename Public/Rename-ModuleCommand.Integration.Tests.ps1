@@ -1,4 +1,4 @@
-describe 'Move-ModuleCommand' {
+describe 'Rename-ModuleCommand' {
     BeforeAll {
         . "$PSScriptRoot\..\Private\_TestEnvironment.ps1"
         
@@ -17,7 +17,7 @@ describe 'Move-ModuleCommand' {
         . "$PSScriptRoot\..\Private\Validators.ps1"
 
         . "$PSScriptRoot\Update-ModuleProject.ps1"
-        . "$PSScriptRoot\Move-ModuleCommand.ps1"
+        . "$PSScriptRoot\Rename-ModuleCommand.ps1"
 
         $ViableModule = "Viable"
         $ParameterBindingException = 'System.Management.Automation.ParameterBindingException'
@@ -38,14 +38,14 @@ describe 'Move-ModuleCommand' {
 
     describe 'validations' {
         it 'throws error if source ModuleProject is null' {
-            $err = { Move-ModuleCommand -SourceModuleProject '' -CommandName 'Get-Foo' -DestinationModuleProject 'Test' -WhatIf } | Should -Throw -PassThru
+            $err = { Rename-ModuleCommand -ModuleProject '' -CommandName 'Get-Foo' -NewCommandName 'Test' -WhatIf } | Should -Throw -PassThru
 
             $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
             $err.Exception.Message -like '*Null or Empty*' | Should -BeTrue
         }
 
         it 'throws error if source ModuleProject does not exist' {   
-            $err = { Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName 'Get-Foo' -DestinationModuleProject 'Test' -WhatIf } | Should -Throw -PassThru
+            $err = { Rename-ModuleCommand -ModuleProject $ViableModule -CommandName 'Get-Foo' -NewCommandName 'Test' -WhatIf } | Should -Throw -PassThru
             $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
             $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ModuleProjectDoesNotExistException'
         }
@@ -53,7 +53,7 @@ describe 'Move-ModuleCommand' {
         it 'throws error if CommandName is null' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
     
-            $err = { Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName '' -DestinationModuleProject 'Test' -WhatIf } | Should -Throw -PassThru
+            $err = { Rename-ModuleCommand -ModuleProject $ViableModule -CommandName '' -NewCommandName 'Test' -WhatIf } | Should -Throw -PassThru
             
             $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
             $err.Exception.Message -like '*Null or Empty*' | Should -BeTrue
@@ -63,44 +63,61 @@ describe 'Move-ModuleCommand' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
 
-            $err = { Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName 'Get-Foo' -DestinationModuleProject 'Test' -WhatIf } | Should -Throw -PassThru
+            $err = { Rename-ModuleCommand  -ModuleProject $ViableModule -CommandName 'Get-Foo' -NewCommandName 'Test' -WhatIf } | Should -Throw -PassThru
             $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
             $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ModuleCommandDoesNotExistException'
         }
     
-        it 'throws error if Destination ModuleProject is null' {
+        it 'throws error if NewCommandName is null' {
             $FunctionName = 'Get-Foo'
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText 'Write-Output "Hello World"'
 
-            $err = { Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject '' -WhatIf } | Should -Throw -PassThru
+            $err = { Rename-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName -NewCommandName '' -WhatIf } | Should -Throw -PassThru
             $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
             $err.Exception.Message -like '*Null or Empty*' | Should -BeTrue
         }
 
-        it 'throws error if destination ModuleProject does not exist' {
+        it 'throws error if NewCommandName already exists' {
             $FunctionName = 'Get-Foo'
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText 'Write-Output "Hello World"'
+            Add-TestFunction -ModuleName $ViableModule -FunctionName 'Test' -FunctionText 'Write-Output "Hello World"'
     
-            $err = { Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject 'Test' -WhatIf } | Should -Throw -PassThru
+            $err = { Rename-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName -NewCommandName 'Test' -WhatIf } | Should -Throw -PassThru
             $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
-            $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ModuleProjectDoesNotExistException'
+            $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ModuleCommandExistsException'
         }
-        it 'throws error if source ModuleProject is same as destination ModuleProject' {
+
+        it 'throws error if NewCommandName is same as CommandName (i.e. already exists)' {
             $FunctionName = 'Get-Foo'
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText 'Write-Output "Hello World"'
     
-            $err = { Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -WhatIf } | Should -Throw -PassThru
-            $err.Exception.GetType().BaseType | Should -Not -Be $ParameterBindingException
-            $err.Exception.GetType().Name | Should -Be 'ModuleCommandMoveDestinationIsInvalidException'
+            $err = { Rename-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName -NewCommandName $FunctionName -WhatIf } | Should -Throw -PassThru
+            $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
+            $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ModuleCommandExistsException'
         }
+
+        it 'throws error if attempting to copy a function using a new name without the approved verb' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "return 'Foo'"
+            $NewFunctionName = 'Foo-Bar'
+    
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+    
+            $err = { Rename-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName -NewCommandName $NewFunctionName } | Should -Throw -PassThru
+    
+            $err.Exception.GetType().BaseType | Should -Not -Be $ParameterBindingException
+            $err.Exception.GetType().Name | Should -Be 'ParameterStartsWithUnapprovedVerbException'
+        }  
+        
     }
     describe 'auto-completion for input' {
         it 'auto-suggests valid Module Arguments for Source Module' {
             Mock Get-ValidModuleProjectNames
-            $Arguments = (Get-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName SourceModuleProject)
+            $Arguments = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName ModuleProject)
             
             try {$Arguments.Definition.Invoke()} catch {}
     
@@ -108,12 +125,12 @@ describe 'Move-ModuleCommand' {
         }
 
         it 'auto-suggests valid Module Command for CommandName' {
-            $FakeBoundParameters = @{'SourceModuleProject'=$ViableModule}
+            $FakeBoundParameters = @{'ModuleProject'=$ViableModule}
             Mock Get-ValidModuleProjectNames {return $ViableModule}
             Mock Get-ModuleProjectFunctionNames
             Mock Get-ModuleProjectAliasNames
 
-            $Arguments = (Get-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName CommandName)
+            $Arguments = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName CommandName)
             
             try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
     
@@ -121,104 +138,105 @@ describe 'Move-ModuleCommand' {
             Assert-MockCalled Get-ModuleProjectAliasNames -Times 1
         }
 
-        it 'auto-suggests valid Module Arguments for Destination Module' {
-            Mock Get-ValidModuleProjectNames
-            $Arguments = (Get-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName DestinationModuleProject)
+        it 'auto-suggests valid verb arguments for NewCommandName if CommandName is a function' {
+            $Arguments = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName NewCommandName)
+            $FakeBoundParameters = @{
+                'ModuleProject'=$ViableModule
+                'CommandName'='Get-Foo'
+            }
+            Mock Get-ValidModuleProjectNames {return $ViableModule}
+            Mock Get-ModuleProjectFunctionNames {'Get-Foo'}
+            Mock Get-ModuleProjectAliasNames
             
-            try {$Arguments.Definition.Invoke()} catch {}
-    
-            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
+            'Get-' -in ($Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)) | Should -BeTrue
+        }
+
+        it 'does not auto-suggest verb arguments for NewCommandName if CommandName is an alias' {
+            $Arguments = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName NewCommandName)
+            $FakeBoundParameters = @{
+                'ModuleProject'=$ViableModule
+                'CommandName'='Get'
+            }
+            Mock Get-ValidModuleProjectNames {return $ViableModule}
+            Mock Get-ModuleProjectFunctionNames 
+            Mock Get-ModuleProjectAliasNames {'Get'}
+            
+            'Get-' -in ($Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)) | Should -BeFalse
         }
     }
     describe 'functionality' {
-        it 'moves command into destination module if function' {
+        it 'renames command into same module if function' {
             $FunctionName = 'Write-Foo'
             $FunctionText = "return 'Foo'"
-    
+            $NewFunctionName = "Test-Foo"
+
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
     
-            Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject 'Test'
+            Rename-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName -NewCommandName $NewFunctionName
     
-            Test-Path (Get-ModuleProjectFunctionPath -ModuleProject 'Test' -CommandName $FunctionName) | Should -BeTrue
+            Test-Path (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $NewFunctionName) | Should -BeTrue
         }
-    
-        it 'moves command into destination module if alias' {
-            $Alias = 'Foo'
-    
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestAlias -ModuleName $ViableModule -AliasName $Alias
-    
-            Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName $Alias -DestinationModuleProject 'Test'
-    
-            Test-Path (Get-ModuleProjectAliasPath -ModuleProject 'Test' -CommandName $Alias) | Should -BeTrue
-        }
-    
-        it 'removes command from source module if function' {
+
+        it 'removes old command if function' {
             $FunctionName = 'Write-Foo'
             $FunctionText = "return 'Foo'"
-    
+            $NewFunctionName = "Test-Foo"
+
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
     
-            Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject 'Test'
+            Rename-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName -NewCommandName $NewFunctionName
     
             Test-Path (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $FunctionName) | Should -BeFalse
         }
-        
-        it 'removes command from source module if alias' {
-            $Alias = 'Foo'
     
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestAlias -ModuleName $ViableModule -AliasName $Alias
-    
-            Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName $Alias -DestinationModuleProject 'Test'
-    
-            Test-Path (Get-ModuleProjectAliasPath -ModuleProject $ViableModule -CommandName $Alias) | Should -BeFalse
-        }
-        
-        it 'attempts to update sourceModuleProject with removed Function or alias' {
-            $FunctionName = 'Write-Foo'
-            $FunctionText = "return 'Foo'"
-            $DestinationModule = 'Test'
+        it 'renames command into same module if alias' {
+            $AliasName = 'Bar'
+            $NewAliasName = "Foo"
 
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestModule -Name $DestinationModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestAlias -ModuleName $ViableModule -AliasName $AliasName
+    
+            Rename-ModuleCommand -ModuleProject $ViableModule -CommandName $AliasName -NewCommandName $NewAliasName
+    
+            Test-Path (Get-ModuleProjectAliasPath -ModuleProject $ViableModule -CommandName $NewAliasName) | Should -BeTrue
+        }
+
+        it 'removes old command if alias' {
+            $AliasName = 'Bar'
+            $NewAliasName = "Foo"
+
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestAlias -ModuleName $ViableModule -AliasName $AliasName
+    
+            Rename-ModuleCommand -ModuleProject $ViableModule -CommandName $AliasName -NewCommandName $NewAliasName
+    
+            Test-Path (Get-ModuleProjectAliasPath -ModuleProject $ViableModule -CommandName $AliasName) | Should -BeFalse
+        }
+        
+        it 'attempts to update ModuleProject with renamed Function or alias' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "return 'Foo'"
+            $NewFunctionName = "Test-Foo"
+
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
     
-            Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $DestinationModule
+            Rename-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName -NewCommandName $NewFunctionName
     
             Assert-MockCalled Update-ModuleProject -Times 1 -ParameterFilter {$ModuleProject -eq $ViableModule}
-        }
-    
-        it 'attempts to update DestinationModuleProject with new Function or alias' {
-            $FunctionName = 'Write-Foo'
-            $FunctionText = "return 'Foo'"
-            $DestinationModule = 'Test'
-
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestModule -Name $DestinationModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
-    
-            Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $DestinationModule
-    
-            Assert-MockCalled Update-ModuleProject -Times 1 -ParameterFilter {$ModuleProject -eq $DestinationModule}
         }
     
         it 'Should try to re-import the ModuleProject' {
             $FunctionName = 'Write-Foo'
             $FunctionText = "return 'Foo'"
-            $DestinationModule = 'Test'
+            $NewFunctionName = "Test-Foo"
 
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestModule -Name $DestinationModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
     
-            Move-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $DestinationModule
+            Rename-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName -NewCommandName $NewFunctionName
     
             Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True}
         }        

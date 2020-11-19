@@ -3,45 +3,9 @@ function Split-ModuleProject {
     param (
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [ValidateModuleProjectExists()]
-        [ValidateModuleDoesNotExist()]
-        [ArgumentCompleter([ModuleProjectArgument])]
-        [string] $ModuleProject,
-
-        [String] $Author,
-        [String] $CompanyName,
-        [String] $Copyright,
-        [Version] $ModuleVersion,
-        [String] $Description,
-        [String[]] $Tags,
-        [Uri] $ProjectUri,
-        [Uri] $LicenseUri,
-        [Uri] $IconUri,
-        [String] $ReleaseNotes,
-        [String] $HelpInfoUri
+        [ValidateScript({ValidateModuleProjectExists $_})]
+        [string] $ModuleProject
     )
-
-    $NestedModuleDirectory = Get-ModuleProjectLocation -ModuleProject $NestedModule
-    $psd1Location = "$NestedModuleDirectory\$NestedModule.psd1"
-
-    $ModuleManifestParameters = @{}
-    Add-InputParametersToObject -BoundParameters $PSBoundParameters `
-        -ObjectToPopulate $ModuleManifestParameters `
-        -Keys @(
-            'Author',
-            'CompanyName',
-            'Copyright',
-            'ModuleVersion',
-            'Description',
-            'Tags',
-            'ProjectUri',
-            'LicenseUri',
-            'IconUri',
-            'ReleaseNotes',
-            'HelpInfoUri'
-        )
-
-    Edit-ModuleManifest -psd1Location $psd1Location @ModuleManifestParameters 
 
     $ModuleDirectories = Get-EnvironmentModuleDirectories
     $ModulesDirectory = $ModuleDirectories | Where-Object {$_.StartsWith((Split-Path $Profile))}
@@ -52,3 +16,4 @@ function Split-ModuleProject {
     Move-Item -Path $NestedModuleDirectory -Destination $ModulesDirectory;
     #Import-Module $BaseModuleName -force
 }
+Register-ArgumentCompleter -CommandName Split-ModuleProject -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

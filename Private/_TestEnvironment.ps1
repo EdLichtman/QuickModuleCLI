@@ -97,7 +97,7 @@ function Add-TestModule {
 
     if ($IncludeManifest) {
         $TestModuleManifest = "$TestModuleDirectory\$Name.psd1"
-        New-Item -Path $TestModuleManifest
+        New-ModuleManifest -Path $TestModuleManifest
     }
 
     if ($IncludeRoot) {
