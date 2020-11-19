@@ -1,4 +1,13 @@
-<#TODO: Test#> 
+function Invoke-External {
+    param(
+      [Parameter(Mandatory=$true)]
+      [string] $LiteralPath,
+      [Parameter(ValueFromRemainingArguments=$true)]
+      $PassThruArgs
+    )
+    & $LiteralPath $PassThruArgs
+}
+
 function Confirm-Choice {
     param(
         [Parameter(Mandatory=$True)][String]$Title,
@@ -20,7 +29,7 @@ function Wait-ForKeyPress {
 
 function Open-PowershellEditor { 
     param([String]$Path)
-    powershell.exe $Path
+    Start-Process "$Path"
 }
 
 function Get-EnvironmentModuleDirectories {

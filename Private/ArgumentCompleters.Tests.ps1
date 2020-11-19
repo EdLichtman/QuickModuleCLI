@@ -60,10 +60,10 @@ Describe 'ArgumentCompleters' {
             $Arguments | Should -Be @($ExpectedArgument)
         }
 
-        It 'Should throw error if no modules exist' {
+        It 'Should throw no error if no modules exist' {
             Mock Get-ValidModuleProjectNames { return @() }
             
-            {Get-ModuleProjectArgumentCompleter } | Should -Throw -ExceptionType $InvalidOperationException
+            {Get-ModuleProjectArgumentCompleter } | Should -Not -Throw
         }
     }
 
@@ -104,12 +104,12 @@ Describe 'ArgumentCompleters' {
             }
 
         }
-        It 'Should throw error if no commands exist' {
+        It 'Should throw no error if no commands exist' {
             Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
             Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
             Add-TestFunction 'Foo' 'Write-HelloWorld'
 
-            { Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule)} | Should -Throw -ExceptionType $InvalidOperationException
+            { Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule)} | Should -Not -Throw
         }
 
         It 'Should show all commands that exist in module from given parameters' {
@@ -138,11 +138,11 @@ Describe 'ArgumentCompleters' {
             $Arguments | Should -Be @($ExpectedFunction)
         }
 
-        It 'Should throw error if module does not exist' {
+        It 'Should throw no error if module does not exist' {
             Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
             Add-TestFunction 'Foo' 'Write-HelloWorld'
 
-            { Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule) } | Should -Throw -ExceptionType $InvalidOperationException
+            { Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule) } | Should -Not -Throw
         }
 
         It 'Should return Aliases if any exist' {

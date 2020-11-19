@@ -15,9 +15,7 @@ function Get-ModuleProjectArgumentCompleter {
     Get-ValidModuleProjectNames | 
         Where-Object {$_ -like "$WordToComplete*"} | 
         ForEach-Object { $Choices.Add("$_") }
-    if (!$Choices) {
-        throw [InvalidOperationException] 'No Modules Exist!'
-    } else {
+    if ($Choices) {
         return @($Choices)
     }
 }
@@ -53,22 +51,16 @@ function Get-CommandFromModuleArgumentCompleter {
     }
 
     if($ModuleProject) {
-        $Choices = @()
         $ModuleProjects = Get-ValidModuleProjectNames 
         if ($ModuleProject -in $ModuleProjects) {
-            [Array]$Functions = Get-ModuleProjectFunctionNames -ModuleProject $ModuleProject | Where-Object {$_ -like "$WordToComplete*"}
-            if ($Functions) { $Choices += $Functions }
-
-            [Array]$Aliases = Get-ModuleProjectAliasNames -ModuleProject $ModuleProject | Where-Object {$_ -like "$WordToComplete*"}
-            if ($Aliases) { $Choices += $Aliases }
-
-            if (!$Choices) {
-                throw [InvalidOperationException] 'No Matching Commands Exist in Module!'
-            } else {
-                return @($Choices)
+            $Functions = @(Get-ModuleProjectFunctionNames -ModuleProject $ModuleProject | Where-Object {$_ -like "$WordToComplete*"})
+            if ($Functions) {
+                $Functions
             }
-        } else {
-            throw [InvalidOperationException] 'No Modules Exist!'
+            $Aliases = @(Get-ModuleProjectAliasNames -ModuleProject $ModuleProject | Where-Object {$_ -like "$WordToComplete*"})
+            if ($Aliases) {
+                $Aliases
+            }
         }
     }  
 }
@@ -90,9 +82,14 @@ function Get-CommandFromOptionalModuleArgumentCompleter {
 
     foreach($Module in $ModuleProjects) {
         if(!$ModuleProject -or ($ModuleProject -eq $Module)) {
-            
-            Get-ModuleProjectFunctionNames -ModuleProject $Module | Where-Object {$_ -like "$WordToComplete*"}
-            Get-ModuleProjectAliasNames -ModuleProject $Module | Where-Object {$_ -like "$WordToComplete*"}
+            $Functions = @(Get-ModuleProjectFunctionNames -ModuleProject $ModuleProject | Where-Object {$_ -like "$WordToComplete*"})
+            if ($Functions) {
+                $Functions
+            }
+            $Aliases = @(Get-ModuleProjectAliasNames -ModuleProject $ModuleProject | Where-Object {$_ -like "$WordToComplete*"})
+            if ($Aliases) {
+                $Aliases
+            }
         }  
     }
 }
@@ -129,8 +126,6 @@ function Get-NewCommandFromModuleArgumentCompleter {
              }
 
             return @($Choices)
-        } else {
-            throw [InvalidOperationException] 'No Modules Exist!'
-        }
+        } 
     }  
 }
