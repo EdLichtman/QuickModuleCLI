@@ -33,7 +33,7 @@ function Rename-ModuleCommand {
     }
 
     Update-ModuleProject -ModuleProject $ModuleProject
-    Import-Module $BaseModuleName -Force
+    Import-Module $BaseModuleName -Force -Global #todo test
 
 }
 

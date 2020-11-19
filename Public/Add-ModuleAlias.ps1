@@ -62,6 +62,6 @@ function Add-ModuleAlias {
     
     New-ModuleProjectAlias -ModuleProject $ModuleProject -Alias $AliasName -CommandName $AliasMappedFunction
     Update-ModuleProject -ModuleProject $ModuleProject
-    Import-Module $BaseModuleName -Force
+    Import-Module $BaseModuleName -Force -Global
 }
 Register-ArgumentCompleter -CommandName Add-ModuleAlias -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

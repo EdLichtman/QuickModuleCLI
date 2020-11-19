@@ -30,7 +30,7 @@ function Move-ModuleCommand {
 
     Update-ModuleProject -ModuleProject $SourceModuleProject
     Update-ModuleProject -ModuleProject $DestinationModuleProject
-    Import-Module $BaseModuleName -Force
+    Import-Module $BaseModuleName -Force -Global
 }
 
 Register-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName SourceModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

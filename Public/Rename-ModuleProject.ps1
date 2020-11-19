@@ -20,7 +20,7 @@ function Rename-ModuleProject {
     Rename-Item -Path "$DestinationModuleProjectLocation\$SourceModuleProject.psm1" -NewName "$DestinationModuleProject.psm1"
 
     Edit-ModuleManifest -psd1Location "$DestinationModuleProjectLocation\$DestinationModuleProject.psd1" -RootModule "$DestinationModuleProject.psm1"
-    Import-Module $BaseModuleName -Force
+    Import-Module $BaseModuleName -Force -Global #todo test
 }
 
 Register-ArgumentCompleter -CommandName Rename-ModuleProject -ParameterName SourceModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock

@@ -139,7 +139,7 @@ describe 'Add-ModuleAlias' {
     
             Add-ModuleAlias -ModuleProject $ViableModule -AliasName $AliasName -AliasMappedFunction 'Write-Output'
     
-            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Force -eq $True -and $Name -eq $BaseModuleName}
+            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Force -eq $True -and $Name -eq $BaseModuleName -and $Global -eq $True}
         }
     
         it 'Should try to update the ModuleProject' {

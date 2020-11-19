@@ -177,4 +177,117 @@ Describe 'ArgumentCompleters' {
             $Arguments | Should -Be ($ExpectedFunctions += $ExpectedAliases)
         }
     }
+
+    describe 'Get-CommandFromOptionalModuleArgumentCompleter' {
+        BeforeAll {
+            function Get-FakeBoundParameters{
+                param([String]$ModuleProject)
+                return @{
+                    'ModuleProject' = $ModuleProject
+                }
+            }
+
+        }
+
+        It 'Should show all commands that exist in module' {
+            $ExpectedFunctions = @('Test-HelloWorld','Test-HowdyWorld')
+            $ExpectedAliases = @('Bar','Foo')
+
+            Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+            Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+            foreach ($function in $ExpectedFunctions) {
+                Add-TestFunction $ViableModule $function
+            }
+
+            foreach($alias in $ExpectedAliases) {
+                Add-TestAlias $ViableModule $alias
+            }
+
+            $Arguments = Get-CommandFromOptionalModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule)
+
+            $Arguments | Should -Be @($ExpectedFunctions + $ExpectedAliases)
+        }
+        
+        
+        It 'Should show all commands that exist in module' {
+            $ExpectedFunctions = @('Test-HelloWorld','Test-HowdyWorld')
+            $ExpectedAliases = @('Bar','Foo')
+            $ExpectedOtherFunctions = @('Foo-Bar')
+            $ExpectedOtherAliases = @('WIP')
+
+            Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+            Add-TestModule 'zFoo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+            foreach ($function in $ExpectedFunctions) {
+                Add-TestFunction $ViableModule $function
+            }
+
+            foreach($alias in $ExpectedAliases) {
+                Add-TestAlias $ViableModule $alias
+            }
+
+            foreach($function in $ExpectedOtherFunctions) {
+                Add-TestFunction 'zFoo' $function
+            }
+
+            foreach($alias in $ExpectedOtherAliases) {
+                Add-TestAlias 'zFoo' $alias
+            }
+
+            $Arguments = Get-CommandFromOptionalModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters '')
+
+            $Arguments | Should -Be @($ExpectedFunctions + $ExpectedAliases + $ExpectedOtherFunctions + $ExpectedOtherAliases)
+        }
+
+        # It 'Should show all commands that exist in module from given parameters that match WordToComplete' {
+        #     $ExpectedFunction = 'Test-HelloWorld'
+        #     Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+        #     Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+        #     Add-TestFunction $ViableModule $ExpectedFunction
+        #     Add-TestFunction $ViableModule 'Assert-HowdyWorld'
+            
+
+        #     $Arguments = Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule) -WordToComplete 'T'
+
+        #     $Arguments | Should -Be @($ExpectedFunction)
+        # }
+
+        # It 'Should throw error if module does not exist' {
+        #     Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+        #     Add-TestFunction 'Foo' 'Write-HelloWorld'
+
+        #     { Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule) } | Should -Throw -ExceptionType $InvalidOperationException
+        # }
+
+        # It 'Should return Aliases if any exist' {
+        #     $ExpectedAliases = @('Hello','Howdy')
+        #     Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+        #     Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+
+        #     foreach ($Alias in $ExpectedAliases) {
+        #         Add-TestAlias $ViableModule $Alias
+        #     }
+
+        #     $Arguments = Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule)
+
+        #     $Arguments | Should -Be $ExpectedAliases
+        # }
+
+        # It 'Should return both Aliases and functions' {
+        #     $ExpectedFunctions = @('Test-HelloWorld', 'Test-HowdyWorld')
+        #     $ExpectedAliases = @('Hello','Howdy')
+        #     Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+        #     Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+        #     foreach ($function in $ExpectedFunctions) {
+        #         Add-TestFunction $ViableModule $function
+        #     }
+
+        #     foreach ($Alias in $ExpectedAliases) {
+        #         Add-TestAlias $ViableModule $Alias
+        #     }
+
+        #     $Arguments = Get-CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule) 
+
+        #     $Arguments | Should -Be ($ExpectedFunctions += $ExpectedAliases)
+        # }
+    }
 }

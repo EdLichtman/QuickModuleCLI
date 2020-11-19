@@ -127,14 +127,6 @@ describe 'Add-ModuleFunction' {
             $actualReturnValue | Should -Be $expectedReturnValue
         }
     
-        it 'Should try to import the module again' {
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-    
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Get-Foo'
-    
-            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Force -eq $True -and $Name -eq $BaseModuleName}
-        }
-    
         it 'attempts to edit-modulecommand if functionText is not provided' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -WhatIf
@@ -170,7 +162,7 @@ describe 'Add-ModuleFunction' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -FunctionText 'Write-Output "Hello World"' -WhatIf
     
-            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True}
+            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True -and $Global -eq $True}
         }
     }
     

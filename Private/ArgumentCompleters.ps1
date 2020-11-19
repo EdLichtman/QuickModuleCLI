@@ -73,6 +73,30 @@ function Get-CommandFromModuleArgumentCompleter {
     }  
 }
 
+function Get-CommandFromOptionalModuleArgumentCompleter {
+    param (
+        [string]      $CommandName ,
+        [string]      $ParameterName,
+        [string]      $WordToComplete,
+        [CommandAst]  $CommandAst,
+        [IDictionary] $FakeBoundParameters
+    )
+
+    $ModuleProject = if ($FakeBoundParameters.Contains('ModuleProject')) {
+        $FakeBoundParameters['ModuleProject']
+    } 
+
+    $ModuleProjects = Get-ValidModuleProjectNames
+
+    foreach($Module in $ModuleProjects) {
+        if(!$ModuleProject -or ($ModuleProject -eq $Module)) {
+            
+            Get-ModuleProjectFunctionNames -ModuleProject $Module | Where-Object {$_ -like "$WordToComplete*"}
+            Get-ModuleProjectAliasNames -ModuleProject $Module | Where-Object {$_ -like "$WordToComplete*"}
+        }  
+    }
+}
+
 <#TODO: Test#>
 function Get-NewCommandFromModuleArgumentCompleter {
     param (

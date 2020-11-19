@@ -112,7 +112,7 @@ describe 'Import-ModuleProject' {
 
             Import-ModuleProject -Path $ImportableProjectLocation
     
-            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Force -eq $True -and $Name -eq $BaseModuleName}
+            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Force -eq $True -and $Name -eq $BaseModuleName -and $Global -eq $True}
         }
     
         it 'leaves a copy of the imported module in the original location' {

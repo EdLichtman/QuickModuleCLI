@@ -15,7 +15,7 @@ function Remove-ModuleCommand {
 
     Remove-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
     Update-ModuleProject -ModuleProject $ModuleProject
-    Import-Module $BaseModuleName -Force
+    Import-Module $BaseModuleName -Force -Global #todo test
 }
 Register-ArgumentCompleter -CommandName Remove-ModuleCommand -ParameterName ModuleProject -ScriptBlock (Get-Command Get-ModuleProjectArgumentCompleter).ScriptBlock
 Register-ArgumentCompleter -CommandName Remove-ModuleCommand -ParameterName CommandName -ScriptBlock (Get-Command Get-CommandFromModuleArgumentCompleter).ScriptBlock

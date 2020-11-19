@@ -10,5 +10,5 @@ function Import-ModuleProject {
 
     Copy-Item -Path $Path -Destination $ModuleProjectsFolder -Recurse;
 
-    Import-Module $BaseModuleName -Force
+    Import-Module $BaseModuleName -Force -Global
 }

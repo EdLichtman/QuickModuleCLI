@@ -4,7 +4,7 @@
 . "$PSScriptRoot\Private\ArgumentCompleters.ps1"
 . "$PSScriptRoot\Private\ArgumentTransformations.ps1"
 . "$PSScriptRoot\Private\ObjectTransformation.ps1"
-. "$PSScriptRoot\..\Private\Validators.Exceptions.ps1"
+. "$PSScriptRoot\Private\Validators.Exceptions.ps1"
 . "$PSScriptRoot\Private\Validators.ps1"
 
 $helperFunctions = Get-ChildItem "$PSScriptRoot\Public" -Filter "*.ps1"
@@ -18,7 +18,7 @@ if (!(Test-Path "$PSScriptRoot\Modules")) {
 }
 
 foreach($Module in (Get-ValidModuleProjects)) {
-        Import-Module "$($Module.FullName)\$($Module.Name).psd1"
+        Import-Module "$($Module.FullName)\$($Module.Name).psd1" -Force -Global
 }
 
 #In theory this will not change the Global Error Action Preference, but will scope this action preference to all of the Module Functions.
