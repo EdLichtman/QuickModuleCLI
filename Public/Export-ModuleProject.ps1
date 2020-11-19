@@ -14,6 +14,7 @@ function Export-ModuleProject {
         [string] $Destination
     )  
 
+    $ModuleProjectLocation = Get-ModuleProjectLocation -ModuleProject $ModuleProject
     Copy-Item -Path $ModuleProjectLocation -Destination $Destination -Recurse;
 }
 
