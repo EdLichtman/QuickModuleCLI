@@ -209,7 +209,7 @@ Describe 'ArgumentCompleters' {
         }
         
         
-        It 'Should show all commands that exist in module' {
+        It 'Should show all commands that exist in all modules' {
             $ExpectedFunctions = @('Test-HelloWorld','Test-HowdyWorld')
             $ExpectedAliases = @('Bar','Foo')
             $ExpectedOtherFunctions = @('Foo-Bar')
@@ -238,56 +238,37 @@ Describe 'ArgumentCompleters' {
             $Arguments | Should -Be @($ExpectedFunctions + $ExpectedAliases + $ExpectedOtherFunctions + $ExpectedOtherAliases)
         }
 
-        # It 'Should show all commands that exist in module from given parameters that match WordToComplete' {
-        #     $ExpectedFunction = 'Test-HelloWorld'
-        #     Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
-        #     Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
-        #     Add-TestFunction $ViableModule $ExpectedFunction
-        #     Add-TestFunction $ViableModule 'Assert-HowdyWorld'
+        It 'Should show all commands that exist in module from given parameters that match WordToComplete' {
+            $ExpectedFunction = 'Test-HelloWorld'
+            Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+            Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+            Add-TestFunction $ViableModule $ExpectedFunction
+            Add-TestFunction $ViableModule 'Assert-HowdyWorld'
             
 
-        #     $Arguments = CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule) -WordToComplete 'T'
+            $Arguments = CommandFromOptionalModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters '') -WordToComplete 'T'
 
-        #     $Arguments | Should -Be @($ExpectedFunction)
-        # }
+            $Arguments | Should -Be @($ExpectedFunction)
+        }
+    }
 
-        # It 'Should throw error if module does not exist' {
-        #     Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
-        #     Add-TestFunction 'Foo' 'Write-HelloWorld'
+    describe 'CommandFromNewModuleArgumentCompleter' {
+        BeforeAll {
+            function Get-FakeBoundParameters{
+                param([String]$ModuleProject)
+                return @{
+                    'ModuleProject' = $ModuleProject
+                }
+            }
 
-        #     { CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule) } | Should -Throw -ExceptionType $InvalidOperationException
-        # }
+        }
 
-        # It 'Should return Aliases if any exist' {
-        #     $ExpectedAliases = @('Hello','Howdy')
-        #     Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
-        #     Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+       it 'Should show Approved Verbs if CommandName is a Function' {
+        throw [System.NotImplementedException]
+       }
 
-        #     foreach ($Alias in $ExpectedAliases) {
-        #         Add-TestAlias $ViableModule $Alias
-        #     }
-
-        #     $Arguments = CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule)
-
-        #     $Arguments | Should -Be $ExpectedAliases
-        # }
-
-        # It 'Should return both Aliases and functions' {
-        #     $ExpectedFunctions = @('Test-HelloWorld', 'Test-HowdyWorld')
-        #     $ExpectedAliases = @('Hello','Howdy')
-        #     Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
-        #     Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
-        #     foreach ($function in $ExpectedFunctions) {
-        #         Add-TestFunction $ViableModule $function
-        #     }
-
-        #     foreach ($Alias in $ExpectedAliases) {
-        #         Add-TestAlias $ViableModule $Alias
-        #     }
-
-        #     $Arguments = CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule) 
-
-        #     $Arguments | Should -Be ($ExpectedFunctions += $ExpectedAliases)
-        # }
+       it 'should not return anything if CommandName is not a function' {
+        throw [System.NotImplementedException]
+       }
     }
 }
