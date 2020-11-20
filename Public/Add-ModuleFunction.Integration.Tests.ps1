@@ -111,6 +111,19 @@ describe 'Add-ModuleFunction' {
             $Function = Get-Item "function:\$FunctionName"
             $Function.Definition.Trim() | Should -Be ''
         }
+
+        it 'Should allow you to create a function without an approved verb with the -Force Command' {
+            $FunctionName = 'Foo-Foo'
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+    
+            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -Force
+    
+            $FunctionPath = Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $FunctionName
+            . "$FunctionPath"
+    
+            $Function = Get-Item "function:\$FunctionName"
+            $Function.Definition.Trim() | Should -Be ''
+        }
     
         it 'Should create a function with a non-standard value text' {
             $expectedReturnValue = 'Foo'

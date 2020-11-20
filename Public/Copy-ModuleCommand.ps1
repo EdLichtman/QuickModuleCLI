@@ -18,8 +18,12 @@ function Copy-ModuleCommand {
         [Parameter(Mandatory=$true)][String]
         [ValidateNotNullOrEmpty()]
         [ValidateScript({ValidateModuleCommandDoesNotExist $_})]
-        $NewCommandName
+        $NewCommandName,
+
+        [Parameter()][Switch]
+        $Force
     )
+    
     if ($SourceModuleProject) {
         ValidateCommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $CommandName
     }
@@ -27,7 +31,10 @@ function Copy-ModuleCommand {
     $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $CommandName
 
     if ($CommandType -EQ 'Function') {
-        ValidateCommandStartsWithApprovedVerb -Command $NewCommandName
+        if (!$Force) {
+            ValidateCommandStartsWithApprovedVerb -Command $NewCommandName
+        }
+        
         New-ModuleProjectFunction -ModuleProject $DestinationModuleProject -CommandName $NewCommandName -Text $CommandBlock
         Edit-ModuleCommand -ModuleProject $DestinationModuleProject -CommandName $NewCommandName
     } elseif ($CommandType -EQ 'Alias') {

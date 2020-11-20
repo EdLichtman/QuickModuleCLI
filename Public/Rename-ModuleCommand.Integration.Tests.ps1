@@ -185,6 +185,20 @@ describe 'Rename-ModuleCommand' {
             Test-Path (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $NewFunctionName) | Should -BeTrue
         }
 
+        it 'renames command into same module if function' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "return 'Foo'"
+            $NewFunctionName = "Foo-Foo"
+
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+    
+            Rename-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName -NewCommandName $NewFunctionName -Force
+    
+            Test-Path (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $NewFunctionName) | Should -BeTrue
+        }
+
+
         it 'removes old command if function' {
             $FunctionName = 'Write-Foo'
             $FunctionText = "return 'Foo'"
@@ -234,7 +248,7 @@ describe 'Rename-ModuleCommand' {
     
             Assert-MockCalled Update-ModuleProject -Times 1 -ParameterFilter {$ModuleProject -eq $ViableModule}
         }
-    
+
         it 'Should try to re-import the ModuleProject' {
             $FunctionName = 'Write-Foo'
             $FunctionText = "return 'Foo'"

@@ -136,6 +136,17 @@ describe 'Copy-ModuleCommand' {
             $err.Exception.GetType().BaseType | Should -Not -Be $ParameterBindingException
             $err.Exception.GetType().Name | Should -Be 'ParameterStartsWithUnapprovedVerbException'
         }    
+
+        it 'does not throw error if attempting to copy a function using a new name without the approved verb and -force flag' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "return 'Foo'"
+            $NewFunctionName = 'Foo-Bar'
+    
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+    
+            { Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -NewCommandName $NewFunctionName -Force } | Should -Not -Throw
+        }    
     }
     describe 'auto-completion for input' {
         it 'auto-suggests valid Module Arguments for Source Module' {
@@ -220,6 +231,19 @@ describe 'Copy-ModuleCommand' {
             Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
     
             Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -NewCommandName $NewFunctionName
+    
+            Test-Path (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $NewFunctionName) | Should -BeTrue
+        }
+
+        it 'Should copy a function to a new function without approved verb using -force' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "return 'Foo'"
+            $NewFunctionName = 'Foo-FooClone'
+    
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+    
+            Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -NewCommandName $NewFunctionName -Force
     
             Test-Path (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $NewFunctionName) | Should -BeTrue
         }

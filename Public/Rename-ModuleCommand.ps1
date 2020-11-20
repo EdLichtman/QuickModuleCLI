@@ -13,13 +13,17 @@ function Rename-ModuleCommand {
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [ValidateScript({ValidateModuleCommandDoesNotExist $_})]
-        [string] $NewCommandName
+        [string] $NewCommandName,
+
+        [Parameter()]
+        [Switch]
+        $Force
     )
     
     ValidateCommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
 
     $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $ModuleProject -CommandName $CommandName
-    if ($CommandType -EQ 'Function') {
+    if ($CommandType -EQ 'Function' -and (!$Force)) {
         ValidateCommandStartsWithApprovedVerb -Command $NewCommandName
     }
 
