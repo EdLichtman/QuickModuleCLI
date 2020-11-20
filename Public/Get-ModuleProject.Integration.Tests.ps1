@@ -73,71 +73,100 @@ describe 'Get-ModuleProject' {
             $OtherFunctionName -in $Project.Command | Should -BeTrue
         }
     
-        # it 'Should create a function' {
-        #     $FunctionName = 'Write-Foo'
-        #     Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-    
-        #     Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName
-    
-        #     $FunctionPath = Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $FunctionName
-        #     . "$FunctionPath"
-    
-        #     $Function = Get-Item "function:\$FunctionName"
-        #     $Function.Definition.Trim() | Should -Be ''
-        # }
-    
-        # it 'Should create a function with a non-standard value text' {
-        #     $expectedReturnValue = 'Foo'
-        #     $FunctionName = 'Get-Foo'
-        #     $FunctionText = "return '$expectedReturnValue'"
-        #     Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-    
-        #     Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText $FunctionText
-    
-        #     $FunctionPath = Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $FunctionName
-        #     . "$FunctionPath"
-    
-        #     $actualReturnValue = Invoke-Expression "$FunctionName"
-        #     $actualReturnValue | Should -Be $expectedReturnValue
-        # }
-    
-        # it 'attempts to edit-modulecommand if functionText is not provided' {
-        #     Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-        #     Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -WhatIf
-            
-        #     Assert-MockCalled Edit-ModuleCommand -Times 1
-        # }
-    
-        # it 'does not edit-modulecommand if functionText is provided' {
-        #     Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-        #     Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -FunctionText 'Write-Output "Hello World"' -WhatIf
-    
-        #     Assert-MockCalled Edit-ModuleCommand -Times 0
-        # }
-    
-        # it 'splits strings into new lines on semicolon' {
-        #     #Mock for the sake of assertion, but you need to still return a value to work.
-        #     Mock SemicolonCreatesLineBreakTransformation {param($inputData) return $inputData} 
-    
-        #     Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-        #     Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -FunctionText 'Write-Output "Hello World"' -WhatIf
-    
-        #     Assert-MockCalled SemicolonCreatesLineBreakTransformation -Times 1
-        # }
+        it 'Should get names of all functions within ModuleProject' {
+            $FunctionName = 'Write-Foo'
+            $OtherFunctionName = 'Test-Foo'
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
 
-        # it 'Should try to update the ModuleProject' {
-        #     Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-        #     Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -FunctionText 'Write-Output "Hello World"' -WhatIf
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName
+            Add-TestFunction -ModuleName 'Test' -FunctionName $OtherFunctionName
     
-        #     Assert-MockCalled Update-ModuleProject -Times 1 -ParameterFilter {$ModuleProject -eq $ViableModule}
-        # }
+            $Project = Get-ModuleProject -ModuleProject $ViableModule
 
-        # it 'Should try to re-import the ModuleProject' {
-        #     Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-        #     Add-ModuleFunction -ModuleProject $ViableModule -FunctionName 'Write-Foo' -FunctionText 'Write-Output "Hello World"' -WhatIf
+            $FunctionName -in $Project.Command | Should -BeTrue
+            $OtherFunctionName -in $Project.Command | Should -BeFalse
+        }
+
+        it 'Should get Function specified' {
+            $FunctionName = 'Write-Foo'
+            $OtherFunctionName = 'Test-Foo'
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName
+            Add-TestFunction -ModuleName 'Test' -FunctionName $OtherFunctionName
     
-        #     Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True -and $Global -eq $True}
-        # }
+            $Project = Get-ModuleProject -CommandName $FunctionName
+
+            $FunctionName -in $Project.Command | Should -BeTrue
+            $OtherFunctionName -in $Project.Command | Should -BeFalse
+        }
+
+        it 'Should get Function specified in ModuleProject' {
+            $FunctionName = 'Write-Foo'
+            $OtherFunctionName = 'Test-Foo'
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName
+            Add-TestFunction -ModuleName 'Test' -FunctionName $OtherFunctionName
+    
+            $Project = Get-ModuleProject -ModuleProject $ViableModule -CommandName $FunctionName
+
+            $FunctionName -in $Project.Command | Should -BeTrue
+            $OtherFunctionName -in $Project.Command | Should -BeFalse
+        }
+
+        it 'Should not get Function specified if not in ModuleProject' {
+            $FunctionName = 'Write-Foo'
+            $OtherFunctionName = 'Test-Foo'
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName
+            Add-TestFunction -ModuleName 'Test' -FunctionName $OtherFunctionName
+    
+            $Project = Get-ModuleProject -ModuleProject $ViableModule -CommandName $OtherFunctionName
+
+            $FunctionName -in $Project.Command | Should -BeFalse
+            $OtherFunctionName -in $Project.Command | Should -BeFalse
+        }
+
+        it 'Should get CommandType of all Commands within ModuleProject' {
+            $FunctionName = 'Write-Foo'
+            $AliasName = 'Foo'
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName
+            Add-TestAlias -ModuleName $ViableModule -AliasName $AliasName
+    
+            $Project = Get-ModuleProject -ModuleProject $ViableModule
+
+            $Function = $Project | Where-Object {$_.Command -eq $FunctionName}
+            $Alias = $Project | Where-Object {$_.Command -eq $AliasName}
+
+            $Function.Type | Should -Be 'Function'
+            $Alias.Type | Should -Be 'Alias'
+        }
+
+        it 'Should get ModuleProject for each Command within ModuleProject' {
+            $FunctionName = 'Write-Foo'
+            $OtherFunctionName = 'Test-Foo'
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName
+            Add-TestFunction -ModuleName 'Test' -FunctionName $OtherFunctionName
+    
+            $Project = Get-ModuleProject
+
+            $Function = $Project | Where-Object {$_.Command -eq $FunctionName}
+            $OtherFunction = $Project | Where-Object {$_.Command -eq $OtherFunctionName}
+
+            $Function.Module | Should -Be $ViableModule
+            $OtherFunction.Module | Should -Be 'Test'
+        }
     }
     
 }
