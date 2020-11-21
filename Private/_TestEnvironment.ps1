@@ -89,8 +89,15 @@ function Add-TestModule {
         [Switch] $IncludeManifest,
         [Switch] $IncludeRoot,
         [Switch] $IncludeFunctions,
-        [Switch] $IncludeAliases
+        [Switch] $IncludeAliases,
+        [Switch] $Valid
     )
+    if ($Valid){
+        $IncludeManifest = $True
+        $IncludeRoot = $True
+        $IncludeFunctions = $True
+        $IncludeAliases = $True
+    }
 
     $TestModuleDirectory = "$(Get-SandboxNestedModulesFolder)\$Name"
     New-Item -Path $TestModuleDirectory -ItemType Directory
@@ -145,7 +152,8 @@ function $functionName {
 function Add-TestAlias {
     param(
         [String] $ModuleName,
-        [String] $AliasName
+        [String] $AliasName,
+        [String] $AliasText
     )
 
     $TestModuleDirectory = "$(Get-SandboxNestedModulesFolder)\$ModuleName"
@@ -158,9 +166,12 @@ function Add-TestAlias {
         throw [System.Management.Automation.ItemNotFoundException] "Test Setup failed. Please add AliasesFolder to '$ModuleName' Module first"
     }
 
+    if (!$AliasText) {
+        $AliasText = "Test-$AliasName"
+    }
     $AliasPath = "$TestAliasesDirectory\$AliasName.ps1"
     New-Item $AliasPath -ItemType File -Force;
-    Add-Content $AliasPath "Set-Alias $AliasName Test-$AliasName"
+    Add-Content $AliasPath "Set-Alias $AliasName $AliasText"
 }
 
 function Get-MockFileInfo {
@@ -178,6 +189,7 @@ function Get-MockFileInfo {
 
 #BeforeEach
 function New-Sandbox {
+    Teardown-Sandbox
     New-Item -Path (Get-SandboxBaseFolder) -ItemType Directory
     New-Item -Path (Get-SandboxNestedModulesFolder) -ItemType Directory 
     New-Item -Path (Get-SandboxFunctionsFolder) -ItemType Directory
@@ -186,7 +198,18 @@ function New-Sandbox {
 
 #AfterEach
 function Remove-Sandbox {
-    $SandboxBase = Get-SandboxBaseFolder
+    $SandboxBase = "$(Get-SandboxNestedModulesFolder)"
+    if (![String]::IsNullOrWhiteSpace($SandboxBase)) {
+        if (Test-Path $SandboxBase) {
+            Remove-Item -Path $SandboxBase -Recurse -Force
+        }
+    } else {
+        throw 'Scoping Exception! Get-SandboxBaseFolder is empty!'
+    }
+}
+
+function Teardown-Sandbox {
+    $SandboxBase = "$(Get-SandboxBaseFolder)"
     if (![String]::IsNullOrWhiteSpace($SandboxBase)) {
         if (Test-Path $SandboxBase) {
             Remove-Item -Path $SandboxBase -Recurse -Force

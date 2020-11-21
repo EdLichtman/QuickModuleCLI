@@ -12,7 +12,7 @@ function ModuleProjectArgumentCompleter {
         [IDictionary] $FakeBoundParameters
     )
     $Choices = [List[String]]::new()
-    Get-ValidModuleProjectNames | 
+    (GetModuleProjectInfo).Name | 
         Where-Object {$_ -like "$WordToComplete*"} | 
         ForEach-Object { $Choices.Add("$_") }
     if ($Choices) {
@@ -51,17 +51,9 @@ function CommandFromModuleArgumentCompleter {
     }
 
     if($ModuleProject) {
-        $ModuleProjects = Get-ValidModuleProjectNames 
-        if ($ModuleProject -in $ModuleProjects) {
-            $Functions = @(Get-ModuleProjectFunctionNames -ModuleProject $ModuleProject | Where-Object {$_ -like "$WordToComplete*"})
-            if ($Functions) {
-                $Functions
-            }
-            $Aliases = @(Get-ModuleProjectAliasNames -ModuleProject $ModuleProject | Where-Object {$_ -like "$WordToComplete*"})
-            if ($Aliases) {
-                $Aliases
-            }
-        }
+        $ModuleProjectCommands = GetCommandsInModuleProject -ModuleProject $ModuleProject
+        $Matching = $ModuleProjectCommands | Where-Object {$_ -like "$WordToComplete*"} 
+        return $Matching
     }  
 }
 
@@ -76,22 +68,13 @@ function CommandFromOptionalModuleArgumentCompleter {
 
     $ModuleProject = if ($FakeBoundParameters.Contains('ModuleProject')) {
         $FakeBoundParameters['ModuleProject']
-    } 
-
-    $ModuleProjects = Get-ValidModuleProjectNames
-
-    foreach($Module in $ModuleProjects) {
-        if(!$ModuleProject -or ($ModuleProject -eq $Module)) {
-            $Functions = @(Get-ModuleProjectFunctionNames -ModuleProject $Module | Where-Object {$_ -like "$WordToComplete*"})
-            if ($Functions) {
-                $Functions
-            }
-            $Aliases = @(Get-ModuleProjectAliasNames -ModuleProject $Module | Where-Object {$_ -like "$WordToComplete*"})
-            if ($Aliases) {
-                $Aliases
-            }
-        }  
+    } elseif ($FakeBoundParameters.Contains('SourceModuleProject')) {
+        $FakeBoundParameters['SourceModuleProject']
     }
+    
+    $ModuleProjectCommands = GetCommandsInModuleProject -ModuleProject $ModuleProject
+    $Matching = $ModuleProjectCommands | Where-Object {$_ -like "$WordToComplete*"} 
+    return $Matching
 }
 
 <#TODO: Test#>
@@ -115,17 +98,14 @@ function NewCommandFromModuleArgumentCompleter {
     } else {''}
 
     if($ModuleProject -and $CommandName) {
-        $Choices = @()
-        $ModuleProjects = Get-ValidModuleProjectNames 
-        if ($ModuleProject -in $ModuleProjects) {
-            $Functions = Get-ModuleProjectFunctionNames -ModuleProject $ModuleProject | Where-Object {$_ -EQ $CommandName}
-            if ($Functions) { 
-                Get-ApprovedVerbs | 
-                    Where-Object {$_ -like "$WordToComplete*"} | 
-                    ForEach-Object { $Choices += @("$_-") }
-             }
-
-            return @($Choices)
-        } 
+        $ModuleProjectCommands = GetCommandsInModuleProject -ModuleProject $ModuleProject
+        $Matching = $ModuleProjectCommands | Where-Object {$_ -like "$WordToComplete*"} 
+        if ($Matching -contains $CommandName) {
+            $CommandType = GetModuleProjectTypeForCommand -CommandName $CommandName
+            if ($CommandType -eq 'Function') {
+                return ApprovedVerbsArgumentCompleter -WordToComplete $WordToComplete
+            }
+        }
+        
     }  
 }

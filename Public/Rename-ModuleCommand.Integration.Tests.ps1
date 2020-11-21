@@ -107,68 +107,74 @@ describe 'Rename-ModuleCommand' {
         }  
         
     }
+
     describe 'auto-completion for input' {
         it 'auto-suggests valid Module Arguments for Source Module' {
-            Mock Get-ValidModuleProjectNames
-            $Arguments = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName ModuleProject)
+            Add-TestModule $ViableModule -Valid
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName ModuleProject)
             
-            try {$Arguments.Definition.Invoke()} catch {}
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke()} catch {}
     
-            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
+            $Arguments | Should -Be @($ViableModule)
         }
 
         it 'auto-suggests valid Module Command for CommandName' {
             $FakeBoundParameters = @{'ModuleProject'=$ViableModule}
-            Mock Get-ValidModuleProjectNames {return $ViableModule}
-            Mock Get-ModuleProjectFunctionNames
-            Mock Get-ModuleProjectAliasNames
+            Add-TestModule $ViableModule -Valid
+            Add-TestFunction $ViableModule 'Foo-Bar' 
+            Add-TestAlias $ViableModule 'Bar'
+            Add-TestModule 'Test' -Valid
+            Add-TestFunction 'Test' 'Get-Foo'
 
-            $Arguments = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName CommandName)
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName CommandName)
             
-            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
     
-            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 1
-            Assert-MockCalled Get-ModuleProjectAliasNames -Times 1
+            $Arguments | Should -Be @('Foo-Bar','Bar')
         }
 
-        it 'auto-suggests valid Module Command for CommandName with no ModuleProject' {
+        it 'auto-suggests valid Module Command for CommandName With no ModuleProject' {
             $FakeBoundParameters = @{}
-            Mock Get-ValidModuleProjectNames {return $ViableModule, 'Test'}
-            Mock Get-ModuleProjectFunctionNames
-            Mock Get-ModuleProjectAliasNames
+            Add-TestModule $ViableModule -Valid
+            Add-TestFunction $ViableModule 'Foo-Bar' 
+            Add-TestModule 'Test' -Valid
+            Add-TestAlias 'Test' 'Bar'
 
-            $Arguments = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName CommandName)
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName CommandName)
             
-            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
     
-            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 2
-            Assert-MockCalled Get-ModuleProjectAliasNames -Times 2
+            $Arguments | Should -Be @('Bar','Foo-Bar')
         }
 
         it 'auto-suggests valid verb arguments for NewCommandName if CommandName is a function' {
-            $Arguments = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName NewCommandName)
+            $FunctionName = 'Get-Foo'
             $FakeBoundParameters = @{
                 'ModuleProject'=$ViableModule
-                'CommandName'='Get-Foo'
+                'CommandName'=$FunctionName
             }
-            Mock Get-ValidModuleProjectNames {return $ViableModule}
-            Mock Get-ModuleProjectFunctionNames {'Get-Foo'}
-            Mock Get-ModuleProjectAliasNames
+            Add-TestModule $ViableModule -Valid
+            Add-TestFunction $ViableModule $FunctionName 
             
-            'Get-' -in ($Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)) | Should -BeTrue
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName NewCommandName)
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+
+            'Get-' -in $Arguments | Should -BeTrue
         }
 
         it 'does not auto-suggest verb arguments for NewCommandName if CommandName is an alias' {
-            $Arguments = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName NewCommandName)
+            $AliasName = 'GetFoo'
             $FakeBoundParameters = @{
                 'ModuleProject'=$ViableModule
-                'CommandName'='Get'
+                'CommandName'=$AliasName
             }
-            Mock Get-ValidModuleProjectNames {return $ViableModule}
-            Mock Get-ModuleProjectFunctionNames 
-            Mock Get-ModuleProjectAliasNames {'Get'}
+            Add-TestModule $ViableModule -Valid
+            Add-TestAlias $ViableModule $AliasName 
             
-            'Get-' -in ($Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)) | Should -BeFalse
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Rename-ModuleCommand -ParameterName NewCommandName)
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+
+            'Get-' -in $Arguments | Should -BeFalse
         }
     }
     describe 'functionality' {

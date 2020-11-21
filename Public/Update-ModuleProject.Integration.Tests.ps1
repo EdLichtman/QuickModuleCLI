@@ -51,11 +51,20 @@ describe 'Export-ModuleProject' {
             $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ModuleProjectDoesNotExistException'
         }
     }
-
+    describe 'auto-completion for input' {
+        it 'auto-suggests valid Module Arguments for Module' {
+            Add-TestModule $ViableModule -Valid
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Update-ModuleProject -ParameterName ModuleProject)
+            
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke()} catch {}
+    
+            $Arguments | Should -Be @($ViableModule)
+        }
+    }
     describe 'functionality' {
         BeforeAll {
             function Get-Psd1 {
-                $ModuleProjects = Get-ValidModuleProjects
+                $ModuleProjects = GetValidModuleProject
                 $psd1Location = "$($ModuleProjects.FullName)\$($ModuleProjects.Name).psd1"
                 $psd1Content = (Get-Content $psd1Location | Out-String)
                 return (Invoke-Expression $psd1Content)
@@ -313,17 +322,6 @@ describe 'Export-ModuleProject' {
             $psd1.PrivateData.PSData.IconUri | Should -Be $expectedIconUri
             $psd1.PrivateData.PSData.ReleaseNotes | Should -Be $expectedReleaseNotes
             $psd1.HelpInfoUri | Should -Be $expectedHelpInfoUri
-        }
-    }
-
-    describe 'auto-completion for input' {
-        it 'auto-suggests valid Module Arguments for Module' {
-            Mock Get-ValidModuleProjectNames
-            $Arguments = (Get-ArgumentCompleter -CommandName Update-ModuleProject -ParameterName ModuleProject)
-            
-            try {$Arguments.Definition.Invoke()} catch {}
-    
-            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
         }
     }
 }

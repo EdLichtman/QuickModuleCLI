@@ -70,17 +70,18 @@ describe 'Add-ModuleFunction' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
     
             $err = { Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText 'Write-Output "Hello"' -WhatIf } | Should -Throw -PassThru
-            $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ParameterStartsWithUnapprovedVerbException'
+            $err.Exception.GetType().Name | Should -Be 'ParameterStartsWithUnapprovedVerbException'
         }
     }
     describe 'auto-completion for input' {
         it 'auto-suggests valid Module Arguments for Module' {
-            Mock Get-ValidModuleProjectNames
-            $Arguments = (Get-ArgumentCompleter -CommandName Add-ModuleFunction -ParameterName ModuleProject)
+            Add-TestModule -Name $ViableModule -Valid
             
-            try {$Arguments.Definition.Invoke()} catch {}
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Add-ModuleFunction -ParameterName ModuleProject)
+            
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke()} catch {}
     
-            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
+            $Arguments | Should -Be @($ViableModule)
         }
 
         it 'auto-suggests valid verb arguments for FunctionName' {

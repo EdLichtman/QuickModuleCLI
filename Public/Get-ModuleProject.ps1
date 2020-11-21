@@ -1,48 +1,32 @@
 function Get-ModuleProject {
     [CmdletBinding(PositionalBinding=$false)]
     param(
-        [String] $ModuleProject,
-        [String] $CommandName
+        [String] $ModuleProject
     )
-    $LimitToModuleProject = $PSBoundParameters.ContainsKey('ModuleProject');
-    $LimitToCommandName = $PSBoundParameters.ContainsKey('CommandName');
 
-    $ModuleProjects = Get-ValidModuleProjects
+    $ModuleProjects = if ($ModuleProject) {
+        @($ModuleProject)
+    } else {
+        (GetModuleProjectInfo).Name
+    }
+
     foreach($Module in $ModuleProjects) {
-        if (!$LimitToModuleProject -or ($LimitToModuleProject -and ($Module.Name -eq $ModuleProject))) {
-            $Functions = Get-ModuleProjectFunctions -ModuleProject $Module.Name
-            $Aliases = Get-ModuleProjectAliases -ModuleProject $Module.Name
-            if (($Functions.Count -eq 0) -and ($Aliases.Count -eq 0)) {
-                if (!$LimitToCommandName) {
-                    $SummaryItem = New-Object System.Object
-                    $SummaryItem | Add-Member -MemberType NoteProperty -Name "Module" -Value $Module.Name
-                    $SummaryItem | Add-Member -MemberType NoteProperty -Name "Command" -Value '[EMPTY]'
-                    $SummaryItem | Add-Member -MemberType NoteProperty -Name "Type" -Value "[EMPTY]"
-                    $SummaryItem
-                }
+        $ModuleInfo = New-Object PSObject -Property @{
+            Name = $Module
+            Function = @()
+            Alias = @()
+        }
+
+        $Commands = GetCommandsInModuleProject -ModuleProject $Module
+        foreach($CommandName in $Commands) {
+            if ((GetModuleProjectTypeForCommand -CommandName $CommandName) -eq 'Function') {
+                $ModuleInfo.Function += @($CommandName)
             } else {
-                foreach($Function in $Functions) {
-                    if (!$LimitToCommandName -or ($LimitToCommandName -and ($Function.BaseName -eq $CommandName))) {
-                        $SummaryItem = New-Object System.Object
-                        $SummaryItem | Add-Member -MemberType NoteProperty -Name "Module" -Value $Module.Name
-                        $SummaryItem | Add-Member -MemberType NoteProperty -Name "Command" -Value $Function.BaseName
-                        $SummaryItem | Add-Member -MemberType NoteProperty -Name "Type" -Value "Function"
-                        $SummaryItem
-                    }
-                }
-                foreach($Alias in $Aliases) {
-                    if (!$LimitToCommandName -or ($LimitToCommandName -and ($Alias.BaseName -eq $CommandName))) {
-                        $SummaryItem = New-Object System.Object
-                        $SummaryItem | Add-Member -MemberType NoteProperty -Name "Module" -Value $Module.Name
-                        $SummaryItem | Add-Member -MemberType NoteProperty -Name "Command" -Value $Alias.BaseName
-                        $SummaryItem | Add-Member -MemberType NoteProperty -Name "Type" -Value "Alias"
-                        $SummaryItem
-                    }
-                }
+                $ModuleInfo.Alias += @($CommandName)
             }
         }
+        $ModuleInfo #yield return
     }
 }
 
 Register-ArgumentCompleter -CommandName Get-ModuleProject -ParameterName ModuleProject -ScriptBlock (Get-Command ModuleProjectArgumentCompleter).ScriptBlock
-Register-ArgumentCompleter -CommandName Get-ModuleProject -ParameterName CommandName -ScriptBlock (Get-Command CommandFromOptionalModuleArgumentCompleter).ScriptBlock

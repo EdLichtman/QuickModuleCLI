@@ -22,7 +22,9 @@ function Rename-ModuleCommand {
     
     ValidateCommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
 
-    $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $ModuleProject -CommandName $CommandName
+    $CommandType = GetModuleProjectTypeForCommand -CommandName $CommandName
+    $CommandBlock = GetDefinitionForCommand -CommandName $CommandName
+    
     if ($CommandType -EQ 'Function' -and (!$Force)) {
         ValidateCommandStartsWithApprovedVerb -Command $NewCommandName
     }

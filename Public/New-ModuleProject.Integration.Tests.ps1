@@ -42,12 +42,18 @@ describe 'New-ModuleProject' {
     it 'creates a new module project' {
         New-ModuleProject -ModuleProject $ViableModule
         
-        $ModuleProject = (Get-ValidModuleProjects)[0]
+        $ModuleProject = (GetValidModuleProject)[0]
 
         $Internals = (Get-ChildItem $ModuleProject.FullName).Name
         ("$ViableModule.psd1" -in $Internals) | Should -Be $True
         ("$ViableModule.psm1" -in $Internals) | Should -Be  $True
         ("Functions" -in $Internals) | Should -Be $True
         ("Aliases" -in $Internals) | Should -Be $True
+    }
+
+    it 'Re-imports Module' {
+        New-ModuleProject -ModuleProject $ViableModule
+
+        Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True -and $Global -eq $True}
     }
 }

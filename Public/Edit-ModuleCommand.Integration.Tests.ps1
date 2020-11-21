@@ -18,7 +18,6 @@ describe 'Edit-ModuleCommand' {
 
         
         . "$PSScriptRoot\Update-ModuleProject.ps1"
-        . "$PSScriptRoot\Add-ModuleFunction.ps1"
         . "$PSScriptRoot\Edit-ModuleCommand.ps1"
 
         $ViableModule = "Viable"
@@ -69,17 +68,69 @@ describe 'Edit-ModuleCommand' {
             $FunctionText = 'Write-Output "Test"'
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleFunction -ModuleProject 'Test' -FunctionName $FunctionName -FunctionText  $FunctionText
+            Add-TestFunction -ModuleName 'Test' -FunctionName $FunctionName -FunctionText  $FunctionText
     
             $err = { Edit-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName } | Should -Throw -PassThru
     
             $err.Exception.GetType().BaseType | Should -Not -Be $ParameterBindingException
             $err.Exception.GetType().Name | Should -Be 'ModuleCommandDoesNotExistException'
         }
-    
     }
 
+    describe 'auto-completion for input' {
+        it 'auto-suggests valid Module Arguments for Module' {
+            Add-TestModule $ViableModule -Valid
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Edit-ModuleCommand -ParameterName ModuleProject)
+            
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke()} catch {}
+    
+            $Arguments | Should -Be @($ViableModule)
+        }
+
+        it 'auto-suggests valid Module Command for CommandName' {
+            $FakeBoundParameters = @{'SourceModuleProject'=$ViableModule}
+            Add-TestModule $ViableModule -Valid
+            Add-TestFunction $ViableModule 'Foo-Bar' 
+            Add-TestAlias $ViableModule 'Bar'
+            Add-TestModule 'Test' -Valid
+            Add-TestFunction 'Test' 'Get-Foo'
+
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Edit-ModuleCommand -ParameterName CommandName)
+            
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+    
+            $Arguments | Should -Be @('Foo-Bar','Bar')
+        }
+
+        it 'auto-suggests valid Module Command for CommandName without ModuleProject' {
+            $FakeBoundParameters = @{}
+            Add-TestModule $ViableModule -Valid
+            Add-TestFunction $ViableModule 'Foo-Bar' 
+            Add-TestModule 'Test' -Valid
+            Add-TestAlias 'Test' 'Bar'
+
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Edit-ModuleCommand -ParameterName CommandName)
+            
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+    
+            $Arguments | Should -Be @('Bar','Foo-Bar')
+        }
+    }
     describe 'functionality' {
+        it 'Can be run without a ModuleProject' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "return 'Foo'"
+    
+            Mock Open-PowershellEditor
+            Mock Wait-ForKeyPress
+    
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+    
+            Edit-ModuleCommand -CommandName $FunctionName
+            
+            Assert-MockCalled Open-PowershellEditor -Times 1
+        }
         it 'Attempts to Open Powershell Editor' {
             $FunctionName = 'Write-Foo'
             $FunctionText = "return 'Foo'"
@@ -88,7 +139,7 @@ describe 'Edit-ModuleCommand' {
             Mock Wait-ForKeyPress
     
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
     
             Edit-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName
             
@@ -103,50 +154,11 @@ describe 'Edit-ModuleCommand' {
             Mock Wait-ForKeyPress
     
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
     
             Edit-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName
             
             Assert-MockCalled Wait-ForKeyPress -Times 1
-        }
-    }
-
-    describe 'auto-completion for input' {
-        it 'auto-suggests valid Module Arguments for Module' {
-            Mock Get-ValidModuleProjectNames
-            $Arguments = (Get-ArgumentCompleter -CommandName Edit-ModuleCommand -ParameterName ModuleProject)
-            
-            try {$Arguments.Definition.Invoke()} catch {}
-    
-            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
-        }
-
-        it 'auto-suggests valid Module Command for CommandName' {
-            $FakeBoundParameters = @{'ModuleProject'=$ViableModule}
-            Mock Get-ValidModuleProjectNames {return $ViableModule}
-            Mock Get-ModuleProjectFunctionNames
-            Mock Get-ModuleProjectAliasNames
-
-            $Arguments = (Get-ArgumentCompleter -CommandName Edit-ModuleCommand -ParameterName CommandName)
-            
-            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
-    
-            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 1
-            Assert-MockCalled Get-ModuleProjectAliasNames -Times 1
-        }
-
-        it 'auto-suggests valid Module Command for CommandName without ModuleProject' {
-            $FakeBoundParameters = @{}
-            Mock Get-ValidModuleProjectNames {return $ViableModule,'Test'}
-            Mock Get-ModuleProjectFunctionNames
-            Mock Get-ModuleProjectAliasNames
-
-            $Arguments = (Get-ArgumentCompleter -CommandName Edit-ModuleCommand -ParameterName CommandName)
-            
-            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
-    
-            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 2
-            Assert-MockCalled Get-ModuleProjectAliasNames -Times 2
         }
     }
 }

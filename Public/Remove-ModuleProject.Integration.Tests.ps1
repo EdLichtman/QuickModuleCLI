@@ -71,7 +71,7 @@ describe 'Remove-ModuleProject' {
     
             Remove-ModuleProject -ModuleProject $ViableModule
 
-            (Get-ValidModuleProjects).Count | Should -Be 0
+            (GetValidModuleProject).Count | Should -Be 0
         }
 
         it 'Removes ModuleProject if choice is not confirmed' {
@@ -81,7 +81,7 @@ describe 'Remove-ModuleProject' {
     
             Remove-ModuleProject -ModuleProject $ViableModule
 
-            (Get-ValidModuleProjects).Name | Should -Be $ViableModule
+            (GetValidModuleProject).Name | Should -Be $ViableModule
         }
 
         it 'Should try to re-import the ModuleProject' {
@@ -98,12 +98,12 @@ describe 'Remove-ModuleProject' {
 
     describe 'auto-completion for input' {
         it 'auto-suggests valid Module Arguments for Module' {
-            Mock Get-ValidModuleProjectNames
-            $Arguments = (Get-ArgumentCompleter -CommandName Remove-ModuleProject -ParameterName ModuleProject)
+            Add-TestModule $ViableModule -Valid
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Remove-ModuleProject -ParameterName ModuleProject)
             
-            try {$Arguments.Definition.Invoke()} catch {}
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke()} catch {}
     
-            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
+            $Arguments | Should -Be @($ViableModule)
         }
     }
 }

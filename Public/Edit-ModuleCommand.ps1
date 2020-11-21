@@ -11,10 +11,12 @@ function Edit-ModuleCommand {
         [string]$CommandName
         
     )
-    ValidateCommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
+    if ($ModuleProject) {
+        ValidateCommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
+    }
 
-    $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
-    Open-PowershellEditor -Path $Command.FullName
+    $File = GetFileForCommand -CommandName $CommandName
+    Open-PowershellEditor -Path $File.FullName
     Wait-ForKeyPress
 
     Import-Module $BaseModuleName -Force -Global

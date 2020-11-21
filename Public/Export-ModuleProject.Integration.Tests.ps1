@@ -64,7 +64,16 @@ describe 'Export-ModuleProject' {
             $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'ModuleProjectExportDestinationIsInvalidException'
         }
     }
-
+    describe 'auto-completion for input' {
+        it 'auto-suggests valid Module Arguments for Module' {
+            Add-TestModule $ViableModule -Valid
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Export-ModuleProject -ParameterName ModuleProject)
+            
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke()} catch {}
+    
+            $Arguments | Should -Be @($ViableModule)
+        }
+    }
     describe 'functionality' {
         it 'copies module project to new location' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
@@ -138,17 +147,6 @@ describe 'Export-ModuleProject' {
 
             (Test-Path "$BaseFolder\ShouldRemain") | Should -BeTrue
             (Test-Path "$BaseFolder\ShouldRemain\Test.txt") | Should -BeTrue
-        }
-    }
-
-    describe 'auto-completion for input' {
-        it 'auto-suggests valid Module Arguments for Module' {
-            Mock Get-ValidModuleProjectNames
-            $Arguments = (Get-ArgumentCompleter -CommandName Export-ModuleProject -ParameterName ModuleProject)
-            
-            try {$Arguments.Definition.Invoke()} catch {}
-    
-            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
         }
     }
 }

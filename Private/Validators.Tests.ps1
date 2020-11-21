@@ -147,48 +147,6 @@ Describe 'Validators' {
         }
     }
 
-    describe 'ValidateCommandExistsInModule' {
-        BeforeEach {
-            function Test-CommandExistsInModuleFunction {
-                param( 
-                    [String]
-                    $ModuleProject,
-                    [ValidateScript({ValidateModuleCommandExists $_})]
-                    [String]
-                    $CommandName
-                    )
-                    ValidateCommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
-            }
-        }
-
-        it 'Errors if command does exist but not in module' {
-            Add-TestModule -Name '_First' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestFunction -ModuleName "_First" -FunctionName 'Get-Foo'
-
-            $err = { Test-CommandExistsInModuleFunction -ModuleProject $ViableModule -CommandName 'Get-Foo' } | Should -Throw -PassThru
-            $err.Exception.GetType().Name | Should -Be 'ModuleCommandDoesNotExistException'
-        }
-
-        it 'Does not error if function exists in Module' {
-            Add-TestModule -Name '_First' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestFunction -ModuleName $ViableModule -FunctionName 'Get-Foo'
-
-            { Test-CommandExistsInModuleFunction -ModuleProject $ViableModule -CommandName 'Get-Foo' } | Should -Not -Throw
-        }
-
-        
-        it 'Does not error if alias exists in Module' {
-            Add-TestModule -Name '_First' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestAlias -ModuleName $ViableModule -AliasName 'Foo'
-
-            { Test-CommandExistsInModuleFunction -ModuleProject $ViableModule -CommandName 'Foo' } | Should -Not -Throw
-        }
-
-    }
-
     describe 'ValidateParameterStartsWithApprovedVerb' {
         BeforeEach {
             function Test-Attribute{

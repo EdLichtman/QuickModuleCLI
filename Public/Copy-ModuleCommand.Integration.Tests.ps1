@@ -17,8 +17,6 @@ describe 'Copy-ModuleCommand' {
         . "$PSScriptRoot\..\Private\Validators.ps1"
         
         . "$PSScriptRoot\Update-ModuleProject.ps1"
-        . "$PSScriptRoot\Add-ModuleFunction.ps1"
-        . "$PSScriptRoot\Add-ModuleAlias.ps1"
         . "$PSScriptRoot\Edit-ModuleCommand.ps1"
         . "$PSScriptRoot\Copy-ModuleCommand.ps1"
 
@@ -61,7 +59,7 @@ describe 'Copy-ModuleCommand' {
             $FunctionText = "return 'Foo'"
     
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
     
             $err = { Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -NewCommandName $FunctionName } | Should -Throw -PassThru
     
@@ -76,25 +74,12 @@ describe 'Copy-ModuleCommand' {
     
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleFunction -ModuleProject 'Test' -FunctionName $FunctionName -FunctionText  $FunctionText
+            Add-TestFunction -ModuleName 'Test' -FunctionName $FunctionName -FunctionText  $FunctionText
 
             $err = { Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -NewCommandName $NewFunctionName } | Should -Throw -PassThru
     
             $err.Exception.GetType().BaseType | Should -Not -Be $ParameterBindingException
             $err.Exception.GetType().Name | Should -Be 'ModuleCommandDoesNotExistException'
-        }
-    
-        it 'throws error if DestinationModuleProject is empty' {
-            $FunctionName = 'Write-Foo'
-            $FunctionText = "return 'Foo'"
-    
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
-
-            $err = {  Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject '' -NewCommandName 'Write-Test2' } | Should -Throw -PassThru
-    
-            $err.Exception.GetType().BaseType | Should -Be $ParameterBindingException
-            $err.Exception.Message -like '*Null or Empty*' | Should -BeTrue
         }
 
         it 'throws error if DestinationCommandModule is not valid' {
@@ -102,7 +87,7 @@ describe 'Copy-ModuleCommand' {
             $FunctionText = "return 'Foo'"
     
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
 
             $err = {  Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject 'Test' -NewCommandName 'Write-Test2' } | Should -Throw -PassThru
     
@@ -115,7 +100,7 @@ describe 'Copy-ModuleCommand' {
             $FunctionText = "return 'Foo'"
     
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
 
             $err = {  Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -NewCommandName '' } | Should -Throw -PassThru
     
@@ -129,7 +114,7 @@ describe 'Copy-ModuleCommand' {
             $NewFunctionName = 'Foo-Bar'
     
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
     
             $err = { Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -NewCommandName $NewFunctionName } | Should -Throw -PassThru
     
@@ -143,82 +128,87 @@ describe 'Copy-ModuleCommand' {
             $NewFunctionName = 'Foo-Bar'
     
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
     
             { Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -NewCommandName $NewFunctionName -Force } | Should -Not -Throw
         }    
     }
     describe 'auto-completion for input' {
         it 'auto-suggests valid Module Arguments for Source Module' {
-            Mock Get-ValidModuleProjectNames
-            $Arguments = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName SourceModuleProject)
+            Add-TestModule $ViableModule -Valid
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName SourceModuleProject)
             
-            try {$Arguments.Definition.Invoke()} catch {}
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke()} catch {}
     
-            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
+            $Arguments | Should -Be @($ViableModule)
         }
 
         it 'auto-suggests valid Module Command for CommandName' {
             $FakeBoundParameters = @{'SourceModuleProject'=$ViableModule}
-            Mock Get-ValidModuleProjectNames {return $ViableModule}
-            Mock Get-ModuleProjectFunctionNames
-            Mock Get-ModuleProjectAliasNames
+            Add-TestModule $ViableModule -Valid
+            Add-TestFunction $ViableModule 'Foo-Bar' 
+            Add-TestAlias $ViableModule 'Bar'
+            Add-TestModule 'Test' -Valid
+            Add-TestFunction 'Test' 'Get-Foo'
 
-            $Arguments = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName CommandName)
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName CommandName)
             
-            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
     
-            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 1
-            Assert-MockCalled Get-ModuleProjectAliasNames -Times 1
+            $Arguments | Should -Be @('Foo-Bar','Bar')
         }
 
         it 'auto-suggests valid Module Command for CommandName With no SourceModuleProject' {
             $FakeBoundParameters = @{}
-            Mock Get-ValidModuleProjectNames {return $ViableModule,'Test'}
-            Mock Get-ModuleProjectFunctionNames
-            Mock Get-ModuleProjectAliasNames
+            Add-TestModule $ViableModule -Valid
+            Add-TestFunction $ViableModule 'Foo-Bar' 
+            Add-TestModule 'Test' -Valid
+            Add-TestAlias 'Test' 'Bar'
 
-            $Arguments = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName CommandName)
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName CommandName)
             
-            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
     
-            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 2
-            Assert-MockCalled Get-ModuleProjectAliasNames -Times 2
+            $Arguments | Should -Be @('Bar','Foo-Bar')
         }
 
         it 'auto-suggests valid Module Arguments for Destination Module' {
-            Mock Get-ValidModuleProjectNames
-            $Arguments = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName DestinationModuleProject)
+            Add-TestModule $ViableModule -Valid
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName DestinationModuleProject)
             
-            try {$Arguments.Definition.Invoke()} catch {}
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke()} catch {}
     
-            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
+            $Arguments | Should -Be @($ViableModule)
         }
 
         it 'auto-suggests valid verb arguments for NewCommandName if CommandName is a function' {
-            $Arguments = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName NewCommandName)
+            $FunctionName = 'Get-Foo'
             $FakeBoundParameters = @{
                 'SourceModuleProject'=$ViableModule
-                'CommandName'='Get-Foo'
+                'CommandName'=$FunctionName
             }
-            Mock Get-ValidModuleProjectNames {return $ViableModule}
-            Mock Get-ModuleProjectFunctionNames {'Get-Foo'}
-            Mock Get-ModuleProjectAliasNames
+            Add-TestModule $ViableModule -Valid
+            Add-TestFunction $ViableModule $FunctionName 
             
-            'Get-' -in ($Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)) | Should -BeTrue
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName NewCommandName)
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+
+            'Get-' -in $Arguments | Should -BeTrue
         }
 
         it 'does not auto-suggest verb arguments for NewCommandName if CommandName is an alias' {
-            $Arguments = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName NewCommandName)
+            $AliasName = 'GetFoo'
             $FakeBoundParameters = @{
                 'SourceModuleProject'=$ViableModule
-                'CommandName'='Get'
+                'CommandName'=$AliasName
             }
-            Mock Get-ValidModuleProjectNames {return $ViableModule}
-            Mock Get-ModuleProjectFunctionNames 
-            Mock Get-ModuleProjectAliasNames {'Get'}
+            Add-TestModule $ViableModule -Valid
+            Add-TestAlias $ViableModule $AliasName 
             
-            'Get-' -in ($Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)) | Should -BeFalse
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName NewCommandName)
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+
+            'Get-' -in $Arguments | Should -BeFalse
         }
     }
     describe 'functionality' {
@@ -228,7 +218,7 @@ describe 'Copy-ModuleCommand' {
             $NewFunctionName = 'Write-FooClone'
     
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
     
             Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -NewCommandName $NewFunctionName
     
@@ -241,7 +231,7 @@ describe 'Copy-ModuleCommand' {
             $NewFunctionName = 'Foo-FooClone'
     
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
     
             Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -NewCommandName $NewFunctionName -Force
     
@@ -256,7 +246,7 @@ describe 'Copy-ModuleCommand' {
     
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestModule -Name $NewModuleName -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
     
             Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $NewModuleName -NewCommandName $NewFunctionName
     
@@ -269,7 +259,7 @@ describe 'Copy-ModuleCommand' {
             $NewAliasName = 'FooClone'
 
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleAlias -ModuleProject $ViableModule -AliasName $AliasName -AliasMappedFunction $AliasMappedFunction
+            Add-TestAlias -ModuleName $ViableModule -AliasName $AliasName -AliasText $AliasMappedFunction
     
             Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $AliasName -DestinationModuleProject $ViableModule -NewCommandName $NewAliasName
     
@@ -284,7 +274,7 @@ describe 'Copy-ModuleCommand' {
 
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestModule -Name $NewModuleName -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleAlias -ModuleProject $ViableModule -AliasName $AliasName -AliasMappedFunction $AliasMappedFunction
+            Add-TestAlias -ModuleName $ViableModule -AliasName $AliasName -AliasText $AliasMappedFunction
     
             Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $AliasName -DestinationModuleProject $NewModuleName -NewCommandName $NewAliasName
     
@@ -297,7 +287,7 @@ describe 'Copy-ModuleCommand' {
             $NewFunctionName = 'Get-FooClone'
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
     
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText $FunctionText
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText $FunctionText
             Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -NewCommandName $NewFunctionName
     
             $FunctionPath = Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $FunctionName
@@ -306,8 +296,10 @@ describe 'Copy-ModuleCommand' {
             . "$FunctionPath"
             . "$CopiedFunctionPath"
     
-            $CommandType, $Definition = Get-ModuleProjectCommandDefinition -ModuleProject $ViableModule -CommandName $FunctionName
-            $CopiedCommandType, $CopiedDefinition = Get-ModuleProjectCommandDefinition -ModuleProject $ViableModule -CommandName $NewFunctionName
+            $Definition = GetDefinitionForCommand -CommandName $FunctionName
+            $CopiedDefinition = GetDefinitionForCommand -CommandName $NewFunctionName
+            
+            $CopiedCommandType = GetModuleProjectTypeForCommand -CommandName $NewFunctionName
     
             $Definition | Should -Be $FunctionText
             $CopiedDefinition | Should -Be $Definition
@@ -320,7 +312,7 @@ describe 'Copy-ModuleCommand' {
             $NewFunctionName = 'Get-FooClone'
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
     
-            Add-ModuleFunction -ModuleProject $ViableModule -FunctionName $FunctionName -FunctionText $FunctionText
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText $FunctionText
             Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -NewCommandName $NewFunctionName
             
             Assert-MockCalled Edit-ModuleCommand -Times 1
@@ -332,11 +324,65 @@ describe 'Copy-ModuleCommand' {
             $NewAliasName = 'FooClone'
 
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-ModuleAlias -ModuleProject $ViableModule -AliasName $AliasName -AliasMappedFunction $AliasMappedFunction
+            Add-TestAlias -ModuleName $ViableModule -AliasName $AliasName -AliasText $AliasMappedFunction
     
             Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $AliasName -DestinationModuleProject $ViableModule -NewCommandName $NewAliasName
 
             Assert-MockCalled Edit-ModuleCommand -Times 0
+        }
+
+        it 'Can copy a module command without SourceModuleProject' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "return 'Foo'"
+            $NewModuleName = 'Test'
+            $NewFunctionName = 'Write-FooClone'
+    
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestModule -Name $NewModuleName -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+
+            Copy-ModuleCommand -CommandName $FunctionName -DestinationModuleProject $NewModuleName -NewCommandName $NewFunctionName
+    
+            Test-Path (Get-ModuleProjectFunctionPath -ModuleProject $NewModuleName -CommandName $NewFunctionName) | Should -BeTrue
+        }
+
+        it 'Should copy a function to the same module without DestinationModuleProject' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "return 'Foo'"
+            $NewFunctionName = 'Write-FooClone'
+    
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+    
+            Copy-ModuleCommand -CommandName $FunctionName -NewCommandName $NewFunctionName
+    
+            Test-Path (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $NewFunctionName) | Should -BeTrue
+        }
+
+        it 'Attempts to Update-ModuleProject for destination if a command is cloned' {
+            $NewModule = 'New'
+            $FunctionName = 'Get-Foo'
+            $FunctionText = "return 'Foo'"
+            $NewFunctionName = 'Get-FooClone'
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestModule -Name $NewModule  -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+    
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText $FunctionText
+            Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $NewModule -NewCommandName $NewFunctionName
+            
+            Assert-MockCalled Update-ModuleProject -Times 1 -ParameterFilter {$ModuleProject -eq $NewModule}
+        }
+
+        it 'Attempts to re-import destination ModuleProject if a command is cloned' {
+            $FunctionName = 'Get-Foo'
+            $FunctionText = "return 'Foo'"
+            $NewFunctionName = 'Get-FooClone'
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+    
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText $FunctionText
+            Copy-ModuleCommand -SourceModuleProject $ViableModule -CommandName $FunctionName -DestinationModuleProject $ViableModule -NewCommandName $NewFunctionName
+            
+            Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True -and $Global -eq $True}
         }
     }
 }

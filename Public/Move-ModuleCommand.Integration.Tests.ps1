@@ -92,49 +92,51 @@ describe 'Move-ModuleCommand' {
     }
     describe 'auto-completion for input' {
         it 'auto-suggests valid Module Arguments for Source Module' {
-            Mock Get-ValidModuleProjectNames
-            $Arguments = (Get-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName SourceModuleProject)
+            Add-TestModule $ViableModule -Valid
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName SourceModuleProject)
             
-            try {$Arguments.Definition.Invoke()} catch {}
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke()} catch {}
     
-            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
+            $Arguments | Should -Be @($ViableModule)
         }
 
         it 'auto-suggests valid Module Command for CommandName' {
             $FakeBoundParameters = @{'SourceModuleProject'=$ViableModule}
-            Mock Get-ValidModuleProjectNames {return $ViableModule}
-            Mock Get-ModuleProjectFunctionNames
-            Mock Get-ModuleProjectAliasNames
+            Add-TestModule $ViableModule -Valid
+            Add-TestFunction $ViableModule 'Foo-Bar' 
+            Add-TestAlias $ViableModule 'Bar'
+            Add-TestModule 'Test' -Valid
+            Add-TestFunction 'Test' 'Get-Foo'
 
-            $Arguments = (Get-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName CommandName)
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName CommandName)
             
-            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
     
-            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 1
-            Assert-MockCalled Get-ModuleProjectAliasNames -Times 1
+            $Arguments | Should -Be @('Foo-Bar','Bar')
         }
 
         it 'auto-suggests valid Module Command for CommandName with no SourceModuleProject' {
             $FakeBoundParameters = @{}
-            Mock Get-ValidModuleProjectNames {return $ViableModule, 'Test'}
-            Mock Get-ModuleProjectFunctionNames
-            Mock Get-ModuleProjectAliasNames
+            Add-TestModule $ViableModule -Valid
+            Add-TestFunction $ViableModule 'Foo-Bar' 
+            Add-TestModule 'Test' -Valid
+            Add-TestAlias 'Test' 'Bar'
 
-            $Arguments = (Get-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName CommandName)
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName CommandName)
             
-            try {$Arguments.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke($Null,$Null,'',$Null,$FakeBoundParameters)} catch {}
     
-            Assert-MockCalled Get-ModuleProjectFunctionNames -Times 2
-            Assert-MockCalled Get-ModuleProjectAliasNames -Times 2
+            $Arguments | Should -Be @('Bar','Foo-Bar')
         }
 
         it 'auto-suggests valid Module Arguments for Destination Module' {
-            Mock Get-ValidModuleProjectNames
-            $Arguments = (Get-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName DestinationModuleProject)
+            Add-TestModule $ViableModule -Valid
+            Add-TestModule 'Test' -Valid
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Move-ModuleCommand -ParameterName DestinationModuleProject)
             
-            try {$Arguments.Definition.Invoke()} catch {}
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke()} catch {}
     
-            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
+            $Arguments | Should -Be @('Test',$ViableModule)
         }
     }
     describe 'functionality' {

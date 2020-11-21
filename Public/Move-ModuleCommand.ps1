@@ -18,7 +18,9 @@ function Move-ModuleCommand {
     ValidateCommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $CommandName
     ValidateModuleCommandMoveDestinationIsValid -SourceModuleProject $SourceModuleProject -DestinationModuleProject $DestinationModuleProject
 
-    $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $CommandName
+    $CommandType = GetModuleProjectTypeForCommand -CommandName $CommandName
+    $CommandBlock = GetDefinitionForCommand -CommandName $CommandName
+
     Remove-ModuleProjectCommand -ModuleProject $SourceModuleProject -CommandName $CommandName
 
     if ($CommandType -EQ 'Function') {

@@ -6,13 +6,10 @@ using namespace System.Management.Automation;
 function ValidateModuleProjectExists {
     param($ModuleProject) 
     if ($ModuleProject) {
-        $Choices = Get-ValidModuleProjectNames
-        if (!$Choices) {
-            throw (New-Object ModuleProjectDoesNotExistException 'No viable Modules. Please create one with New-ModuleProject!')
-        }
-    
-        if (!($moduleProject -in ($Choices))) {
-            throw (New-Object ModuleProjectDoesNotExistException "Parameter must be one of the following choices: $Choices")
+        $ExistingModuleProject = GetModuleProjectInfo -ModuleProject $ModuleProject
+        
+        if (!($ExistingModuleProject)) {
+            throw (New-Object ModuleProjectDoesNotExistException "Enter a valid ModuleProject!")
         }
     }
 
@@ -23,9 +20,9 @@ function ValidateModuleProjectExists {
 function ValidateModuleProjectDoesNotExist {
     param($ModuleProject) 
     if ($ModuleProject) {
-        $Choices = Get-ValidModuleProjectNames
-        if ($Choices -and ($moduleProject -in ($Choices))) {
-            throw (New-Object ModuleProjectExistsException "Parameter must not be one of the following choices: $Choices")
+        $ExistingModuleProject = GetModuleProjectInfo -ModuleProject $ModuleProject
+        if ($ExistingModuleProject) {
+            throw (New-Object ModuleProjectExistsException "Parameter must not be one of the following choices: $(GetModuleProjectInfo)")
         }
     }
     return $True
@@ -41,35 +38,13 @@ function ValidateModuleDoesNotExist {
 
         $ModuleDirectories = Get-EnvironmentModuleDirectories
         foreach($Directory in $ModuleDirectories) {
-            if ($ModuleProject -in (Get-ChildItem $Directory -Directory).Name) {
+            if ((Get-ChildItem $Directory -Directory).Name -Contains $ModuleProject) {
                 throw (New-Object ModuleExistsException "Module already exists by the name '$moduleProject'")
             }
         }
     }
     return $True
 }
-
-<#Internal#>
-<#Fully Tested#>
-function Test-CommandExistsInModule {
-    param(
-        [String] $ModuleProject,
-        [String] $CommandName
-    )
-
-    $Functions = Get-ModuleProjectFunctions -ModuleProject $ModuleProject
-    if (($Functions | Where-Object { $_.BaseName -eq $CommandName})) {
-        return $True
-    } else {
-        $Aliases = Get-ModuleProjectAliases -ModuleProject $ModuleProject
-        if (($Aliases | Where-Object { $_.BaseName -eq $CommandName})) {
-            return $True
-        } 
-    } 
-
-    return $False
-}
-<#/Internal#>
 
 <#Fully Tested#>
 function ValidateCommandExistsInModule {
@@ -78,7 +53,7 @@ function ValidateCommandExistsInModule {
         [String] $CommandName
     )
 
-    if (!(Test-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName)) {
+    if (!((GetCommandsInModuleProject -ModuleProject $ModuleProject) -Contains $CommandName)) {
         throw (New-Object ModuleCommandDoesNotExistException "'$CommandName' does not exist as a command in $ModuleProject!")
     }
 }
@@ -87,14 +62,11 @@ function ValidateCommandExistsInModule {
 function ValidateModuleCommandExists {
     param($CommandName)
     if ($CommandName) {
-        $ModuleProjects = Get-ValidModuleProjectNames;
-        foreach($ModuleProject in $ModuleProjects) {
-           if (Test-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName) {
-               return $True;
-           }
+        if (!(GetCommandsInModuleProject) -Contains $CommandName){
+            throw (New-Object ModuleCommandDoesNotExistException "'$CommandName' does not exist as a command in any ModuleProject!")
         }
 
-        throw (New-Object ModuleCommandDoesNotExistException "'$CommandName' does not exist as a command in any ModuleProject!")
+
     }
     return $True
 }
@@ -102,11 +74,10 @@ function ValidateModuleCommandExists {
 <#TODO: Test#>
 function ValidateCommandExists {
     param($CommandName)
-    $ModuleProjects = Get-ValidModuleProjectNames;
-    foreach($ModuleProject in $ModuleProjects) {
-       if (Test-CommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName) {
-           return $True; #todo: Test
-       }
+    if ($CommandName) {
+        if ((GetCommandsInModuleProject) -contains $CommandName) {
+            return $True
+        }
     }
 
     if (!(Get-Command -Name $CommandName -ErrorAction 'SilentlyContinue')) {
@@ -119,17 +90,8 @@ function ValidateCommandExists {
 function ValidateModuleCommandDoesNotExist {
     param($CommandName) 
     if ($CommandName) {
-        $ModuleProjects = Get-ValidModuleProjectNames;
-        foreach($ModuleProject in $ModuleProjects) {
-            $Functions = Get-ModuleProjectFunctions -ModuleProject $ModuleProject
-            $FunctionExists = ($Functions | Where-Object { $_.BaseName -eq $CommandName});
-    
-            $Aliases = Get-ModuleProjectAliases -ModuleProject $ModuleProject
-            $AliasExists = ($Aliases | Where-Object { $_.BaseName -eq $CommandName})
-            
-            if ($FunctionExists -or $AliasExists) {
-                throw (New-Object ModuleCommandExistsException "'$CommandName' already exists as a command in '$ModuleProject'!")
-            }
+        if ((GetCommandsInModuleProject) -Contains $CommandName){
+            throw (New-Object ModuleCommandExistsException "'$CommandName' already exists as a command!")
         }
     }
     

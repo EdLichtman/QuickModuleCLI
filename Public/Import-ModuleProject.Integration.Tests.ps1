@@ -99,12 +99,12 @@ describe 'Import-ModuleProject' {
     describe 'functionality' {     
         it 'Should try to import the module' { 
             $ImportableProjectLocation = New-ImportableModuleProject $ViableModule
-            (Get-ValidModuleProjects).Count | Should -Be 0
+            (GetValidModuleProject).Count | Should -Be 0
 
             Import-ModuleProject -Path $ImportableProjectLocation
     
-            (Get-ValidModuleProjects).Count | Should -Be 1
-            (Get-ValidModuleProjects).Name | Should -Be $ViableModule
+            (GetValidModuleProject).Count | Should -Be 1
+            (GetValidModuleProject).Name | Should -Be $ViableModule
         }
 
         it 'Should try to import the base module again' {

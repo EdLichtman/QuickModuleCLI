@@ -10,8 +10,7 @@ function Copy-ModuleCommand {
         [ValidateScript({ValidateModuleCommandExists $_})]
         [String]$CommandName,
 
-        [Parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
+        [Parameter()]
         [ValidateScript({ValidateModuleProjectExists $_})]
         [String]$DestinationModuleProject,
 
@@ -23,12 +22,19 @@ function Copy-ModuleCommand {
         [Parameter()][Switch]
         $Force
     )
-    
+
     if ($SourceModuleProject) {
         ValidateCommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $CommandName
+    } else {
+        $SourceModuleProject = (GetModuleProjectForCommand -CommandName $CommandName)
     }
 
-    $CommandType, $CommandBlock = Get-ModuleProjectCommandDefinition -ModuleProject $SourceModuleProject -CommandName $CommandName
+    if (!$DestinationModuleProject) {
+        $DestinationModuleProject = $SourceModuleProject
+    }
+
+    $CommandBlock = GetDefinitionForCommand -CommandName $CommandName
+    $CommandType = GetModuleProjectTypeForCommand -CommandName $CommandName
 
     if ($CommandType -EQ 'Function') {
         if (!$Force) {
@@ -41,9 +47,8 @@ function Copy-ModuleCommand {
        New-ModuleProjectAlias -ModuleProject $DestinationModuleProject -Alias $NewCommandName -CommandName $CommandBlock
     }
 
-    # Update-ModuleProject -NestedModule $DestinationNestedModule
-
-    # Edit-ModuleCommand -NestedModule $DestinationNestedModule -commandName $NewCommandName
+    Update-ModuleProject -ModuleProject $DestinationModuleProject
+    Import-Module $BaseModuleName -Force -Global
 }
 Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName SourceModuleProject -ScriptBlock (Get-Command ModuleProjectArgumentCompleter).ScriptBlock
 Register-ArgumentCompleter -CommandName Copy-ModuleCommand -ParameterName CommandName -ScriptBlock (Get-Command CommandFromOptionalModuleArgumentCompleter).ScriptBlock

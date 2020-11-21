@@ -2,14 +2,27 @@ using namespace System.Collections.Generic
 using namespace System.IO
 using namespace System.Management.Automation
 
-<#FULLY TESTED#>
-function Get-ModuleProjectLocation {
-    param([Parameter(Mandatory=$true)][String]$ModuleProject)
-    return "$ModuleProjectsFolder\$ModuleProject"
+<#TODO: Test#>
+function GetFunctionDefinition {
+    param(
+        [Parameter(Mandatory=$true)][String]$CommandName
+    )
+    # Using AST because -ExpandProperty Definition adds a /r/n to the beginning and end of the line 
+    # and instead of hoping all powershell versions work the same way, this is safer than manipulating 
+    # any text.
+    #TODO: EndBlock isn't always foolproof, figure out a better way of combining body
+    return (Get-ChildItem function:\$CommandName).ScriptBlock.Ast.Body.EndBlock.ToString()
+}
+<#TODO: Test#>
+function GetAliasDefinition {
+    param(
+        [Parameter(Mandatory=$true)][String]$CommandName
+    )
+    return (Get-ChildItem alias:\$CommandName).Definition
 }
 
 <#FULLY TESTED#>
-function Get-ValidModuleProjects {
+function GetValidModuleProject {
     return Get-ChildItem ($ModuleProjectsFolder) | 
     Where-Object {
         $files = Get-ChildItem $_.FullName -File | Select-Object -Property Name
@@ -29,16 +42,149 @@ function Get-ValidModuleProjects {
     }
 }
 
-<#FULLY TESTED#>
-function Get-ValidModuleProjectNames {
-    [OutputType([Array])]
-    $ProjectNames = @()
-    (Get-ValidModuleProjects) | 
-    ForEach-Object {
-        $ProjectNames += "$($_.Name)"
-    };
-    return $ProjectNames
+function GetCommandEnvironmentVariables {
+    #Todo: Replace many instances of Get-ChildItem and Get-ValidModuleProject with this to save on processing
+    
+    $_ValidModuleProjects = (GetValidModuleProject)
+    $_ModuleProjects = [Dictionary[String, List[String]]]::new()
+    $_ModuleProjectInfos = [Dictionary[String, FileSystemInfo]]::new()
+    $_ModuleProjectCommands = [Dictionary[String, FileSystemInfo]]::new()
+    $_ModuleProjectCommandFiles = [Dictionary[String, FileSystemInfo]]::new()
+    $_ModuleProjectCommandDefinitions = [Dictionary[String,String]]::new()
+    $_ModuleProjectCommandTypes = [Dictionary[String,String]]::new()
+
+    foreach($_ModuleProject in $_ValidModuleProjects) {
+        $_ModuleProjects[$_ModuleProject.Name] = [List[String]]::new()
+        $_ModuleProjectInfos[$_ModuleProject.Name] = $_ModuleProject
+
+        $_ModuleProjectFunctions = (Get-ChildItem "$($_ModuleProject.FullName)\Functions")
+        foreach ($_Function in $_ModuleProjectFunctions) {
+            $_FunctionName = $_Function.BaseName
+            . $_Function.FullName
+
+            $_ModuleProjects[$_ModuleProject.Name].Add($_FunctionName)
+            $_ModuleProjectCommands[$_FunctionName] = $_ModuleProject
+            $_ModuleProjectCommandFiles[$_FunctionName] = $_Function
+            $_ModuleProjectCommandDefinitions[$_FunctionName] = GetFunctionDefinition -CommandName $_FunctionName
+            $_ModuleProjectCommandTypes[$_FunctionName] = 'Function'
+        }
+
+        $_ModuleProjectAliases = (Get-ChildItem "$($_ModuleProject.FullName)\Aliases")
+        foreach ($_Alias in $_ModuleProjectAliases) {
+            $_AliasName = $_Alias.BaseName
+            . $_Alias.FullName
+
+            $_ModuleProjects[$_ModuleProject.Name].Add($_AliasName)
+            $_ModuleProjectCommands[$_AliasName] = $_ModuleProject
+            $_ModuleProjectCommandFiles[$_AliasName] = $_Alias
+            $_ModuleProjectCommandDefinitions[$_AliasName] = GetAliasDefinition -CommandName $_AliasName
+            $_ModuleProjectCommandTypes[$_AliasName] = 'Alias'
+        }
+    }
+    return $_ModuleProjects, $_ModuleProjectInfos, $_ModuleProjectCommands, $_ModuleProjectCommandFiles, $_ModuleProjectCommandTypes, $_ModuleProjectCommandDefinitions
 }
+function GetDefinitionForCommand {
+    param(
+        [Parameter()][String] $CommandName
+    )
+    if (!$_ModuleProjectCommandDefinitions) {
+        if ($IsProduction) {
+            throw 'This should be cached. If you''re seeing this, the Module would be running super slowly'
+        }
+        $_, $_, $_,$_,$_,$_ModuleProjectCommandDefinitions = (GetCommandEnvironmentVariables)
+    }
+
+    return $_ModuleProjectCommandDefinitions[$CommandName]
+}
+function GetFileForCommand {
+    param(
+        [Parameter()][String] $CommandName
+    )
+    if (!$_ModuleProjectCommandFiles) {
+        if ($IsProduction) {
+            throw 'This should be cached. If you''re seeing this, the Module would be running super slowly'
+        }
+        $_, $_, $_,$_ModuleProjectCommandFiles,$_,$_ = (GetCommandEnvironmentVariables)
+    }
+
+    return $_ModuleProjectCommandFiles[$CommandName]
+}
+function GetModuleProjectTypeForCommand {
+    param(
+        [Parameter()][String] $CommandName
+    )
+    if (!$_ModuleProjectCommandTypes) {
+        if ($IsProduction) {
+            throw 'This should be cached. If you''re seeing this, the Module would be running super slowly'
+        }
+        $_, $_, $_,$_,$_ModuleProjectCommandTypes,$_ = (GetCommandEnvironmentVariables)
+    }
+
+    return $_ModuleProjectCommandTypes[$CommandName]
+}
+function GetModuleProjectForCommand {
+    param(
+        [Parameter()][String] $CommandName
+    )
+
+    if (!$_ModuleProjectCommands) {
+        if ($IsProduction) {
+            throw 'This should be cached. If you''re seeing this, the Module would be running super slowly'
+        }
+        $_, $_, $_ModuleProjectCommands,$_,$_,$_ = (GetCommandEnvironmentVariables)
+    }
+    
+    return $_ModuleProjectCommands[$CommandName]
+}
+
+function GetModuleProjectInfo {
+    param(
+        [Parameter()][String] $ModuleProject
+    )
+
+    if (!$_ModuleProjectInfos) {
+        if ($IsProduction) {
+            throw 'This should be cached. If you''re seeing this, the Module would be running super slowly'
+        }
+        $_, $_ModuleProjectInfos, $_,$_,$_,$_ = (GetCommandEnvironmentVariables)
+    }
+
+    if ($ModuleProject) {
+        return $_ModuleProjectInfos[$ModuleProject]
+    }
+    return $_ModuleProjectInfos.Values
+}
+
+function GetCommandsInModuleProject {
+    param(
+        [Parameter()][String] $ModuleProject
+    )
+
+    if (!$_ModuleProjects) {
+        if ($IsProduction) {
+            throw 'This should be cached. If you''re seeing this, the Module would be running super slowly'
+        }
+        $_ModuleProjects, $_, $_,$_,$_,$_ = (GetCommandEnvironmentVariables)
+    }
+
+    if ($ModuleProject) {
+        return $_ModuleProjects[$ModuleProject]
+    }
+    $ReturnValue = @()
+    foreach($_ModuleProject in $_ModuleProjects.Values) {
+        $ReturnValue += $_ModuleProject
+    }
+    return $ReturnValue
+}
+
+
+
+<#FULLY TESTED - DON"T TOUCH NEEDED FOR NEW #>
+function Get-ModuleProjectLocation {
+    param([Parameter(Mandatory=$true)][String]$ModuleProject)
+    return "$ModuleProjectsFolder\$ModuleProject"
+}
+
 
 <#FULLY TESTED#>
 function Get-ModuleProjectFunctionsFolder {
@@ -59,11 +205,13 @@ function Get-ModuleProjectFunctions {
         [String]$ModuleProject
         )
     
-    $FunctionsFolder = Get-ModuleProjectFunctionsFolder -ModuleProject $ModuleProject
-    if (!(Test-Path $FunctionsFolder)) {
-        throw [ItemNotFoundException] "Module does not exist by the name '$ModuleProject'"
+    $Commands = GetCommandsInModuleProject -ModuleProject $ModuleProject 
+    foreach($CommandName in $Commands) {
+        $CommandType = GetModuleProjectTypeForCommand -CommandName $CommandName
+        if ($CommandType -eq 'Function') {
+            GetFileForCommand -CommandName $CommandName
+        }
     }
-    return @(Get-ChildItem ($FunctionsFolder))
 }
 
 <#FULLY TESTED#>
@@ -116,7 +264,7 @@ function $CommandName {
 "@
     }
     
-    Add-Content -Path $ModuleFunctionPath -Value $functionContent 
+    Add-Content -Path $ModuleFunctionPath -Value $functionContent | Out-Null
 }
 
 <#FULLY TESTED#>
@@ -137,11 +285,13 @@ function Get-ModuleProjectAliases {
         [String]$ModuleProject
         )
     
-    $AliasesFolder = Get-ModuleProjectAliasesFolder -ModuleProject $ModuleProject
-    if (!(Test-Path $AliasesFolder)) {
-        throw [ItemNotFoundException] "Module does not exist by the name '$ModuleProject'"
-    }
-    return @(Get-ChildItem ($AliasesFolder))
+        $Commands = GetCommandsInModuleProject -ModuleProject $ModuleProject 
+        foreach($CommandName in $Commands) {
+            $CommandType = GetModuleProjectTypeForCommand -CommandName $CommandName
+            if ($CommandType -eq 'Alias') {
+                GetFileForCommand -CommandName $CommandName
+            }
+        }
 }
 
 <#FULLY TESTED#>
@@ -172,7 +322,7 @@ function New-ModuleProjectAlias {
         [Parameter(Mandatory=$true)][String]$Alias,
         [Parameter(Mandatory=$true)][String]$CommandName
         )
-        
+
     $ModuleProjectPath = Get-ModuleProjectLocation -ModuleProject $ModuleProject
     if (!(Test-Path ($ModuleProjectPath))) {
         throw [System.ArgumentException] "Module does not exist by the name '$ModuleProject'"
@@ -186,50 +336,7 @@ function New-ModuleProjectAlias {
     New-Item -Path $ModuleAliasPath -ItemType File | Out-Null
     $aliasContent = "Set-Alias $Alias $CommandName"
     
-    Add-Content -Path $ModuleAliasPath -Value $aliasContent
-}
-
-<#SOME TESTING DONE#>
-function Get-ModuleProjectCommand {
-    param(
-        [Parameter(Mandatory=$true)][String]$ModuleProject,
-        [Parameter(Mandatory=$true)][String]$CommandName
-        )
-    $FunctionPath = Get-ModuleProjectFunctionPath -ModuleProject $ModuleProject -CommandName $CommandName
-    $AliasPath = Get-ModuleProjectAliasPath -ModuleProject $ModuleProject -CommandName $CommandName
-
-    if (Test-Path $FunctionPath) {
-        return ('Function', (Get-Item $FunctionPath))
-    }
-    if (Test-Path $AliasPath) {
-        return ('Alias', (Get-Item $AliasPath))
-    }
-    throw [System.InvalidOperationException] "No command exists named $CommandName in $ModuleProject!"
-}
-
-<#SOME TESTING DONE#>
-function Get-ModuleProjectCommandDefinition {
-    param(
-        [Parameter(Mandatory=$true)][String]$ModuleProject,
-        [Parameter(Mandatory=$true)][String]$CommandName
-    )
-    $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
-    $CommandName = $Command.BaseName
-    $CommandDefinition = ""
-
-    . "$($Command.FullName)"
-
-    if ($CommandType -EQ 'Function') {
-        # Using AST because -ExpandProperty Definition adds a /r/n to the beginning and end of the line 
-        # and instead of hoping all powershell versions work the same way, this is safer than manipulating 
-        # any text.
-        #TODO: EndBlock isn't always foolproof, figure out a better way of combining body
-        $CommandDefinition = (Get-ChildItem function:\$CommandName).ScriptBlock.Ast.Body.EndBlock.ToString()
-    } elseif($CommandType -EQ 'Alias') {
-        $CommandDefinition = (Get-ChildItem alias:\$CommandName).Definition
-    }
-    
-    return ($CommandType, $CommandDefinition)
+    Add-Content -Path $ModuleAliasPath -Value $aliasContent | Out-Null
 }
 
 <#TODO: Test#>
@@ -239,8 +346,8 @@ function Remove-ModuleProjectCommand {
         [Parameter(Mandatory=$true)][String]$CommandName
     )
 
-    $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
-    Remove-Item $Command
+    $Command = (GetFileForCommand -CommandName $CommandName)
+    Remove-Item $Command.FullName
 }
 <#TODO: Test#> 
 function Remove-ModuleProjectFolder {
@@ -359,3 +466,4 @@ function Edit-ModuleManifest {
 
     New-ModuleManifest -Path $psd1Location @ManifestProperties
 }
+

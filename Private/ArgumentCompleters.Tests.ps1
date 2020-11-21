@@ -34,35 +34,24 @@ Describe 'ArgumentCompleters' {
     }
 
     describe 'Get-ModuleProjectArgument' {
-        It 'Uses Tested Get-ValidModuleProjects logic to figure out Valid Choices' {
-            Mock Get-ValidModuleProjectNames { return @('Test') }
-            ModuleProjectArgumentCompleter ''
-
-            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
-        }
-
-
         It 'Gets all valid Module Project choices' {
-            $ExpectedArguments = @('Foo','Bar')
-            Mock Get-ValidModuleProjectNames { return $ExpectedArguments }
+            Add-TestModule 'Foo' -Valid
+            Add-TestModule 'Bar' -Valid
             
             $Arguments = ModuleProjectArgumentCompleter ''
 
-            $Arguments | Should -Be $ExpectedArguments
+            $Arguments | Should -Be @('Bar','Foo')
         }
 
         It 'Gets all valid modules that match the WordToComplete' {
-            $ExpectedArgument = @('Foo')
-            Mock Get-ValidModuleProjectNames { return @($expectedArgument, 'Bar') }
+            Add-TestModule 'Foo' -Valid
             
             $Arguments = ModuleProjectArgumentCompleter -WordToComplete 'F'
 
-            $Arguments | Should -Be @($ExpectedArgument)
+            $Arguments | Should -Be @('Foo')
         }
 
-        It 'Should throw no error if no modules exist' {
-            Mock Get-ValidModuleProjectNames { return @() }
-            
+        It 'Should throw no error if no modules exist' {          
             {ModuleProjectArgumentCompleter } | Should -Not -Throw
         }
     }
@@ -105,8 +94,8 @@ Describe 'ArgumentCompleters' {
 
         }
         It 'Should throw no error if no commands exist' {
-            Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
-            Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+            Add-TestModule $ViableModule -Valid
+            Add-TestModule 'Foo' -Valid
             Add-TestFunction 'Foo' 'Write-HelloWorld'
 
             { CommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule)} | Should -Not -Throw
@@ -116,6 +105,7 @@ Describe 'ArgumentCompleters' {
             $ExpectedFunctions = @('Test-HelloWorld','Test-HowdyWorld')
             Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
             Add-TestModule 'Foo' -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+
             foreach ($function in $ExpectedFunctions) {
                 Add-TestFunction $ViableModule $function
             }
@@ -255,20 +245,36 @@ Describe 'ArgumentCompleters' {
     describe 'CommandFromNewModuleArgumentCompleter' {
         BeforeAll {
             function Get-FakeBoundParameters{
-                param([String]$ModuleProject)
+                param(
+                    [String]$ModuleProject,
+                    [String]$CommandName
+                )
                 return @{
                     'ModuleProject' = $ModuleProject
+                    'CommandName' = $CommandName
                 }
             }
 
         }
 
        it 'Should show Approved Verbs if CommandName is a Function' {
-        throw [System.NotImplementedException]
+            $ExpectedFunction = 'Test-HelloWorld'
+            Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+            Add-TestFunction $ViableModule $ExpectedFunction
+
+            $Arguments = NewCommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule -CommandName $ExpectedFunction)
+
+            $Arguments -contains 'Get-' | Should -BeTrue
        }
 
        it 'should not return anything if CommandName is not a function' {
-        throw [System.NotImplementedException]
+            $ExpectedAlias = 'Test'
+            Add-TestModule $ViableModule -IncludeRoot -IncludeManifest -IncludeFunctions -IncludeAliases
+            Add-TestAlias $ViableModule $ExpectedAlias
+
+            $Arguments = NewCommandFromModuleArgumentCompleter -FakeBoundParameters (Get-FakeBoundParameters $ViableModule -CommandName $ExpectedAlias)
+
+            $Arguments | Should -Be $Null
        }
     }
 }

@@ -43,4 +43,6 @@ foreach($alias in $aliases) {
         -FunctionsToExport @() `
         -AliasesToExport @() `
         -CmdletsToExport @() `
+
+    Import-Module $BaseModuleName -Force -Global
 }

@@ -19,12 +19,9 @@ function Export-ModuleProject {
         $Path += [System.IO.Path]::DirectorySeparatorChar
     }
     
-    $ModuleProjects = Get-ValidModuleProjects 
-    if ($ModuleProject) {
-        $ModuleProjects = $ModuleProjects | Where-Object { $_.Name -eq $ModuleProject }
-    }
+    $ModuleProjectForExport = GetModuleProjectInfo -ModuleProject $ModuleProject
 
-    foreach($ModuleProjectFolder in $ModuleProjects) {
+    foreach($ModuleProjectFolder in $ModuleProjectForExport) {
         if ($Force) {
             $ExportedModuleLocation = "$Path\$($ModuleProjectFolder.Name)"
             if (Test-Path $ExportedModuleLocation) {

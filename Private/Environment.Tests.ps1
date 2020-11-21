@@ -50,89 +50,56 @@ Describe 'Environment' {
         }
     }
 
-    describe 'Get-ValidModuleProjects' {
+    describe 'GetValidModuleProject' {
         It 'Does not throw error if no viable module exists' {
-            { Get-ValidModuleProjects } | Should -Not -Throw
+            { GetValidModuleProject } | Should -Not -Throw
         }
 
         It 'Has empty array if no viable modules exist' {
-            (Get-ValidModuleProjects).Count | Should -Be 0
+            (GetValidModuleProject).Count | Should -Be 0
         }
 
         It 'Does not consider a folder without psd1 and psm1 and functions and aliases as a viable module' {
             Add-TestModule -Name 'Test'
 
-            (Get-ValidModuleProjects).Count | Should -Be 0
+            (GetValidModuleProject).Count | Should -Be 0
         }
 
         It 'Does not consider a folder without psd1 as a viable module' {
             Add-TestModule -Name 'Test' -IncludeRoot -IncludeFunctions -IncludeAliases
 
-            (Get-ValidModuleProjects).Count | Should -Be 0
+            (GetValidModuleProject).Count | Should -Be 0
         }
 
         It 'Does not consider a folder without psm1 as a viable module' {
             Add-TestModule -Name 'Test' -IncludeManifest -IncludeFunctions -IncludeAliases
 
-            (Get-ValidModuleProjects).Count | Should -Be 0
+            (GetValidModuleProject).Count | Should -Be 0
         }
 
 
         It 'Does not consider a folder without functions as a viable module' {
             Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeAliases
 
-            (Get-ValidModuleProjects).Count | Should -Be 0
+            (GetValidModuleProject).Count | Should -Be 0
         }        
 
         It 'Does not consider a folder without aliases as a viable module' {
             Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions
 
-            (Get-ValidModuleProjects).Count | Should -Be 0
+            (GetValidModuleProject).Count | Should -Be 0
         }        
 
         It 'Considers an array with a single value to still be an array' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
 
-            (Get-ValidModuleProjects).Count | Should -Be 1
+            (GetValidModuleProject).Count | Should -Be 1
         }
 
         It 'Considers a folder with psd1 and psm1 and Functions and Aliases as a viable module' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
 
-            Get-ValidModuleProjects | ForEach-Object {$_.Name} | Should -contain $ViableModule
-        }
-    }
-
-    describe 'Get-ValidModuleProjectNames' {
-        It 'Does not throw error if no viable module exists' {
-            { Get-ValidModuleProjectNames } | Should -Not -Throw
-        }
-
-        It 'Has empty array if no viable modules exist' {
-            (Get-ValidModuleProjectNames).Count | Should -Be 0
-        }
-
-        It 'Gets ModuleProjectNames from ValidModuleProjects' {
-            Mock Get-ValidModuleProjects { return @(@{Name=$ViableModule})}
-
-            (Get-ValidModuleProjectNames).Count | Should -Be 1
-        }
-
-        It 'Gets array of ModuleProjectNames from ValidModuleProjects if only one exists' {
-            $CustomObject = Get-MockFileInfo -BaseName $ViableModule -Directory
-
-            Mock Get-ValidModuleProjects { return @($CustomObject)}
-
-            (Get-ValidModuleProjectNames) -contains $ViableModule | Should -BeTrue
-        }
-
-        It 'Gets array of ModuleProjectNames from ValidModuleProjects' {
-            $CustomObject = Get-MockFileInfo -BaseName $ViableModule -Directory
-            $CustomObject2 = Get-MockFileInfo -BaseName 'Test' -Directory
-
-            Mock Get-ValidModuleProjects { return @($CustomObject, $CustomObject2)}
-
-            (Get-ValidModuleProjectNames)[0] | Should -Be $ViableModule
+            GetValidModuleProject | ForEach-Object {$_.Name} | Should -contain $ViableModule
         }
     }
 
@@ -148,18 +115,14 @@ Describe 'Environment' {
     }
 
     describe 'Get-ModuleProjectFunctions' {
-        It 'Throws error if module does not exist' {
-            { Get-ModuleProjectFunctions -ModuleProject $ViableModule } | Should -Throw -ExceptionType $ItemNotFoundException
-        }
-
         It 'Does not throw error if no functions exist' {
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions
+            Add-TestModule -Name $ViableModule -Valid
             { Get-ModuleProjectFunctions -ModuleProject $ViableModule } | Should -Not -Throw
         }
 
         It 'Should contain values within module project' {
             $expectedTestFunction = 'Get-Test'
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions
+            Add-TestModule -Name $ViableModule -Valid
             Add-TestFunction -ModuleName $ViableModule -FunctionName $expectedTestFunction
 
             $Functions = (Get-ModuleProjectFunctions -ModuleProject $ViableModule).BaseName
@@ -168,7 +131,7 @@ Describe 'Environment' {
 
         It 'Should not contain values within other module project' {
             $expectedTestFunction = 'Get-Test'
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions
+            Add-TestModule -Name $ViableModule -Valid
             Add-TestModule -Name 'Test' -IncludeManifest -IncludeRoot -IncludeFunctions
             Add-TestFunction -ModuleName 'Test' -FunctionName $expectedTestFunction
 
@@ -177,7 +140,7 @@ Describe 'Environment' {
         }
 
         It 'Should contain all values within module project' {
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions
+            Add-TestModule -Name $ViableModule -Valid
             Add-TestFunction -ModuleName $ViableModule -FunctionName 'Get-Test'
             Add-TestFunction -ModuleName $ViableModule -FunctionName 'Get-OtherTest'
 
@@ -217,7 +180,7 @@ Describe 'Environment' {
         }
 
         It 'Should contain all values within module project' {
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions
+            Add-TestModule -Name $ViableModule -Valid
             Add-TestFunction -ModuleName $ViableModule -FunctionName 'Get-Test'
             Add-TestFunction -ModuleName $ViableModule -FunctionName 'Get-OtherTest'
 
@@ -242,70 +205,6 @@ Describe 'Environment' {
 
         It 'Should end in a file by the expected name' {
             (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName "Write-Foo").EndsWith("\Write-Foo.ps1") | Should -BeTrue
-        }
-    }
-
-    describe 'Get-ModuleProjectCommand' {
-        it 'should return function' {
-            $FunctionName = 'Get-Test'
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions
-            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName
-
-            $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ViableModule -CommandName $FunctionName
-
-            $ExpectedCommandType = "Function"
-            $ExpectedCommandPath = (Get-Item (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $FunctionName)).FullName
-
-            $CommandType | Should -Be $ExpectedCommandType
-            $Command.FullName | Should -Be $ExpectedCommandPath
-        }
-
-        it 'should return alias' {
-            $AliasName = 'Test'
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestAlias -ModuleName $ViableModule -AliasName $AliasName
-
-            $CommandType, $Command = Get-ModuleProjectCommand -ModuleProject $ViableModule -CommandName $AliasName
-
-            $ExpectedCommandType = "Alias"
-            $ExpectedCommandPath = (Get-Item (Get-ModuleProjectAliasPath -ModuleProject $ViableModule -CommandName $AliasName)).FullName
-
-            $CommandType | Should -Be $ExpectedCommandType
-            $Command.FullName | Should -Be $ExpectedCommandPath
-        }
-    }
-
-    
-    describe 'Get-ModuleProjectCommandDefinition' {
-        it 'should return function definition' {
-            $FunctionName = 'Get-Test'
-            $FunctionText = @"
-`$Foo = 'Hello World'
-Write-Output `$Foo
-"@
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions
-            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText $FunctionText
-
-            $CommandType, $CommandDefinition = Get-ModuleProjectCommandDefinition -ModuleProject $ViableModule -CommandName $FunctionName
-
-            $ExpectedCommandType = "Function"
-
-            $CommandType | Should -Be $ExpectedCommandType
-            $CommandDefinition | Should -Be $FunctionText
-        }
-
-        it 'should return alias definition' {
-            $AliasName = 'GetAliasDefinitionTest'
-            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
-            Add-TestAlias -ModuleName $ViableModule -AliasName $AliasName
-
-            $CommandType, $CommandDefinition = Get-ModuleProjectCommandDefinition -ModuleProject $ViableModule -CommandName $AliasName
-
-            $ExpectedCommandType = "Alias"
-            $ExpectedCommandDefinition = "Test-$AliasName"
-
-            $CommandType | Should -Be $ExpectedCommandType
-            $CommandDefinition | Should -Be $ExpectedCommandDefinition
         }
     }
 
@@ -384,10 +283,6 @@ Write-Output `$Foo
 
 
     describe 'Get-ModuleProjectAliases' {
-        It 'Throws error if module does not exist' {
-            { Get-ModuleProjectAliases -ModuleProject $ViableModule } | Should -Throw -ExceptionType $ItemNotFoundException
-        }
-
         It 'Does not throw error if no Aliases exist' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             { Get-ModuleProjectAliases -ModuleProject $ViableModule } | Should -Not -Throw

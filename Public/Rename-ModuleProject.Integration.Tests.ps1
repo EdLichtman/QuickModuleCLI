@@ -72,12 +72,12 @@ describe 'Rename-ModuleProject' {
 
     describe 'auto-completion for input' {
         it 'auto-suggests valid Module Arguments for Module' {
-            Mock Get-ValidModuleProjectNames
-            $Arguments = (Get-ArgumentCompleter -CommandName Rename-ModuleProject -ParameterName SourceModuleProject)
+            Add-TestModule $ViableModule -Valid
+            $ArgumentCompleter = (Get-ArgumentCompleter -CommandName Rename-ModuleProject -ParameterName SourceModuleProject)
             
-            try {$Arguments.Definition.Invoke()} catch {}
+            $Arguments = try {$ArgumentCompleter.Definition.Invoke()} catch {}
     
-            Assert-MockCalled Get-ValidModuleProjectNames -Times 1
+            $Arguments | Should -Be @($ViableModule)
         }
     }
 
@@ -87,12 +87,12 @@ describe 'Rename-ModuleProject' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestFunction -ModuleName $ViableModule -FunctionName 'Write-Foo' -FunctionText  "return 'Foo'"
 
-            (Get-ValidModuleProjects).Count | Should -Be 1
-            $ViableModule -in (Get-ValidModuleProjectNames) | Should -BeTrue
+            (GetValidModuleProject).Count | Should -Be 1
+            (GetModuleProjectInfo $ViableModule) | Should -Not -Be $Null
 
             Rename-ModuleProject -SourceModuleProject $ViableModule -DestinationModuleProject $ExpectedDestinationModuleProject
             
-            $ModuleProjects = Get-ValidModuleProjects
+            $ModuleProjects = GetValidModuleProject
             $ModuleProjects.Count | Should -Be 1
             $ModuleProjects.Name | Should -Be $ExpectedDestinationModuleProject
 
@@ -109,7 +109,7 @@ describe 'Rename-ModuleProject' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
             Add-TestFunction -ModuleName $ViableModule -FunctionName 'Write-Foo' -FunctionText  "return 'Foo'"
 
-            $ViableModule -in (Get-ValidModuleProjectNames) | Should -BeTrue
+            (GetModuleProjectInfo $ViableModule) | Should -Not -Be $Null
 
             Rename-ModuleProject -SourceModuleProject $ViableModule -DestinationModuleProject $ExpectedDestinationModuleProject
 
