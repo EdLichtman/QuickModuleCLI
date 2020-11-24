@@ -1,6 +1,8 @@
 using namespace System.Collections.Generic
 using namespace System.IO
 using namespace System.Management.Automation
+<#TODO: CacheBusting Logic on certain functions, such as Rename-ModuleCommand. 
+Right now, Rename-ModuleCommand gets the already existing FunctionNames#>
 
 <#TODO: Test#>
 function GetFunctionDefinition {

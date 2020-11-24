@@ -19,6 +19,9 @@ function Update-ModuleProject {
         [String] $ReleaseNotes,
         [String] $HelpInfoUri
     )
+    #Refresh the Cache before making any updates. TODO: Test
+    . "$PrivateFunctionsFolder\Cache.ps1"
+
     $ModuleProjectLocation = Get-ModuleProjectLocation -ModuleProject $ModuleProject
     $psd1Location = "$ModuleProjectLocation\$ModuleProject.psd1"
     
