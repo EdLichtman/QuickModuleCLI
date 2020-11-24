@@ -101,9 +101,10 @@ function ValidateModuleCommandDoesNotExist {
 function ValidateCommandStartsWithApprovedVerb {
     param([String]$Command) 
     if ($Command) {
-        $chosenVerb = $Command.Split('-')[0]
+        $chosenVerbParts = $Command.Split('-')
+        $chosenVerb = $chosenVerbParts[0]
         $ApprovedVerbs = Get-ApprovedVerbs;
-        if (!$ApprovedVerbs.Contains($chosenVerb)) {
+        if (!$ApprovedVerbs.Contains($chosenVerb) -or $chosenVerbParts.Length -ne 2) {
             throw (New-Object ParameterStartsWithUnapprovedVerbException "$chosenVerb is not a common accepted verb. Please find an appropriate verb by using the command 'Get-Verb'.")
         }
     }

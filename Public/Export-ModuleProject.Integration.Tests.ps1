@@ -30,7 +30,7 @@ describe 'Export-ModuleProject' {
         Remove-Sandbox
     }
     AfterAll {
-        Remove-Sandbox
+        Teardown-Sandbox
     }
 
     describe 'validations' {
@@ -147,6 +147,17 @@ describe 'Export-ModuleProject' {
 
             (Test-Path "$BaseFolder\ShouldRemain") | Should -BeTrue
             (Test-Path "$BaseFolder\ShouldRemain\Test.txt") | Should -BeTrue
+        }
+
+        it 'Always exports into a folder by the name' {
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestFunction -ModuleName $ViableModule -FunctionName 'Get-Foo' -FunctionText "Write-Output 'Foo'"
+
+            $NewPath = "$BaseFolder\Path\To\New\Folder\$(Get-Random)"
+            Export-ModuleProject -ModuleProject $ViableModule -Path $NewPath
+
+            (Test-Path "$NewPath\$ViableModule") | Should -BeTrue
+            "$ViableModule.psd1" -in (Get-ChildItem "$NewPath\$ViableModule").Name | Should -BeTrue
         }
     }
 }

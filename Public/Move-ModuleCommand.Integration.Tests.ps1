@@ -33,7 +33,7 @@ describe 'Move-ModuleCommand' {
         Remove-Sandbox
     }
     AfterAll {
-        Remove-Sandbox
+        Teardown-Sandbox
     }
 
     describe 'validations' {
@@ -231,6 +231,42 @@ describe 'Move-ModuleCommand' {
     
             Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True -and $Global -eq $True}
         }        
+
+        it 'moves command into destination module if no SourceModuleProject is provided' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "return 'Foo'"
+    
+            Add-TestModule -Name $ViableModule -Valid
+            Add-TestModule -Name 'Test' -Valid
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+    
+            Move-ModuleCommand -CommandName $FunctionName -DestinationModuleProject 'Test'
+    
+            Test-Path (Get-ModuleProjectFunctionPath -ModuleProject 'Test' -CommandName $FunctionName) | Should -BeTrue
+        }
+
+        it 'moves entire function including Argument completers and anything else' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "param([String]`$foo)`nreturn `$foo"
+
+            Add-TestModule -Name $ViableModule -Valid
+            Add-TestModule -Name 'Test' -Valid
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+            $BeforeFunction = "`$Foo = 'Bar'"
+            $AfterFunction = "Register-ArgumentCompleter -CommandName $FunctionName -ParameterName foo -ScriptBlock {return 'a'}"
+            $FunctionFilePath = (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $FunctionName)
+            $Output = @($BeforeFunction) + @(Get-Content $FunctionFilePath ) + @($AfterFunction)
+            [IO.File]::WriteAllText($FunctionFilePath, $Output -join "`n" ,[Text.Encoding]::UTF8)
+            
+            Move-ModuleCommand -CommandName $FunctionName -DestinationModuleProject 'Test'
+    
+            $Content = Get-Content (Get-ModuleProjectFunctionPath -ModuleProject 'Test' -CommandName $FunctionName)
+
+            $FirstLine = $Content[0]
+            $FirstLine | Should -Be $BeforeFunction
+            $LastLine = $Content[$Content.Length -1] 
+            $LastLine | Should -Be $AfterFunction
+        } 
     }
 
 }

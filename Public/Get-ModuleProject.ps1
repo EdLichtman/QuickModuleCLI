@@ -11,11 +11,20 @@ function Get-ModuleProject {
     }
 
     foreach($Module in $ModuleProjects) {
-        $ModuleInfo = New-Object PSObject -Property @{
-            Name = $Module
-            Function = @()
-            Alias = @()
+        $ModuleInfo = if ($ModuleProjects.Count -eq 1) {
+            [PSObject][Ordered]@{
+                Name = $Module;
+                Function = @();
+                Alias = @()
+            }
+        } else {
+            [PSCustomObject][Ordered]@{
+                Name = $Module;
+                Function = @();
+                Alias = @()
+            }
         }
+        
 
         $Commands = GetCommandsInModuleProject -ModuleProject $Module
         foreach($CommandName in $Commands) {

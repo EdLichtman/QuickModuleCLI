@@ -28,7 +28,7 @@ Describe 'Validators' {
         Remove-Sandbox
     }
     AfterAll {
-        Remove-Sandbox
+        Teardown-Sandbox
     }
     Describe 'ValidateModuleProjectExists' {
         BeforeEach {
@@ -175,6 +175,10 @@ Describe 'Validators' {
 
         it 'disallows unapproved verb' {
             { Test-Attribute -Command "Foo-Bar" } | Should -Throw -ExceptionType $ParameterBindingException
+        }
+
+        it 'disallows approved verb without dash' {
+            { Test-Attribute -Command "Test" } | Should -Throw -ExceptionType $ParameterBindingException
         }
 
         it 'allows approved verb' {

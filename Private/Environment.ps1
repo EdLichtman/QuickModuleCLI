@@ -7,11 +7,13 @@ function GetFunctionDefinition {
     param(
         [Parameter(Mandatory=$true)][String]$CommandName
     )
-    # Using AST because -ExpandProperty Definition adds a /r/n to the beginning and end of the line 
-    # and instead of hoping all powershell versions work the same way, this is safer than manipulating 
-    # any text.
-    #TODO: EndBlock isn't always foolproof, figure out a better way of combining body
-    return (Get-ChildItem function:\$CommandName).ScriptBlock.Ast.Body.EndBlock.ToString()
+    
+    $Definition = (Get-ChildItem function:\$CommandName).ScriptBlock
+    return @"
+{
+    $Definition
+}
+"@
 }
 <#TODO: Test#>
 function GetAliasDefinition {
@@ -60,12 +62,11 @@ function GetCommandEnvironmentVariables {
         $_ModuleProjectFunctions = (Get-ChildItem "$($_ModuleProject.FullName)\Functions")
         foreach ($_Function in $_ModuleProjectFunctions) {
             $_FunctionName = $_Function.BaseName
-            . $_Function.FullName
 
             $_ModuleProjects[$_ModuleProject.Name].Add($_FunctionName)
             $_ModuleProjectCommands[$_FunctionName] = $_ModuleProject
             $_ModuleProjectCommandFiles[$_FunctionName] = $_Function
-            $_ModuleProjectCommandDefinitions[$_FunctionName] = GetFunctionDefinition -CommandName $_FunctionName
+            $_ModuleProjectCommandDefinitions[$_FunctionName] = Get-Content -Path $_Function.FullName -Raw
             $_ModuleProjectCommandTypes[$_FunctionName] = 'Function'
         }
 
@@ -85,7 +86,8 @@ function GetCommandEnvironmentVariables {
 }
 function GetDefinitionForCommand {
     param(
-        [Parameter()][String] $CommandName
+        [Parameter()][String] $CommandName,
+        [Parameter()][String] $NewCommandName
     )
     if (!$_ModuleProjectCommandDefinitions) {
         if ($IsProduction) {
@@ -94,6 +96,9 @@ function GetDefinitionForCommand {
         $_, $_, $_,$_,$_,$_ModuleProjectCommandDefinitions = (GetCommandEnvironmentVariables)
     }
 
+    if ($NewCommandName) {
+        return $_ModuleProjectCommandDefinitions[$CommandName] -replace $CommandName, $NewCommandName
+    }
     return $_ModuleProjectCommandDefinitions[$CommandName]
 }
 function GetFileForCommand {
@@ -264,7 +269,7 @@ function $CommandName {
 "@
     }
     
-    Add-Content -Path $ModuleFunctionPath -Value $functionContent | Out-Null
+    [IO.File]::WriteAllText($ModuleFunctionPath, $functionContent ,[Text.Encoding]::UTF8)
 }
 
 <#FULLY TESTED#>

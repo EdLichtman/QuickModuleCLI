@@ -242,6 +242,19 @@ describe 'Rename-ModuleCommand' {
             Test-Path (Get-ModuleProjectAliasPath -ModuleProject $ViableModule -CommandName $AliasName) | Should -BeFalse
         }
         
+        it 'renames command without requiring ModuleProject' {
+            $AliasName = 'Bar'
+            $NewAliasName = "Foo"
+
+            Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
+            Add-TestAlias -ModuleName $ViableModule -AliasName $AliasName
+    
+            Rename-ModuleCommand -CommandName $AliasName -NewCommandName $NewAliasName
+    
+            Test-Path (Get-ModuleProjectAliasPath -ModuleProject $ViableModule -CommandName $NewAliasName) | Should -BeTrue
+        }
+
+
         it 'attempts to update ModuleProject with renamed Function or alias' {
             $FunctionName = 'Write-Foo'
             $FunctionText = "return 'Foo'"
@@ -266,7 +279,31 @@ describe 'Rename-ModuleCommand' {
             Rename-ModuleCommand -ModuleProject $ViableModule -CommandName $FunctionName -NewCommandName $NewFunctionName
     
             Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True -and $Global -eq $True}
-        }        
+        }     
+        
+        it 'moves entire function including Argument completers and anything else' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "param([String]`$foo)`nreturn `$foo"
+            $NewFunctionName = 'Get-FooClone'
+
+            Add-TestModule -Name $ViableModule -Valid
+            Add-TestModule -Name 'Test' -Valid
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+            $BeforeFunction = "`$Foo = 'Bar'"
+            $AfterFunction = "Register-ArgumentCompleter -CommandName $FunctionName -ParameterName foo -ScriptBlock {return 'a'}"
+            $FunctionFilePath = (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $FunctionName)
+            $Output = @($BeforeFunction) + @(Get-Content $FunctionFilePath ) + @($AfterFunction)
+            [IO.File]::WriteAllText($FunctionFilePath, $Output -join "`n" ,[Text.Encoding]::UTF8)
+            
+            Rename-ModuleCommand -CommandName $FunctionName -NewCommandName $NewFunctionName
+    
+            $Content = Get-Content (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $NewFunctionName)
+
+            $FirstLine = $Content[0]
+            $FirstLine | Should -Be $BeforeFunction
+            $LastLine = $Content[$Content.Length -1] 
+            $LastLine | Should -Be ($AfterFunction -replace $FunctionName, $NewFunctionName)
+        } 
     }
 
 }

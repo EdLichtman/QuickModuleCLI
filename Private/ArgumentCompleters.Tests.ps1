@@ -30,7 +30,7 @@ Describe 'ArgumentCompleters' {
         Remove-Sandbox
     }
     AfterAll {
-        Remove-Sandbox
+        Teardown-Sandbox
     }
 
     describe 'Get-ModuleProjectArgument' {

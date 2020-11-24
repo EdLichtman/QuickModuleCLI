@@ -23,12 +23,13 @@ describe 'New-ModuleProject' {
     }
     BeforeEach {
         New-Sandbox
+        Mock Import-Module
     }
     AfterEach {
         Remove-Sandbox
     }
     AfterAll {
-        Remove-Sandbox
+        Teardown-Sandbox
     }
 
     it 'throws error if project already exists' {

@@ -15,8 +15,8 @@ function Export-ModuleProject {
         $Force
     )  
 
-    if (!$Path.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {
-        $Path += [System.IO.Path]::DirectorySeparatorChar
+    if (!(Test-Path $Path)) {
+        New-Item $Path -ItemType Directory | Out-Null
     }
     
     $ModuleProjectForExport = GetModuleProjectInfo -ModuleProject $ModuleProject

@@ -35,7 +35,7 @@ describe 'Copy-ModuleCommand' {
         Remove-Sandbox
     }
     AfterAll {
-        Remove-Sandbox
+        Teardown-Sandbox
     }
 
     describe 'validations' {
@@ -296,13 +296,11 @@ describe 'Copy-ModuleCommand' {
             . "$FunctionPath"
             . "$CopiedFunctionPath"
     
-            $Definition = GetDefinitionForCommand -CommandName $FunctionName
-            $CopiedDefinition = GetDefinitionForCommand -CommandName $NewFunctionName
-            
             $CopiedCommandType = GetModuleProjectTypeForCommand -CommandName $NewFunctionName
-    
-            $Definition | Should -Be $FunctionText
-            $CopiedDefinition | Should -Be $Definition
+            $Content = Get-Content (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $FunctionName)
+            $CopiedContent = Get-Content (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $NewFunctionName)
+
+            $CopiedContent | Should -Be ($Content -Replace $FunctionName, $NewFunctionName)
             $CopiedCommandType | Should -Be 'Function'
         }
 
@@ -384,5 +382,30 @@ describe 'Copy-ModuleCommand' {
             
             Assert-MockCalled Import-Module -Times 1 -ParameterFilter {$Name -eq $BaseModuleName -and $Force -eq $True -and $Global -eq $True}
         }
+
+        it 'moves entire function including Argument completers and anything else' {
+            $FunctionName = 'Write-Foo'
+            $FunctionText = "param([String]`$foo)`nreturn `$foo"
+            $NewFunctionName = 'Get-FooClone'
+
+            Add-TestModule -Name $ViableModule -Valid
+            Add-TestModule -Name 'Test' -Valid
+            Add-TestFunction -ModuleName $ViableModule -FunctionName $FunctionName -FunctionText  $FunctionText
+            $BeforeFunction = "`$Foo = 'Bar'"
+            $AfterFunction = "Register-ArgumentCompleter -CommandName $FunctionName -ParameterName foo -ScriptBlock {return 'a'}"
+            $FunctionFilePath = (Get-ModuleProjectFunctionPath -ModuleProject $ViableModule -CommandName $FunctionName)
+            $Output = @($BeforeFunction) + @(Get-Content $FunctionFilePath ) + @($AfterFunction)
+            [IO.File]::WriteAllText($FunctionFilePath, $Output -join "`n" ,[Text.Encoding]::UTF8)
+            
+            Copy-ModuleCommand -CommandName $FunctionName -DestinationModuleProject 'Test' -NewCommandName $NewFunctionName
+    
+            $Content = Get-Content (Get-ModuleProjectFunctionPath -ModuleProject 'Test' -CommandName $NewFunctionName)
+
+            $FirstLine = $Content[0]
+            $FirstLine | Should -Be $BeforeFunction
+            $LastLine = $Content[$Content.Length -1] 
+            $LastLine | Should -Be ($AfterFunction -Replace $FunctionName, $NewFunctionName)
+        } 
+        
     }
 }

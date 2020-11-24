@@ -33,7 +33,7 @@ describe 'Add-ModuleAlias' {
         Remove-Sandbox
     }
     AfterAll {
-        Remove-Sandbox
+        Teardown-Sandbox
     }
 
     describe 'validation' {
@@ -54,7 +54,7 @@ describe 'Add-ModuleAlias' {
         it 'throws error if command does not exist' {
             Add-TestModule -Name $ViableModule -IncludeManifest -IncludeRoot -IncludeFunctions -IncludeAliases
     
-            $err = { Add-ModuleAlias -ModuleProject $ViableModule -AliasName 'foo' -AliasMappedFunction 'Write-Foo' -WhatIf } | Should -Throw -PassThru
+            $err = { Add-ModuleAlias -ModuleProject $ViableModule -AliasName 'foo' -AliasMappedFunction "Write-Foo$(Get-Random)" -WhatIf } | Should -Throw -PassThru
             $err.Exception.InnerException.InnerException.GetType().Name | Should -Be 'CommandDoesNotExistException'
         }
 

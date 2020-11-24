@@ -33,7 +33,7 @@ function Copy-ModuleCommand {
         $DestinationModuleProject = $SourceModuleProject
     }
 
-    $CommandBlock = GetDefinitionForCommand -CommandName $CommandName
+    $CommandBlock = GetDefinitionForCommand -CommandName $CommandName -NewCommandName $NewCommandName
     $CommandType = GetModuleProjectTypeForCommand -CommandName $CommandName
 
     if ($CommandType -EQ 'Function') {
@@ -41,7 +41,7 @@ function Copy-ModuleCommand {
             ValidateCommandStartsWithApprovedVerb -Command $NewCommandName
         }
         
-        New-ModuleProjectFunction -ModuleProject $DestinationModuleProject -CommandName $NewCommandName -Text $CommandBlock
+        New-ModuleProjectFunction -ModuleProject $DestinationModuleProject -CommandName $NewCommandName -Text $CommandBlock -Raw
         Edit-ModuleCommand -ModuleProject $DestinationModuleProject -CommandName $NewCommandName
     } elseif ($CommandType -EQ 'Alias') {
        New-ModuleProjectAlias -ModuleProject $DestinationModuleProject -Alias $NewCommandName -CommandName $CommandBlock

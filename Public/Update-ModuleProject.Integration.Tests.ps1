@@ -30,7 +30,7 @@ describe 'Export-ModuleProject' {
         Remove-Sandbox
     }
     AfterAll {
-        Remove-Sandbox
+        Teardown-Sandbox
     }
 
     describe 'validations' {

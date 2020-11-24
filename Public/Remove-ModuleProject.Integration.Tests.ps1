@@ -30,7 +30,7 @@ describe 'Remove-ModuleProject' {
         Remove-Sandbox
     }
     AfterAll {
-        Remove-Sandbox
+        Teardown-Sandbox
     }
 
     describe 'validations' {

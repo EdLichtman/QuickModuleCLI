@@ -15,7 +15,12 @@ function Move-ModuleCommand {
         [ValidateScript({ValidateModuleProjectExists $_})]
         [string] $DestinationModuleProject
     )
-    ValidateCommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $CommandName
+    if ($SourceModuleProject) {
+        ValidateCommandExistsInModule -ModuleProject $SourceModuleProject -CommandName $CommandName
+    } else {
+        $SourceModuleProject = (GetModuleProjectForCommand -CommandName $CommandName)
+    }
+    
     ValidateModuleCommandMoveDestinationIsValid -SourceModuleProject $SourceModuleProject -DestinationModuleProject $DestinationModuleProject
 
     $CommandType = GetModuleProjectTypeForCommand -CommandName $CommandName
@@ -24,7 +29,7 @@ function Move-ModuleCommand {
     Remove-ModuleProjectCommand -ModuleProject $SourceModuleProject -CommandName $CommandName
 
     if ($CommandType -EQ 'Function') {
-        New-ModuleProjectFunction -ModuleProject $DestinationModuleProject -CommandName $CommandName -Text $CommandBlock
+        New-ModuleProjectFunction -ModuleProject $DestinationModuleProject -CommandName $CommandName -Text $CommandBlock -Raw
     } elseif ($CommandType -EQ 'Alias') {
        New-ModuleProjectAlias -ModuleProject $DestinationModuleProject -Alias $CommandName -CommandName $CommandBlock
     }

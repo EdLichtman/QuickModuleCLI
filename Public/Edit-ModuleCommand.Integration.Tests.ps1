@@ -33,7 +33,7 @@ describe 'Edit-ModuleCommand' {
         Remove-Sandbox
     }
     AfterAll {
-        Remove-Sandbox
+        Teardown-Sandbox
     }
 
     describe 'validations' {

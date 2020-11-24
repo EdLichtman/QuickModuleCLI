@@ -31,7 +31,7 @@ describe 'Rename-ModuleProject' {
         Remove-Sandbox
     }
     AfterAll {
-        Remove-Sandbox
+        Teardown-Sandbox
     }
 
     describe 'validations' {

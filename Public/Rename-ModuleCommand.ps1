@@ -20,10 +20,14 @@ function Rename-ModuleCommand {
         $Force
     )
     
-    ValidateCommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
+    if ($ModuleProject) {
+        ValidateCommandExistsInModule -ModuleProject $ModuleProject -CommandName $CommandName
+    } else {
+        $ModuleProject = (GetModuleProjectForCommand -CommandName $CommandName)
+    }
 
     $CommandType = GetModuleProjectTypeForCommand -CommandName $CommandName
-    $CommandBlock = GetDefinitionForCommand -CommandName $CommandName
+    $CommandBlock = GetDefinitionForCommand -CommandName $CommandName -NewCommandName $NewCommandName
     
     if ($CommandType -EQ 'Function' -and (!$Force)) {
         ValidateCommandStartsWithApprovedVerb -Command $NewCommandName
@@ -32,7 +36,7 @@ function Rename-ModuleCommand {
     Remove-ModuleProjectCommand -ModuleProject $ModuleProject -CommandName $CommandName
 
     if ($CommandType -EQ 'Function') {
-        New-ModuleProjectFunction -ModuleProject $ModuleProject -CommandName $NewCommandName -Text $CommandBlock
+        New-ModuleProjectFunction -ModuleProject $ModuleProject -CommandName $NewCommandName -Text $CommandBlock -Raw
     } elseif ($CommandType -EQ 'Alias') {
        New-ModuleProjectAlias -ModuleProject $ModuleProject -Alias $NewCommandName -CommandName $CommandBlock
     }

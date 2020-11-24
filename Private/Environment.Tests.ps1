@@ -31,7 +31,7 @@ Describe 'Environment' {
         Remove-Sandbox
     }
     AfterAll {
-        Remove-Sandbox
+        Teardown-Sandbox
     }
 
     describe 'Get-ModuleProjectLocation' {

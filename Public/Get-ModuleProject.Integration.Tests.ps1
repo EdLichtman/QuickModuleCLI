@@ -34,7 +34,7 @@ describe 'Get-ModuleProject' {
         Remove-Sandbox
     }
     AfterAll {
-        Remove-Sandbox
+        Teardown-Sandbox
     }
 
     describe 'auto-completion for input' {
