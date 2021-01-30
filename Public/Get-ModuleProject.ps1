@@ -1,5 +1,5 @@
 function Get-ModuleProject {
-    [CmdletBinding(PositionalBinding=$false)]
+    [CmdletBinding()]
     param(
         [String] $ModuleProject
     )

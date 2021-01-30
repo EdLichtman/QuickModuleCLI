@@ -26,13 +26,12 @@ function Add-ModuleFunction {
     }
     New-ModuleProjectFunction -ModuleProject $ModuleProject -CommandName $FunctionName -Text (SemicolonCreatesLineBreakTransformation $FunctionText)
 
-    if ([String]::IsNullOrWhiteSpace($FunctionText)) {
-        Edit-ModuleCommand -ModuleProject $ModuleProject -CommandName $FunctionName
-    }
-
     Update-ModuleProject -ModuleProject $ModuleProject
     Import-Module $BaseModuleName -Force -Global
 
+    if ([String]::IsNullOrWhiteSpace($FunctionText)) {
+        Edit-ModuleCommand -ModuleProject $ModuleProject -CommandName $FunctionName
+    }
 }
 Register-ArgumentCompleter -CommandName Add-ModuleFunction -ParameterName ModuleProject -ScriptBlock (Get-Command ModuleProjectArgumentCompleter).ScriptBlock
 Register-ArgumentCompleter -CommandName Add-ModuleFunction -ParameterName FunctionName -ScriptBlock (Get-Command ApprovedVerbsArgumentCompleter).ScriptBlock

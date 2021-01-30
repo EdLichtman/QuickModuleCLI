@@ -18,11 +18,17 @@ function New-ModuleProject {
     New-Item "$AliasesDirectory" -ItemType Directory | Out-Null
 
     $ModuleFileContent = @'
+if (!(Test-Path "$PSScriptRoot\Functions")) {
+    mkdir "$PSScriptRoot\Functions"
+}
 $functions = Get-ChildItem $PSScriptRoot\Functions -Filter "*.ps1"
 foreach($function in $functions) {
     . $PSScriptRoot\Functions\$function
 }
 
+if (!(Test-Path "$PSScriptRoot\Aliases")) {
+    mkdir "$PSScriptRoot\Aliases"
+}
 $aliases = Get-ChildItem $PSScriptRoot\Aliases -Filter "*.ps1"
 foreach($alias in $aliases) {
     . $PSScriptRoot\Aliases\$alias
